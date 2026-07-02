@@ -358,7 +358,7 @@ svg[stroke="currentColor"]{stroke-width:2}
     <a class="btn btn-ghost btn-sm" href="dashboard.html" style="margin-right:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Client View</a>
     <button class="icon-btn" onclick="toggleTheme()" id="themeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
     <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="dot"></span></button>
-    <div class="tb-user"><div class="tb-avatar">AD</div><div><div class="un">Admin</div><div class="uc">Operations</div></div></div>
+    <button class="icon-btn" data-action="logout" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button><div class="tb-user"><div class="tb-avatar">AD</div><div><div class="un">Admin</div><div class="uc">Operations</div></div></div>
   </div>
 </header><div class="content"><div class="page active" data-page="admin_overview">
       <div style="margin-bottom:16px"><div class="page-title">Operations Overview</div><div class="page-sub">Queue health and recent activity across the platform</div></div>
@@ -466,7 +466,7 @@ svg[stroke="currentColor"]{stroke-width:2}
       </tbody></table></div></div></div>
 <div class="page" data-page="admin_revenue">
       <div class="page-head"><div><div class="page-title">Revenue Reports</div><div class="page-sub">Platform revenue across all client accounts</div></div>
-      <button class="btn btn-ghost" onclick="toast('Exporting report')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</button></div>
+      <button class="btn btn-ghost" data-action="export-csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</button></div>
       <div class="stat-grid"><div class="stat"><div class="lbl">Gross revenue (Jun)</div><div class="val">$214,500</div></div><div class="stat"><div class="lbl">Distributor share</div><div class="val">$32,175</div></div><div class="stat"><div class="lbl">Client share</div><div class="val">$182,325</div></div><div class="stat"><div class="lbl">Streams</div><div class="val">53.2M</div></div></div>
       <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Period</th><th>Platform</th><th>Streams</th><th>Revenue</th></tr></thead><tbody><tr><td class="cell-mono">Jun 2026</td><td>Spotify</td><td class="cell-mono">1,240,500</td><td class="cell-mono">$4,962.00</td></tr><tr><td class="cell-mono">Jun 2026</td><td>YouTube</td><td class="cell-mono">3,850,200</td><td class="cell-mono">$3,080.16</td></tr><tr><td class="cell-mono">Jun 2026</td><td>Apple Music</td><td class="cell-mono">640,100</td><td class="cell-mono">$3,840.60</td></tr><tr><td class="cell-mono">May 2026</td><td>Spotify</td><td class="cell-mono">1,180,300</td><td class="cell-mono">$4,721.20</td></tr><tr><td class="cell-mono">May 2026</td><td>TikTok</td><td class="cell-mono">5,200,000</td><td class="cell-mono">$1,560.00</td></tr></tbody></table></div></div></div>
 <div class="page" data-page="admin_splits">
@@ -528,5 +528,7 @@ document.addEventListener('click',e=>{var t=e.target.closest('.tab');if(t){t.par
 var toastT;function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400);}
 go('admin_overview');
 </script>
+<script src="/api-client.js"></script>
+<script src="/admin-data.js"></script>
 </body>
 </html>
