@@ -3,7 +3,7 @@
 // Creates SQLite database with all tables and a default admin.
 // Run once: node init-db.js
 // ============================================================
-const Database = require('better-sqlite3');
+const { openDatabase } = require('./db');
 const bcrypt = require('bcryptjs');
 const path = require('path');
 const fs = require('fs');
@@ -12,8 +12,8 @@ const DB_PATH = path.join(__dirname, 'data', 'sout.db');
 fs.mkdirSync(path.join(__dirname, 'data'), { recursive: true });
 fs.mkdirSync(path.join(__dirname, 'uploads'), { recursive: true });
 
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
+async function main() {
+const db = await openDatabase(DB_PATH);
 db.pragma('foreign_keys = ON');
 
 // ---------- USERS (admins + client users) ----------
@@ -184,3 +184,6 @@ if (userCount === 0) {
 
 console.log('✓ Database ready at', DB_PATH);
 db.close();
+}
+
+main().catch(e => { console.error('init-db error:', e); process.exit(1); });

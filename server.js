@@ -3,7 +3,7 @@
 // Node.js + Express + SQLite. Secure auth, client isolation.
 // ============================================================
 const express = require('express');
-const Database = require('better-sqlite3');
+const { openDatabase } = require('./db');
 const bcrypt = require('bcryptjs');
 const jwt = require('jsonwebtoken');
 const cookieParser = require('cookie-parser');
@@ -26,9 +26,7 @@ if (fs.existsSync(SECRET_PATH)) {
   fs.writeFileSync(SECRET_PATH, JWT_SECRET, { mode: 0o600 });
 }
 
-const db = new Database(DB_PATH);
-db.pragma('journal_mode = WAL');
-db.pragma('foreign_keys = ON');
+let db; // assigned in bootstrap() before the server starts listening
 
 app.use(express.json({ limit: '2mb' }));
 app.use(cookieParser());
@@ -447,4 +445,9 @@ app.get('/api/clients-list', auth, adminOnly, (req, res) => {
 // ---------- health ----------
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
-app.listen(PORT, '127.0.0.1', () => console.log(`Sout backend running on 127.0.0.1:${PORT}`));
+bootstrap();
+async function bootstrap() {
+  db = await openDatabase(DB_PATH);
+  db.pragma('foreign_keys = ON');
+  app.listen(PORT, '127.0.0.1', () => console.log(`Sout backend running on 127.0.0.1:${PORT}`));
+}
