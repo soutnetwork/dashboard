@@ -1,0 +1,532 @@
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><title>Sout Network — Admin Console</title>
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0a08'/><polygon points='59.7,12.2 42.9,13.4 42.1,14.6 41.3,15.7 40.4,16.9 39.6,18.1 38.9,19.2 38.1,20.4 37.2,21.6 36.4,22.8 35.6,23.9 35.5,25.1 35.7,26.3 35.8,27.4 36.0,28.6 36.2,29.8 36.3,31.0 36.5,32.1 36.7,33.3 37.5,34.5 40.1,35.6 42.7,36.8 45.2,38.0 46.0,38.0 44.7,36.8 43.6,35.6 43.8,34.5 46.2,33.3 47.5,32.1 47.3,31.0 47.1,29.8 47.0,28.6 46.8,27.4 46.6,26.3 46.6,25.1 47.9,23.9 49.3,22.8 50.7,21.6 52.1,20.4 53.4,19.2 54.8,18.1 56.2,16.9 57.4,15.7 58.8,14.6 60.1,13.4 61.3,12.2' fill='%23f3efe5'/><polygon points='53.4,61.4 54.6,62.6 55.9,63.8 57.0,64.9 54.7,66.1 52.4,67.3 52.5,68.5 52.7,69.6 52.9,70.8 53.0,72.0 53.2,73.1 53.4,74.3 52.5,75.5 51.2,76.7 49.8,77.8 48.4,79.0 47.0,80.2 45.6,81.3 44.3,82.5 43.0,83.7 41.7,84.9 40.3,86.0 39.1,87.2 50.1,87.2 57.3,86.0 58.2,84.9 59.0,83.7 59.8,82.5 60.5,81.3 61.4,80.2 62.2,79.0 63.0,77.8 63.8,76.7 64.5,75.5 64.3,74.3 64.2,73.1 64.0,72.0 63.8,70.8 63.7,69.6 63.5,68.5 63.3,67.3 63.1,66.1 61.3,64.9 58.7,63.8 56.2,62.6 53.5,61.4' fill='%23f3efe5'/></svg>">
+<style>
+:root{
+  --bg:#f6f7f9; --surface:#ffffff; --surface-2:#f8f9fb; --surface-3:#f1f3f6;
+  --line:#eaecef; --line-2:#f0f2f4; --line-strong:#e2e5ea;
+  --fg:#1e2330; --fg-soft:#5b6472; --fg-faint:#939aa8;
+  --accent:#4f46e5; --accent-hover:#4338ca; --accent-soft:#eef0fe;
+  --green:#16a34a; --green-soft:#e9f7ef;
+  --amber:#d97706; --amber-soft:#fdf3e3;
+  --red:#dc2626; --red-soft:#fdecec;
+  --purple:#7c3aed; --purple-soft:#f2ecfd;
+  --blue:#2563eb; --blue-soft:#e8f0fe;
+  --link:#4f46e5;
+  --sidebar-bg:#ffffff; --sidebar-fg:#464f5e; --sidebar-fg-faint:#9aa1ae; --sidebar-line:#eef0f3; --sidebar-active:#eef0fe; --sidebar-brand:#1e2330;
+  --radius:12px; --radius-sm:9px; --radius-lg:16px;
+  --shadow:0 1px 2px rgba(20,28,48,.04); --shadow-md:0 2px 8px rgba(20,28,48,.06),0 1px 2px rgba(20,28,48,.04); --shadow-lg:0 12px 32px -8px rgba(20,28,48,.16);
+  --display:'Inter',-apple-system,'Segoe UI',sans-serif; --body:'Inter',-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --row-h:44px;
+}
+html[data-theme="dark"]{
+  --bg:#0e1017; --surface:#161922; --surface-2:#1b1f2a; --surface-3:#212634;
+  --line:#242938; --line-2:#1e2330; --line-strong:#2d3344;
+  --fg:#eef0f4; --fg-soft:#9aa3b4; --fg-faint:#5f6779;
+  --accent:#6366f1; --accent-hover:#818cf8; --accent-soft:#1e2138;
+  --green:#34d399; --green-soft:#12241d;
+  --amber:#fbbf24; --amber-soft:#241d10;
+  --red:#f87171; --red-soft:#241415;
+  --purple:#a78bfa; --purple-soft:#1d1830;
+  --blue:#60a5fa; --blue-soft:#101a2e;
+  --link:#818cf8;
+  --sidebar-bg:#131620; --sidebar-fg:#b7becd; --sidebar-fg-faint:#616a7d; --sidebar-line:#212636; --sidebar-active:#1e2138; --sidebar-brand:#ffffff;
+  --shadow:0 1px 2px rgba(0,0,0,.3); --shadow-md:0 2px 10px rgba(0,0,0,.4); --shadow-lg:0 16px 40px -8px rgba(0,0,0,.6);
+}
+*{margin:0;padding:0;box-sizing:border-box}
+html,body{height:100%}
+body{font-family:var(--body);background:var(--bg);color:var(--fg);font-size:13px;line-height:1.5;-webkit-font-smoothing:antialiased;letter-spacing:-.006em}
+::selection{background:var(--accent-soft)}
+a{color:inherit;text-decoration:none}
+button{font-family:inherit;cursor:pointer;border:none;background:none;color:inherit}
+input,select,textarea{font-family:inherit;font-size:inherit}
+::-webkit-scrollbar{width:11px;height:11px}
+::-webkit-scrollbar-thumb{background:var(--line-strong);border-radius:8px;border:3px solid var(--bg)}
+::-webkit-scrollbar-thumb:hover{background:var(--fg-faint)}
+
+/* ============ LAYOUT ============ */
+.app{display:grid;grid-template-columns:236px 1fr;height:100vh;overflow:hidden}
+.sidebar{background:var(--sidebar-bg);border-right:1px solid var(--sidebar-line);display:flex;flex-direction:column;overflow:hidden}
+.main{display:flex;flex-direction:column;overflow:hidden;background:var(--bg)}
+.content{flex:1;overflow-y:auto;padding:26px 30px 80px}
+
+/* ============ SIDEBAR ============ */
+.sb-brand{display:flex;align-items:center;gap:8px;padding:0 16px;height:56px;flex:none}
+.sb-brand .logo{height:22px;width:auto;color:var(--accent);flex:none}
+.sb-brand .bt{font-family:var(--display);font-weight:700;font-size:.95rem;color:var(--sidebar-brand);letter-spacing:-.02em;line-height:1.05}
+.sb-brand .bt small{display:block;font-weight:500;font-size:.6rem;letter-spacing:.03em;color:var(--sidebar-fg-faint);margin-top:1px}
+.sb-scroll{flex:1;overflow-y:auto;padding:8px 12px 20px}
+.sb-scroll::-webkit-scrollbar{width:0}
+.sb-group{margin-bottom:14px}
+.sb-label{font-size:.64rem;font-weight:700;letter-spacing:.08em;text-transform:uppercase;color:var(--sidebar-fg-faint);padding:8px 12px 6px}
+.sb-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;color:var(--sidebar-fg);font-weight:500;font-size:.86rem;cursor:pointer;transition:.12s;position:relative;margin-bottom:2px}
+.sb-item:hover{background:var(--surface-3)}
+.sb-item.active{background:var(--sidebar-active);color:var(--accent);font-weight:600}
+.sb-item svg{width:17px;height:17px;flex:none;opacity:1;stroke-width:2}
+.sb-item.active svg{opacity:1}
+.sb-item .badge{margin-left:auto;font-size:.66rem;font-weight:700;padding:1px 7px;border-radius:20px;background:var(--surface-3);color:var(--fg-soft);min-width:20px;text-align:center}
+.sb-item .badge:not(.muted){background:var(--red-soft);color:var(--red)}
+.sb-item.active .badge{background:var(--surface);color:var(--accent)}
+
+/* ============ TOPBAR ============ */
+.topbar{height:56px;border-bottom:1px solid var(--line);background:var(--surface);display:flex;align-items:center;gap:16px;padding:0 24px;flex:none}
+.tb-crumb{display:flex;align-items:center;gap:7px;font-size:.85rem;color:var(--fg-faint)}
+.tb-crumb b{color:var(--fg);font-weight:700}
+.tb-crumb svg{width:14px;height:14px;opacity:.5}
+.tb-search{flex:1;max-width:460px;position:relative}
+.tb-search input{width:100%;height:40px;border:1px solid var(--line-strong);background:var(--surface-2);border-radius:11px;padding:0 14px 0 40px;color:var(--fg);transition:.12s;font-size:.85rem}
+.tb-search input:focus{outline:none;border-color:var(--accent);background:var(--surface);box-shadow:0 0 0 3px var(--accent-soft)}
+.tb-search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--fg-faint)}
+.tb-spacer{flex:1}
+.tb-actions{display:flex;align-items:center;gap:4px}
+.icon-btn{width:40px;height:40px;border-radius:11px;display:grid;place-items:center;color:var(--fg-soft);transition:.12s;position:relative}
+.icon-btn:hover{background:var(--surface-2);color:var(--fg)}
+.icon-btn svg{width:19px;height:19px}
+.icon-btn .dot{position:absolute;top:9px;right:10px;width:7px;height:7px;border-radius:50%;background:var(--red);border:2px solid var(--surface)}
+.tb-user{display:flex;align-items:center;gap:10px;padding:5px 10px 5px 6px;border-radius:11px;cursor:pointer;transition:.12s;margin-left:6px}
+.tb-user:hover{background:var(--surface-2)}
+.tb-avatar{width:34px;height:34px;border-radius:50%;background:var(--accent);display:grid;place-items:center;color:#fff;font-weight:700;font-size:.78rem;flex:none}
+.tb-user .un{font-weight:600;font-size:.84rem;line-height:1.15}
+.tb-user .uc{font-size:.68rem;color:var(--fg-faint)}
+
+/* ============ PAGE ============ */
+.page{display:none}
+.page.active{display:block;animation:fade .2s ease}
+@keyframes fade{from{opacity:0;transform:translateY(4px)}to{opacity:1;transform:none}}
+.page-head{display:flex;align-items:center;justify-content:space-between;gap:18px;margin-bottom:22px;flex-wrap:wrap}
+.page-title{font-family:var(--display);font-weight:700;font-size:1.25rem;letter-spacing:-.02em}
+.page-sub{color:var(--fg-soft);margin-top:3px;font-size:.85rem;font-weight:400}
+
+/* buttons */
+.btn{display:inline-flex;align-items:center;gap:6px;height:36px;padding:0 14px;border-radius:9px;font-weight:600;font-size:.82rem;transition:.12s;white-space:nowrap;border:1px solid transparent}
+.btn svg{width:16px;height:16px}
+.btn-primary{background:var(--accent);color:#fff}
+.btn-primary:hover{background:var(--accent-hover)}
+.btn-ghost{background:var(--surface);border-color:var(--line-strong);color:var(--fg);box-shadow:var(--shadow)}
+.btn-ghost:hover{background:var(--surface-2)}
+.btn-sm{height:34px;padding:0 12px;font-size:.8rem;border-radius:9px}
+.btn-danger{background:var(--surface);border-color:var(--line-strong);color:var(--red)}
+.btn-danger:hover{background:var(--red-soft);border-color:var(--red-soft)}
+
+/* cards */
+.card{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);box-shadow:var(--shadow)}
+.card-pad{padding:20px}
+
+/* service/stat cards — colored icon tiles, big numbers (RightsHero style) */
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:16px;margin-bottom:24px}
+.stat{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);padding:16px 18px;box-shadow:var(--shadow);display:flex;align-items:center;gap:14px}
+.stat:not(:has(.ico)){display:block}
+.stat:not(:has(.ico)) .lbl{margin-bottom:4px}
+.stat .ico{width:40px;height:40px;border-radius:10px;display:grid!important;place-items:center;flex:none}
+.stat .ico svg{width:19px;height:19px;stroke-width:2.2}
+.stat .ico.red{background:var(--red-soft);color:var(--red)}
+.stat .ico.amber{background:var(--amber-soft);color:var(--amber)}
+.stat .ico.green{background:var(--green-soft);color:var(--green)}
+.stat .ico.blue{background:var(--blue-soft);color:var(--blue)}
+.stat .ico.purple{background:var(--purple-soft);color:var(--purple)}
+.stat .ico.gray{background:var(--surface-3);color:var(--fg-soft)}
+.stat .txt{display:flex;flex-direction:column}
+.stat .lbl{font-size:.82rem;color:var(--fg-soft);font-weight:500;text-transform:none;letter-spacing:0}
+.stat .val{font-family:var(--display);font-weight:700;font-size:1.4rem;letter-spacing:-.02em;margin-top:1px}
+.stat .chg{font-size:.72rem;margin-top:2px;display:inline-flex;align-items:center;gap:3px;font-weight:600}
+.stat .chg svg{display:none}
+.chg.up{color:var(--green)} .chg.down{color:var(--red)}
+.chg.up::before{content:"↑"} .chg.down::before{content:"↓"}
+
+/* tables */
+.table-wrap{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);overflow:hidden;box-shadow:var(--shadow)}
+.table-toolbar{display:flex;align-items:center;gap:10px;padding:14px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.table-scroll{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:.84rem}
+thead th{text-align:left;padding:0 16px;font-size:.68rem;letter-spacing:.05em;text-transform:uppercase;color:var(--fg-faint);font-weight:700;background:var(--surface-2);border-bottom:1px solid var(--line);white-space:nowrap;cursor:pointer;user-select:none;height:42px}
+thead th:hover{color:var(--fg-soft)}
+tbody td{padding:0 16px;border-bottom:1px solid var(--line-2);vertical-align:middle;height:var(--row-h)}
+tbody tr{transition:background .1s}
+tbody tr:hover{background:var(--surface-2)}
+tbody tr:last-child td{border-bottom:none}
+.cell-main{font-weight:600;color:var(--fg)}
+.cell-sub{font-size:.74rem;color:var(--fg-faint);margin-top:1px}
+.cell-mono{font-family:var(--mono);font-size:.76rem;color:var(--fg-soft)}
+a.cell-sub,a.cell-main{color:var(--link)}
+
+/* chips/badges — soft rounded (RightsHero style) */
+.chip{display:inline-flex;align-items:center;gap:5px;padding:3px 10px;border-radius:20px;font-size:.72rem;font-weight:600;letter-spacing:0;border:none}
+.chip svg{width:11px;height:11px}
+.chip.green{background:var(--green-soft);color:var(--green)}
+.chip.amber{background:var(--amber-soft);color:var(--amber)}
+.chip.red{background:var(--red-soft);color:var(--red)}
+.chip.blue{background:var(--blue-soft);color:var(--blue)}
+.chip.purple{background:var(--purple-soft);color:var(--purple)}
+.chip.gray{background:var(--surface-3);color:var(--fg-soft)}
+.dot-status{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
+
+/* checkbox */
+.cbx{width:17px;height:17px;border:1.5px solid var(--line-strong);border-radius:5px;display:grid;place-items:center;cursor:pointer;transition:.12s;flex:none;background:var(--surface)}
+.cbx:hover{border-color:var(--accent)}
+.cbx.on{background:var(--accent);border-color:var(--accent)}
+.cbx svg{width:11px;height:11px;color:#fff;opacity:0}
+.cbx.on svg{opacity:1}
+
+/* art thumb */
+.art{width:38px;height:38px;border-radius:9px;object-fit:cover;flex:none;background:var(--surface-3);display:grid;place-items:center;color:var(--fg-soft);font-weight:700;font-size:.66rem;overflow:hidden;border:1px solid var(--line)}
+.art svg{width:16px;height:16px}
+.row-flex{display:flex;align-items:center;gap:11px}
+.row-flex > svg{width:15px;height:15px;flex:none;color:var(--fg-faint)}
+tbody td > svg{width:15px;height:15px;color:var(--fg-faint)}
+.sec-title > svg{width:16px;height:16px}
+
+/* controls */
+.ctrl{height:36px;border:1px solid var(--line-strong);background:var(--surface);border-radius:9px;padding:0 12px;color:var(--fg);font-size:.8rem;font-weight:500;display:inline-flex;align-items:center;gap:7px;cursor:pointer;transition:.12s;box-shadow:var(--shadow)}
+.ctrl:hover{background:var(--surface-2)}
+.ctrl svg{width:14px;height:14px;opacity:.6}
+select.ctrl{cursor:pointer;appearance:none;padding-right:28px;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23939aa8' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 10px center;background-size:12px}
+.input{height:36px;border:1px solid var(--line-strong);background:var(--surface);border-radius:10px;padding:0 13px;color:var(--fg);font-size:.85rem;width:100%;transition:.12s}
+.input:focus{outline:none;border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.input:disabled{background:var(--surface-2);color:var(--fg-faint)}
+select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23939aa8' stroke-width='2.4'%3E%3Cpath d='M6 9l6 6 6-6'/%3E%3C/svg%3E");background-repeat:no-repeat;background-position:right 12px center;background-size:13px;padding-right:32px;cursor:pointer}
+
+/* tabs */
+.tabs{display:flex;gap:2px;border-bottom:1px solid var(--line);margin-bottom:22px}
+.tab{padding:10px 16px;font-weight:600;font-size:.86rem;color:var(--fg-soft);border-bottom:2px solid transparent;margin-bottom:-1px;cursor:pointer;transition:.12s}
+.tab:hover{color:var(--fg)}
+.tab.active{color:var(--accent);border-bottom-color:var(--accent);font-weight:700}
+
+/* segmented */
+.seg{display:inline-flex;background:var(--surface-2);border:1px solid var(--line-strong);border-radius:10px;padding:3px}
+.seg button{padding:6px 13px;border-radius:8px;font-size:.78rem;font-weight:600;color:var(--fg-soft);transition:.12s}
+.seg button.on{background:var(--surface);color:var(--accent);box-shadow:var(--shadow)}
+
+/* bulk bar */
+.bulkbar{position:fixed;bottom:22px;left:50%;transform:translateX(-50%) translateY(160%);background:var(--surface);color:var(--fg);border:1px solid var(--line-strong);border-radius:14px;padding:11px 16px;display:flex;align-items:center;gap:6px;z-index:60;transition:transform .2s cubic-bezier(.2,.8,.2,1);box-shadow:var(--shadow-lg)}
+.bulkbar.show{transform:translateX(-50%) translateY(0)}
+.bulkbar .cnt{font-weight:700;font-size:.82rem;padding-right:12px;margin-right:4px;border-right:1px solid var(--line);color:var(--fg)}
+.bulkbar button{display:inline-flex;align-items:center;gap:6px;padding:7px 12px;border-radius:9px;font-size:.8rem;font-weight:600;color:var(--fg-soft);transition:.12s}
+.bulkbar button:hover{background:var(--surface-2);color:var(--accent)}
+.bulkbar button svg{width:15px;height:15px}
+
+/* progress */
+.bar{height:7px;background:var(--surface-3);border-radius:6px;overflow:hidden}
+.bar > i{display:block;height:100%;background:var(--accent);border-radius:6px}
+
+/* sparkline */
+.spark{display:flex;align-items:flex-end;gap:3px;height:42px}
+.spark > i{flex:1;background:var(--accent-soft);border-radius:3px 3px 0 0;min-height:3px}
+.spark > i.hot{background:var(--accent)}
+
+/* section title */
+.sec-title{font-family:var(--display);font-weight:700;font-size:1.05rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title svg{width:16px;height:16px;opacity:.6}
+.sec-title .count{font-size:.7rem;color:var(--fg-faint);font-weight:600;background:var(--surface-3);padding:2px 9px;border-radius:20px}
+
+/* modal */
+.modal-bg{position:fixed;inset:0;background:rgba(20,28,48,.4);backdrop-filter:blur(2px);z-index:80;display:none;align-items:flex-start;justify-content:center;padding:56px 20px;overflow-y:auto}
+.modal-bg.show{display:flex}
+.modal{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius-lg);width:100%;max-width:680px;box-shadow:var(--shadow-lg)}
+.modal-head{display:flex;align-items:center;justify-content:space-between;padding:18px 22px;border-bottom:1px solid var(--line)}
+.modal-head h3{font-family:var(--display);font-weight:700;font-size:1.05rem}
+.modal-body{padding:22px}
+.modal-foot{display:flex;justify-content:flex-end;gap:10px;padding:16px 22px;border-top:1px solid var(--line)}
+
+/* empty */
+.empty{text-align:center;padding:52px 20px;color:var(--fg-faint)}
+.empty svg{width:42px;height:42px;margin-bottom:12px;opacity:.4}
+.empty h4{font-weight:700;color:var(--fg-soft);margin-bottom:5px;font-size:.98rem}
+
+/* form */
+.fgrid{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+.field{display:flex;flex-direction:column;gap:6px}
+.field.full{grid-column:1/-1}
+.field label{font-size:.78rem;font-weight:600;color:var(--fg-soft)}
+.field label .req{color:var(--red)}
+
+/* toast */
+.toast{position:fixed;bottom:22px;right:22px;background:var(--fg);color:var(--surface);padding:12px 17px;border-radius:12px;box-shadow:var(--shadow-lg);display:flex;align-items:center;gap:9px;z-index:90;transform:translateY(160%);transition:transform .25s cubic-bezier(.2,.8,.2,1);font-size:.84rem;font-weight:600}
+.toast.show{transform:none}
+.toast svg{width:16px;height:16px;color:var(--green)}
+
+/* donut */
+.donut{width:150px;height:150px;border-radius:50%;display:grid;place-items:center;position:relative}
+.donut .hole{width:96px;height:96px;border-radius:50%;background:var(--surface);display:grid;place-items:center;text-align:center}
+.donut .hole .v{font-family:var(--display);font-weight:800;font-size:1.25rem}
+.donut .hole .l{font-size:.64rem;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.06em}
+
+/* legend */
+.legend{display:flex;flex-direction:column;gap:10px}
+.legend .li{display:flex;align-items:center;gap:9px;font-size:.82rem}
+.legend .sw{width:10px;height:10px;border-radius:3px;flex:none}
+.legend .li .v{margin-left:auto;font-family:var(--mono);font-weight:600;color:var(--fg-soft);font-size:.76rem}
+
+/* wizard */
+.wz-nav{display:flex;flex-direction:column;gap:2px}
+.wz-step{display:flex;align-items:center;gap:10px;padding:10px 13px;border-radius:10px;color:var(--fg-soft);font-weight:500;font-size:.84rem;cursor:pointer;transition:.12s}
+.wz-step:hover{background:var(--surface-2)}
+.wz-step.active{background:var(--accent-soft);color:var(--accent);font-weight:700}
+.wz-num{width:22px;height:22px;border-radius:50%;border:1.5px solid var(--line-strong);display:grid;place-items:center;font-size:.68rem;font-family:var(--mono);flex:none}
+.wz-step.active .wz-num{border-color:var(--accent);background:var(--accent);color:#fff}
+.claim-opt.sel{border-color:var(--accent)}
+.claim-opt svg{width:16px;height:16px}
+
+/* release builder */
+.asset{margin-bottom:12px}
+.asset-head{display:flex;align-items:center;justify-content:space-between;padding:13px 16px;cursor:pointer;background:var(--surface-2);border-bottom:1px solid var(--line);border-radius:var(--radius-lg) var(--radius-lg) 0 0}
+.asset.collapsed .asset-body{display:none}
+.asset.collapsed .asset-head{border-bottom:none;border-radius:var(--radius-lg)}
+.asset-no{font-family:var(--mono);font-size:.72rem;color:var(--fg-faint);border:1px solid var(--line-strong);padding:1px 6px;border-radius:6px}
+.asset-head > .row-flex > svg{width:15px;height:15px}
+.asset-body{padding:18px}
+.asset-sec{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.05em;color:var(--fg-faint);margin:18px 0 11px;padding-bottom:6px;border-bottom:1px solid var(--line-2)}
+.contrib-row{display:flex;align-items:center;justify-content:space-between;gap:10px;padding:9px 0;border-bottom:1px solid var(--line-2)}
+.contrib-row:last-child{border-bottom:none}
+.upload{display:flex;align-items:center;gap:12px;padding:16px;border:1.5px dashed var(--line-strong);border-radius:11px;cursor:pointer;transition:.12s;background:var(--surface-2)}
+.upload:hover{border-color:var(--accent);background:var(--accent-soft)}
+.upload svg{width:24px;height:24px;color:var(--fg-faint);flex:none}
+
+
+
+svg[stroke="currentColor"]{stroke-width:2}
+.stat .ico svg{stroke-width:2.2}
+.sb-item svg{stroke-width:2}
+.btn svg,.chip svg{stroke-width:2.2}
+
+/* menu btn */
+.menu-btn{display:none}
+@media(max-width:1024px){
+  .app{grid-template-columns:1fr}
+  .sidebar{position:fixed;left:0;top:0;bottom:0;width:236px;z-index:100;transform:translateX(-100%);transition:transform .2s;box-shadow:var(--shadow-lg)}
+  .sidebar.open{transform:none}
+  .menu-btn{display:grid}
+  .sb-backdrop{position:fixed;inset:0;background:rgba(0,0,0,.4);z-index:99;display:none}
+  .sb-backdrop.show{display:block}
+}
+@media(max-width:920px){
+  [style*="grid-template-columns:1.6fr 1fr"],[style*="grid-template-columns:1.5fr 1fr"],[style*="grid-template-columns:1fr 1.4fr"],[style*="grid-template-columns:1fr 320px"]{grid-template-columns:1fr !important}
+}
+@media(max-width:680px){
+  .content{padding:18px 16px 80px}
+  .tb-search{display:none}
+  .page-title{font-size:1.2rem}
+  .fgrid{grid-template-columns:1fr}
+  .wz-nav{flex-direction:row;overflow-x:auto}
+  [style*="grid-template-columns:220px 1fr"]{grid-template-columns:1fr !important}
+}
+
+</style>
+
+<style>
+/* merged into main stylesheet */
+</style>
+
+</head>
+<body>
+<div class="app" id="app"><aside class="sidebar" id="sidebar">
+  <div class="sb-brand"><svg class="logo" viewBox="33 10 34 80" fill="currentColor"><polygon points="59.7,12.2 42.9,13.4 42.1,14.6 41.3,15.7 40.4,16.9 39.6,18.1 38.9,19.2 38.1,20.4 37.2,21.6 36.4,22.8 35.6,23.9 35.5,25.1 35.7,26.3 35.8,27.4 36.0,28.6 36.2,29.8 36.3,31.0 36.5,32.1 36.7,33.3 37.5,34.5 40.1,35.6 42.7,36.8 45.2,38.0 46.0,38.0 44.7,36.8 43.6,35.6 43.8,34.5 46.2,33.3 47.5,32.1 47.3,31.0 47.1,29.8 47.0,28.6 46.8,27.4 46.6,26.3 46.6,25.1 47.9,23.9 49.3,22.8 50.7,21.6 52.1,20.4 53.4,19.2 54.8,18.1 56.2,16.9 57.4,15.7 58.8,14.6 60.1,13.4 61.3,12.2"/><polygon points="53.4,61.4 54.6,62.6 55.9,63.8 57.0,64.9 54.7,66.1 52.4,67.3 52.5,68.5 52.7,69.6 52.9,70.8 53.0,72.0 53.2,73.1 53.4,74.3 52.5,75.5 51.2,76.7 49.8,77.8 48.4,79.0 47.0,80.2 45.6,81.3 44.3,82.5 43.0,83.7 41.7,84.9 40.3,86.0 39.1,87.2 50.1,87.2 57.3,86.0 58.2,84.9 59.0,83.7 59.8,82.5 60.5,81.3 61.4,80.2 62.2,79.0 63.0,77.8 63.8,76.7 64.5,75.5 64.3,74.3 64.2,73.1 64.0,72.0 63.8,70.8 63.7,69.6 63.5,68.5 63.3,67.3 63.1,66.1 61.3,64.9 58.7,63.8 56.2,62.6 53.5,61.4"/></svg><div class="bt">Sout Network<small>Admin Console</small></div></div>
+  <div class="sb-scroll">
+    <div class="sb-group"><div class="sb-label">Operations</div>
+      <div class="sb-item" data-page="admin_overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Overview</span></div>
+      <div class="sb-item" data-page="admin_moderation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Review Queue</span><span class="badge">12</span></div>
+      <div class="sb-item" data-page="admin_distribution"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span>Distribution</span></div>
+    </div>
+    <div class="sb-group"><div class="sb-label">Accounts</div>
+      <div class="sb-item" data-page="admin_users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 010 5.8M21 20c0-2.5-1.5-4.7-3.7-5.6"/></svg><span>User Management</span></div>
+      <div class="sb-item" data-page="admin_permissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Permissions</span></div>
+      <div class="sb-item" data-page="admin_clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8"/><path d="M3 21h18"/></svg><span>Client Accounts</span></div>
+    </div>
+    <div class="sb-group"><div class="sb-label">Rights</div>
+      <div class="sb-item" data-page="admin_rights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg><span>UGC & Claims</span><span class="badge">63</span></div>
+      <div class="sb-item" data-page="admin_conflicts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span>Ownership Conflicts</span><span class="badge">2</span></div>
+      <div class="sb-item" data-page="admin_takedowns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg><span>Takedowns</span></div>
+    </div>
+    <div class="sb-group"><div class="sb-label">Finance</div>
+      <div class="sb-item" data-page="admin_revenue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg><span>Revenue Reports</span></div>
+      <div class="sb-item" data-page="admin_splits"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15.5A9 9 0 118.5 3v9H21z"/><path d="M12 3a9 9 0 019 9h-9z"/></svg><span>Split Payments</span></div>
+      <div class="sb-item" data-page="admin_payouts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h3v-4z"/></svg><span>Payout Approvals</span><span class="badge">4</span></div>
+      <div class="sb-item" data-page="admin_tax"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg><span>Statements & Tax</span></div>
+    </div>
+    <div class="sb-group"><div class="sb-label">System</div>
+      <div class="sb-item" data-page="admin_audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Audit Logs</span></div>
+      <div class="sb-item" data-page="admin_settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.7 1.6 1.6 0 01-3.2 0 1.6 1.6 0 00-2.7-.7l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-.7-2.7 1.6 1.6 0 010-3.2 1.6 1.6 0 00.7-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 002.7-.7 1.6 1.6 0 013.2 0 1.6 1.6 0 002.7.7l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00.7 2.7 1.6 1.6 0 010 3.2 1.6 1.6 0 00-1 .9z"/></svg><span>Settings</span></div>
+    </div>
+  </div>
+</aside><div class="main"><header class="topbar">
+  <button class="icon-btn menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
+  <div class="tb-crumb" id="crumb"><span>Admin</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><b>Overview</b></div>
+  <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="Search users, releases, claims, assets..."></div>
+  <div class="tb-spacer"></div>
+  <div class="tb-actions">
+    <a class="btn btn-ghost btn-sm" href="dashboard.html" style="margin-right:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg> Client View</a>
+    <button class="icon-btn" onclick="toggleTheme()" id="themeBtn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
+    <button class="icon-btn"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="dot"></span></button>
+    <div class="tb-user"><div class="tb-avatar">AD</div><div><div class="un">Admin</div><div class="uc">Operations</div></div></div>
+  </div>
+</header><div class="content"><div class="page active" data-page="admin_overview">
+      <div style="margin-bottom:16px"><div class="page-title">Operations Overview</div><div class="page-sub">Queue health and recent activity across the platform</div></div>
+      <div class="stat-grid"><div class="stat"><div class="lbl">Pending review</div><div class="val">12</div></div><div class="stat"><div class="lbl">Awaiting delivery</div><div class="val">8</div></div><div class="stat"><div class="lbl">Open rights issues</div><div class="val">65</div></div><div class="stat"><div class="lbl">Payout approvals</div><div class="val">4</div></div><div class="stat"><div class="lbl">Active users</div><div class="val">42</div></div><div class="stat"><div class="lbl">Failed deliveries</div><div class="val">3</div></div></div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start">
+        <div><div class="sec-title">Review Queue <span class="count">12 pending</span></div>
+          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Stage</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">KA</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td><td><span class="chip gray">Metadata</span></td><td><span class="chip amber">Pending</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr><tr><td><div class="row-flex"><div class="art">EL</div><div><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></div></div></td><td><span class="chip gray">Artwork</span></td><td><span class="chip amber">Pending</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr><tr><td><div class="row-flex"><div class="art">EH</div><div><div class="cell-main">Ehsas</div><div class="cell-sub">Nour Adel</div></div></div></td><td><span class="chip gray">Audio</span></td><td><span class="chip amber">Pending</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr></tbody></table></div></div></div>
+        <div><div class="sec-title">Recent Activity</div>
+          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>User</th><th>Action</th><th>Target</th><th>When</th></tr></thead><tbody><tr><td class="cell-mono">ahmed@soutnetwork.com</td><td>Approved release</td><td class="cell-main">Kan Wedy Naltaqy</td><td class="cell-mono">2m ago</td></tr><tr><td class="cell-mono">ops@soutnetwork.com</td><td>Delivered to Spotify</td><td class="cell-main">El Mafrod</td><td class="cell-mono">18m ago</td></tr><tr><td class="cell-mono">admin</td><td>Reset password</td><td class="cell-main">yara.label@…</td><td class="cell-mono">1h ago</td></tr><tr><td class="cell-mono">ops@soutnetwork.com</td><td>Rejected release</td><td class="cell-main">Layali — third-party logo</td><td class="cell-mono">2h ago</td></tr><tr><td class="cell-mono">finance@soutnetwork.com</td><td>Approved payout</td><td class="cell-main">$15,420.00</td><td class="cell-mono">3h ago</td></tr></tbody></table></div></div></div>
+      </div>
+    </div>
+<div class="page" data-page="admin_moderation">
+      <div class="page-head"><div><div class="page-title">Review Queue</div><div class="page-sub">Validate metadata, artwork, audio, copyright, AI content and duplicates</div></div>
+      <select class="ctrl"><option>All stages</option><option>Metadata</option><option>Artwork</option><option>Audio</option><option>Copyright</option><option>AI content</option><option>Duplicate</option></select></div>
+      <div class="table-wrap"><div class="table-scroll"><table>
+        <thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Release</th><th>Stage</th><th>Result</th><th>Checks</th><th></th></tr></thead>
+        <tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">KA</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal · ELshamrany</div></div></div></td>
+        <td><span class="chip gray">Metadata</span></td><td><span class="chip amber">Pending</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">EL</div><div><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy · Injaz Teqani</div></div></div></td>
+        <td><span class="chip gray">Artwork</span></td><td><span class="chip amber">Pending</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">EH</div><div><div class="cell-main">Ehsas</div><div class="cell-sub">Nour Adel · Injaz Teqani</div></div></div></td>
+        <td><span class="chip gray">Audio</span></td><td><span class="chip amber">Pending</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">FY</div><div><div class="cell-main">Fy Oyonak</div><div class="cell-sub">Khaled Nabil · ELshamrany</div></div></div></td>
+        <td><span class="chip gray">Copyright</span></td><td><span class="chip red">Flagged</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">LA</div><div><div class="cell-main">Layali</div><div class="cell-sub">Omar Khaled · PNDA Media</div></div></div></td>
+        <td><span class="chip gray">AI content</span></td><td><span class="chip red">Flagged</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
+        <td><div class="row-flex"><div class="art">SH</div><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal · ELshamrany</div></div></div></td>
+        <td><span class="chip gray">Duplicate</span></td><td><span class="chip green">Clear</span></td>
+        <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_distribution">
+      <div class="page-head"><div><div class="page-title">Distribution</div><div class="page-sub">Deliver, re-deliver and manage store / territory exclusions</div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toast('Territory rules')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg> Territory Exclusions</button><button class="btn btn-primary" onclick="toast('Bulk deliver started')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Deliver Selected</button></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Release</th><th>Store</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
+        <td>Spotify</td><td><span class="chip green">Delivered</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
+        <td>YouTube Music</td><td><span class="chip amber">Processing</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">KA</div><div class="cell-main">Kan Wedy Naltaqy</div></div></td>
+        <td>TikTok</td><td><span class="chip green">Delivered</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
+        <td>Deezer</td><td><span class="chip gray">Queued</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
+        <td>Anghami</td><td><span class="chip red">Failed</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_users">
+      <div class="page-head"><div><div class="page-title">User Management</div><div class="page-sub">Create and manage users, plans and limits</div></div>
+      <button class="btn btn-primary" onclick="toast('Create user form')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create User</button></div>
+      <div class="table-wrap"><div class="table-toolbar"><div class="tb-search" style="max-width:260px;flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input class="input" style="padding-left:34px" placeholder="Search users..."></div>
+      <select class="ctrl"><option>All roles</option><option>Owner</option><option>Label Manager</option><option>Operations</option><option>Finance</option></select>
+      <select class="ctrl"><option>All plans</option><option>Pro</option><option>Label</option><option>Internal</option></select></div>
+      <div class="table-scroll"><table><thead><tr><th>User</th><th>Role</th><th>Plan</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">AH</div><div><div class="cell-main">Ahmed Hassan</div><div class="cell-sub">ahmed@soutnetwork.com</div></div></div></td>
+        <td><span class="chip gray">Owner</span></td><td><span class="chip gray">Pro</span></td><td><span class="chip green">Active</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Reset link sent')">Reset Password</button> <button class="btn btn-ghost btn-sm" onclick="toast('User disabled')">Disable</button></td></tr><tr><td><div class="row-flex"><div class="art">YL</div><div><div class="cell-main">Yara Label</div><div class="cell-sub">yara.label@elshamrany.com</div></div></div></td>
+        <td><span class="chip gray">Label Manager</span></td><td><span class="chip gray">Label</span></td><td><span class="chip green">Active</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Reset link sent')">Reset Password</button> <button class="btn btn-ghost btn-sm" onclick="toast('User disabled')">Disable</button></td></tr><tr><td><div class="row-flex"><div class="art">OT</div><div><div class="cell-main">Ops Team</div><div class="cell-sub">ops@soutnetwork.com</div></div></div></td>
+        <td><span class="chip gray">Operations</span></td><td><span class="chip gray">Internal</span></td><td><span class="chip green">Active</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Reset link sent')">Reset Password</button> <button class="btn btn-ghost btn-sm" onclick="toast('User disabled')">Disable</button></td></tr><tr><td><div class="row-flex"><div class="art">F</div><div><div class="cell-main">Finance</div><div class="cell-sub">finance@soutnetwork.com</div></div></div></td>
+        <td><span class="chip gray">Finance</span></td><td><span class="chip gray">Internal</span></td><td><span class="chip green">Active</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Reset link sent')">Reset Password</button> <button class="btn btn-ghost btn-sm" onclick="toast('User disabled')">Disable</button></td></tr><tr><td><div class="row-flex"><div class="art">IA</div><div><div class="cell-main">Injaz Admin</div><div class="cell-sub">admin@injazteqani.com</div></div></div></td>
+        <td><span class="chip gray">Label Manager</span></td><td><span class="chip gray">Label</span></td><td><span class="chip gray">Disabled</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Reset link sent')">Reset Password</button> <button class="btn btn-ghost btn-sm" onclick="toast('User disabled')">Enable</button></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_permissions">
+      <div class="page-head"><div><div class="page-title">Permissions</div><div class="page-sub">Role-based access control · toggle capabilities per role</div></div>
+      <button class="btn btn-primary" onclick="toast('Permissions saved')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Save Changes</button></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Capability</th><th style="text-align:center">Owner</th><th style="text-align:center">Label Manager</th><th style="text-align:center">Operations</th><th style="text-align:center">Finance</th><th style="text-align:center">Analyst</th></tr></thead><tbody><tr><td class="cell-main">Upload releases</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Edit releases</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Deliver releases</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Metadata edits</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Takedowns</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Financial access</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Rights access</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Analytics access</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr><tr><td class="cell-main">Team access</td><td style="text-align:center"><div class="cbx perm on" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td style="text-align:center"><div class="cbx perm" style="margin:0 auto" onclick="this.classList.toggle('on')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_clients">
+      <div class="page-head"><div><div class="page-title">Client Accounts</div><div class="page-sub">Labels and partner companies on the platform</div></div>
+      <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Client</button></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Client</th><th>Catalog</th><th>Plan</th><th>Status</th><th></th></tr></thead><tbody>
+      <tr><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">ELshamrany</div></div></td><td class="cell-mono">679 releases</td><td><span class="chip gray">Label</span></td><td><span class="chip green">Active</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Manage</button></td></tr>
+      <tr><td><div class="row-flex"><div class="art">IT</div><div class="cell-main">Injaz Teqani</div></div></td><td class="cell-mono">312 releases</td><td><span class="chip gray">Label</span></td><td><span class="chip green">Active</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Manage</button></td></tr>
+      <tr><td><div class="row-flex"><div class="art">PM</div><div class="cell-main">PNDA Media</div></div></td><td class="cell-mono">148 releases</td><td><span class="chip gray">Pro</span></td><td><span class="chip green">Active</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Manage</button></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_rights">
+      <div class="page-head"><div><div class="page-title">UGC & Claims</div><div class="page-sub">Manage user-generated content claims and counter-claims</div></div></div>
+      <div class="tabs"><div class="tab active">Claims</div><div class="tab">Counter-claims</div><div class="tab">Released</div></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Claimant</th><th>Type</th><th>Status</th><th>Views</th><th></th></tr></thead><tbody>
+      <tr><td><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></td><td>Sout Network</td><td><span class="chip gray">Monetize</span></td><td><span class="chip green">Active</span></td><td class="cell-mono">1,024</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+      <tr><td><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></td><td>Injaz Teqani</td><td><span class="chip gray">Block</span></td><td><span class="chip amber">Disputed</span></td><td class="cell-mono">0</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+      <tr><td><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></td><td>Injaz Teqani</td><td><span class="chip gray">Takedown</span></td><td><span class="chip red">Counter-claim</span></td><td class="cell-mono">50</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_conflicts">
+      <div class="page-head"><div><div class="page-title">Ownership Conflicts</div><div class="page-sub">Overlapping ownership claims requiring resolution</div></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Party A</th><th>Party B</th><th>Overlap</th><th>Status</th><th></th></tr></thead><tbody>
+      <tr><td class="cell-main">Wahed Asy</td><td>ELshamrany</td><td>ghassen gh</td><td class="cell-mono">100%</td><td><span class="chip amber">Open</span></td><td style="text-align:right"><button class="btn btn-primary btn-sm">Resolve</button></td></tr>
+      <tr><td class="cell-main">Rahmak Ya Rab</td><td>Injaz Teqani</td><td>Unknown</td><td class="cell-mono">60%</td><td><span class="chip amber">Open</span></td><td style="text-align:right"><button class="btn btn-primary btn-sm">Resolve</button></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_takedowns">
+      <div class="page-head"><div><div class="page-title">Takedowns</div><div class="page-sub">Process and track content takedown requests</div></div>
+      <button class="btn btn-primary" onclick="toast('Takedown request')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Takedown</button></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Platform</th><th>Reason</th><th>Requested by</th><th>Status</th></tr></thead><tbody>
+      <tr><td class="cell-main">Layali</td><td>YouTube</td><td>Third-party logo</td><td class="cell-mono">ops@soutnetwork.com</td><td><span class="chip amber">Processing</span></td></tr>
+      <tr><td class="cell-main">Old Mix v1</td><td>Spotify</td><td>Replaced version</td><td class="cell-mono">ahmed@soutnetwork.com</td><td><span class="chip green">Completed</span></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_revenue">
+      <div class="page-head"><div><div class="page-title">Revenue Reports</div><div class="page-sub">Platform revenue across all client accounts</div></div>
+      <button class="btn btn-ghost" onclick="toast('Exporting report')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</button></div>
+      <div class="stat-grid"><div class="stat"><div class="lbl">Gross revenue (Jun)</div><div class="val">$214,500</div></div><div class="stat"><div class="lbl">Distributor share</div><div class="val">$32,175</div></div><div class="stat"><div class="lbl">Client share</div><div class="val">$182,325</div></div><div class="stat"><div class="lbl">Streams</div><div class="val">53.2M</div></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Period</th><th>Platform</th><th>Streams</th><th>Revenue</th></tr></thead><tbody><tr><td class="cell-mono">Jun 2026</td><td>Spotify</td><td class="cell-mono">1,240,500</td><td class="cell-mono">$4,962.00</td></tr><tr><td class="cell-mono">Jun 2026</td><td>YouTube</td><td class="cell-mono">3,850,200</td><td class="cell-mono">$3,080.16</td></tr><tr><td class="cell-mono">Jun 2026</td><td>Apple Music</td><td class="cell-mono">640,100</td><td class="cell-mono">$3,840.60</td></tr><tr><td class="cell-mono">May 2026</td><td>Spotify</td><td class="cell-mono">1,180,300</td><td class="cell-mono">$4,721.20</td></tr><tr><td class="cell-mono">May 2026</td><td>TikTok</td><td class="cell-mono">5,200,000</td><td class="cell-mono">$1,560.00</td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_splits">
+      <div class="page-head"><div><div class="page-title">Split Payments</div><div class="page-sub">Revenue split agreements between contributors</div></div>
+      <button class="btn btn-primary" onclick="toast('New split')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Split</button></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Payee</th><th>Role</th><th>Split</th><th>Status</th></tr></thead><tbody>
+      <tr><td class="cell-main">El Mafrod</td><td>Planko</td><td>Main Artist</td><td class="cell-mono">60%</td><td><span class="chip green">Active</span></td></tr>
+      <tr><td class="cell-main">El Mafrod</td><td>Echo EG</td><td>Featured</td><td class="cell-mono">40%</td><td><span class="chip green">Active</span></td></tr>
+      <tr><td class="cell-main">Kan Wedy Naltaqy</td><td>Yara Gamal</td><td>Main Artist</td><td class="cell-mono">100%</td><td><span class="chip green">Active</span></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_payouts">
+      <div class="page-head"><div><div class="page-title">Payout Approvals</div><div class="page-sub">Review and approve client withdrawal requests</div></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Client</th><th>Amount</th><th>Method</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td class="cell-main">ELshamrany</td><td class="cell-mono">$15,420.00</td><td>Bank Transfer</td><td><span class="chip amber">Pending approval</span></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Payout approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Payout held')">Hold</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td class="cell-main">Injaz Teqani</td><td class="cell-mono">$8,200.00</td><td>PayPal</td><td><span class="chip amber">Pending approval</span></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Payout approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Payout held')">Hold</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td class="cell-main">PNDA Media</td><td class="cell-mono">$4,100.00</td><td>Wise</td><td><span class="chip amber">Pending approval</span></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Payout approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Payout held')">Hold</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td class="cell-main">Echo EG</td><td class="cell-mono">$2,640.00</td><td>Bank Transfer</td><td><span class="chip amber">Pending approval</span></td>
+        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Payout approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Payout held')">Hold</button></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_tax">
+      <div class="page-head"><div><div class="page-title">Statements & Tax</div><div class="page-sub">Monthly statements and tax forms per client</div></div>
+      <button class="btn btn-ghost" onclick="toast('Generating statements')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> Generate Statements</button></div>
+      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Client</th><th>Period</th><th>Statement</th><th>Tax form</th><th></th></tr></thead><tbody>
+      <tr><td class="cell-main">ELshamrany</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
+      <tr><td class="cell-main">Injaz Teqani</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
+      </tbody></table></div></div></div>
+<div class="page" data-page="admin_audit">
+      <div class="page-head"><div><div class="page-title">Audit Logs</div><div class="page-sub">Every action — who changed what and when</div></div>
+      <div style="display:flex;gap:8px"><select class="ctrl"><option>All actions</option><option>release.*</option><option>delivery.*</option><option>user.*</option><option>payout.*</option></select><button class="btn btn-ghost" onclick="toast('Exporting logs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button></div></div>
+      <div class="table-wrap"><div class="table-toolbar"><div class="tb-search" style="max-width:280px;flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input class="input" style="padding-left:34px" placeholder="Search by user, action or target..."></div></div>
+      <div class="table-scroll"><table><thead><tr><th>Timestamp</th><th>User</th><th>Action</th><th>Target</th><th>IP</th></tr></thead><tbody><tr><td class="cell-mono">2026-06-30 14:22</td><td class="cell-mono">ahmed@soutnetwork.com</td><td><span class="chip gray">release.approve</span></td><td class="cell-main">Kan Wedy Naltaqy</td><td class="cell-mono">203.0.113.4</td></tr><tr><td class="cell-mono">2026-06-30 14:05</td><td class="cell-mono">ops@soutnetwork.com</td><td><span class="chip gray">delivery.send</span></td><td class="cell-main">El Mafrod → Spotify</td><td class="cell-mono">203.0.113.9</td></tr><tr><td class="cell-mono">2026-06-30 13:40</td><td class="cell-mono">admin</td><td><span class="chip gray">user.password_reset</span></td><td class="cell-main">yara.label@…</td><td class="cell-mono">10.0.0.2</td></tr><tr><td class="cell-mono">2026-06-30 12:18</td><td class="cell-mono">ops@soutnetwork.com</td><td><span class="chip gray">release.reject</span></td><td class="cell-main">Layali</td><td class="cell-mono">203.0.113.9</td></tr><tr><td class="cell-mono">2026-06-30 11:50</td><td class="cell-mono">finance@soutnetwork.com</td><td><span class="chip gray">payout.approve</span></td><td class="cell-main">$15,420.00 → ELshamrany</td><td class="cell-mono">203.0.113.7</td></tr><tr><td class="cell-mono">2026-06-30 10:30</td><td class="cell-mono">admin</td><td><span class="chip gray">permission.update</span></td><td class="cell-main">Operations: deliver=on</td><td class="cell-mono">10.0.0.2</td></tr><tr><td class="cell-mono">2026-06-30 09:15</td><td class="cell-mono">ahmed@soutnetwork.com</td><td><span class="chip gray">metadata.edit</span></td><td class="cell-main">Shok El Ghadr · genre</td><td class="cell-mono">203.0.113.4</td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_settings">
+      <div class="page-head"><div><div class="page-title">Settings</div><div class="page-sub">Platform configuration</div></div></div>
+      <div class="card card-pad" style="max-width:620px"><div class="fgrid">
+        <div class="field"><label>Platform name</label><input class="input" value="Sout Network"></div>
+        <div class="field"><label>Default distributor share</label><input class="input" value="15%"></div>
+        <div class="field"><label>Auto-deliver on approval</label><select class="input"><option>Enabled</option><option>Disabled</option></select></div>
+        <div class="field"><label>AI content scanning</label><select class="input"><option>Enabled</option><option>Disabled</option></select></div>
+      </div><div style="margin-top:16px"><button class="btn btn-primary" onclick="toast('Settings saved')">Save changes</button></div></div></div></div></div></div><div class="bulkbar" id="bulkbar"><span class="cnt"><span id="bulkCount">0</span> selected</span>
+  <button onclick="toast('Approved')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Approve</button><button onclick="toast('Rejected')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Reject</button>
+  <button onclick="toast('Delivered')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg> Deliver</button><button onclick="toast('Exported')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button>
+  <button onclick="clearSel()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Clear</button></div>
+<div class="toast" id="toast"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg><span id="toastMsg">Done</span></div>
+<div class="sb-backdrop" id="sbBackdrop" onclick="toggleSidebar()"></div>
+<script>
+function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
+  var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
+  document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
+  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','UGC & Claims'],admin_conflicts:['Rights','Ownership Conflicts'],admin_takedowns:['Rights','Takedowns'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
+  var c=L[p]||['','']; document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
+  document.querySelector('.content').scrollTop=0; clearSel(); if(window.innerWidth<=1024)closeSidebar();}
+document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>go(it.dataset.page)));
+function toggleTheme(){var h=document.documentElement,d=h.getAttribute('data-theme')==='dark';h.setAttribute('data-theme',d?'light':'dark');document.getElementById('themeBtn').innerHTML=d?`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>`:`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg>`;}
+function toggleSidebar(){document.getElementById('sidebar').classList.toggle('open');document.getElementById('sbBackdrop').classList.toggle('show');}
+function closeSidebar(){document.getElementById('sidebar').classList.remove('open');document.getElementById('sbBackdrop').classList.remove('show');}
+function toggleRow(el,e){e&&e.stopPropagation();el.classList.toggle('on');updateBulk();}
+function toggleAll(el){var on=!el.classList.contains('on');el.classList.toggle('on',on);el.closest('table').querySelectorAll('tbody .cbx').forEach(c=>c.classList.toggle('on',on));updateBulk();}
+function updateBulk(){var n=document.querySelectorAll('.page.active tbody .cbx.on:not(.perm)').length;var bb=document.getElementById('bulkbar');if(bb){document.getElementById('bulkCount').textContent=n;bb.classList.toggle('show',n>0);}}
+function clearSel(){document.querySelectorAll('tbody .cbx.on:not(.perm)').forEach(c=>c.classList.remove('on'));var bb=document.getElementById('bulkbar');if(bb)bb.classList.remove('show');}
+document.addEventListener('click',e=>{var t=e.target.closest('.tab');if(t){t.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');}});
+var toastT;function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400);}
+go('admin_overview');
+</script>
+</body>
+</html>
