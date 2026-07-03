@@ -334,9 +334,7 @@ svg[stroke="currentColor"]{stroke-width:2}
       <div class="sb-item" data-page="admin_clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8"/><path d="M3 21h18"/></svg><span>Client Accounts</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">Rights</div>
-      <div class="sb-item" data-page="admin_rights"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg><span>UGC & Claims</span><span class="badge">63</span></div>
-      <div class="sb-item" data-page="admin_conflicts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span>Ownership Conflicts</span><span class="badge">2</span></div>
-      <div class="sb-item" data-page="admin_takedowns"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg><span>Takedowns</span></div>
+      <div class="sb-item" data-page="admin_rights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Rights Manager</span><span class="badge" id="aRightsBadge" style="display:none">0</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">Finance</div>
       <div class="sb-item" data-page="admin_revenue"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg><span>Revenue Reports</span></div>
@@ -444,26 +442,83 @@ svg[stroke="currentColor"]{stroke-width:2}
       <tr><td><div class="row-flex"><div class="art">PM</div><div class="cell-main">PNDA Media</div></div></td><td class="cell-mono">148 releases</td><td><span class="chip gray">Pro</span></td><td><span class="chip green">Active</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Manage</button></td></tr>
       </tbody></table></div></div></div>
 <div class="page" data-page="admin_rights">
-      <div class="page-head"><div><div class="page-title">UGC & Claims</div><div class="page-sub">Manage user-generated content claims and counter-claims</div></div></div>
-      <div class="tabs"><div class="tab active">Claims</div><div class="tab">Counter-claims</div><div class="tab">Released</div></div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Claimant</th><th>Type</th><th>Status</th><th>Views</th><th></th></tr></thead><tbody>
-      <tr><td><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></td><td>Sout Network</td><td><span class="chip gray">Monetize</span></td><td><span class="chip green">Active</span></td><td class="cell-mono">1,024</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
-      <tr><td><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></td><td>Injaz Teqani</td><td><span class="chip gray">Block</span></td><td><span class="chip amber">Disputed</span></td><td class="cell-mono">0</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
-      <tr><td><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></td><td>Injaz Teqani</td><td><span class="chip gray">Takedown</span></td><td><span class="chip red">Counter-claim</span></td><td class="cell-mono">50</td><td style="text-align:right"><button class="btn btn-ghost btn-sm">Review</button></td></tr>
-      </tbody></table></div></div></div>
-<div class="page" data-page="admin_conflicts">
-      <div class="page-head"><div><div class="page-title">Ownership Conflicts</div><div class="page-sub">Overlapping ownership claims requiring resolution</div></div></div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Party A</th><th>Party B</th><th>Overlap</th><th>Status</th><th></th></tr></thead><tbody>
-      <tr><td class="cell-main">Wahed Asy</td><td>ELshamrany</td><td>ghassen gh</td><td class="cell-mono">100%</td><td><span class="chip amber">Open</span></td><td style="text-align:right"><button class="btn btn-primary btn-sm">Resolve</button></td></tr>
-      <tr><td class="cell-main">Rahmak Ya Rab</td><td>Injaz Teqani</td><td>Unknown</td><td class="cell-mono">60%</td><td><span class="chip amber">Open</span></td><td style="text-align:right"><button class="btn btn-primary btn-sm">Resolve</button></td></tr>
-      </tbody></table></div></div></div>
-<div class="page" data-page="admin_takedowns">
-      <div class="page-head"><div><div class="page-title">Takedowns</div><div class="page-sub">Process and track content takedown requests</div></div>
-      <button class="btn btn-primary" onclick="toast('Takedown request')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Takedown</button></div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Asset</th><th>Platform</th><th>Reason</th><th>Requested by</th><th>Status</th></tr></thead><tbody>
-      <tr><td class="cell-main">Layali</td><td>YouTube</td><td>Third-party logo</td><td class="cell-mono">ops@soutnetwork.com</td><td><span class="chip amber">Processing</span></td></tr>
-      <tr><td class="cell-main">Old Mix v1</td><td>Spotify</td><td>Replaced version</td><td class="cell-mono">ahmed@soutnetwork.com</td><td><span class="chip green">Completed</span></td></tr>
-      </tbody></table></div></div></div>
+      <div class="page-head"><div><div class="page-title">Rights Manager</div><div class="page-sub">Enter rights issues per client, track answers, execute claim requests</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="SoutRightsAdmin.exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</button>
+        <button class="btn btn-primary" onclick="SoutRightsAdmin.openForm()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Rights Issue</button>
+      </div></div>
+      <div class="stat-grid">
+        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg></div><div class="lbl">New (waiting client)</div><div class="val" id="aStNew">—</div></div>
+        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 11.5a8.4 8.4 0 01-9 8.4 8.6 8.6 0 01-3.5-.7L3 21l1.8-5.5A8.4 8.4 0 1121 11.5z"/></svg></div><div class="lbl">Answered (need action)</div><div class="val" id="aStAnswered">—</div></div>
+        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div><div class="lbl">Claim requests pending</div><div class="val" id="aStClaims">—</div></div>
+        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">Resolved (90d)</div><div class="val" id="aStResolved">—</div></div>
+      </div>
+      <div class="tabs">
+        <div class="tab active" onclick="SoutRightsAdmin.tab(this,'issues')">Rights Issues</div>
+        <div class="tab" onclick="SoutRightsAdmin.tab(this,'claims')">Claim Requests</div>
+      </div>
+      <div id="aIssuesView">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="ctrl" id="aFltClient" onchange="SoutRightsAdmin.renderIssues()"><option value="all">All clients</option></select>
+            <select class="ctrl" id="aFltCat" onchange="SoutRightsAdmin.renderIssues()"><option value="all">All categories</option></select>
+            <select class="ctrl" id="aFltStatus" onchange="SoutRightsAdmin.renderIssues()">
+              <option value="all">All statuses</option><option value="new">New</option><option value="answered">Answered</option><option value="resolved">Resolved</option><option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Client</th><th>Store</th><th>Category</th><th>Asset</th><th>UPC / ISRC</th><th>Other Party</th><th>Client Answer</th><th>Expiry</th><th>Status</th><th></th></tr></thead>
+            <tbody id="aIssuesBody"><tr><td colspan="10"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+      <div id="aClaimsView" style="display:none">
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="ctrl" id="aFltClaimSt" onchange="SoutRightsAdmin.renderClaims()">
+              <option value="all">All statuses</option><option value="pending">Pending</option><option value="in_progress">In Progress</option><option value="done">Done</option><option value="rejected">Rejected</option>
+            </select>
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Client</th><th>Type</th><th>Platform</th><th>Action</th><th>Asset</th><th>Video</th><th>Note</th><th>Status</th><th></th></tr></thead>
+            <tbody id="aClaimsBody"><tr><td colspan="9"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+          </table></div>
+        </div>
+      </div>
+    </div>
+
+<div class="modal-bg" id="aIssueModal">
+  <div class="modal" style="max-width:720px">
+    <div class="modal-head"><h3>Add Rights Issue</h3><button class="icon-btn" onclick="closeModal('aIssueModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field"><label>Client *</label><select class="ctrl" id="afClient" style="width:100%"></select></div>
+        <div class="field"><label>Platform *</label><select class="ctrl" id="afPlatform" style="width:100%"><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option><option value="other">Other</option></select></div>
+        <div class="field full" style="grid-column:1/-1"><label>Category *</label><select class="ctrl" id="afCategory" style="width:100%">
+          <option value="ownership_conflict">Ownership conflict</option>
+          <option value="disputed_claim">Disputed claims</option>
+          <option value="takedown_video">Takedown video</option>
+          <option value="ugc_monetize">Claim UGC video : monetize</option>
+          <option value="ugc_block">Claim UGC video : block</option>
+          <option value="release_claim">Release claim</option>
+          <option value="copyright_check">Copyright check</option>
+        </select></div>
+        <div class="field"><label>Asset title</label><input class="input" id="afAssetTitle" placeholder="e.g. اذكار المساء - هاني العزوني"></div>
+        <div class="field"><label>Artist</label><input class="input" id="afArtist" placeholder="Artist name"></div>
+        <div class="field"><label>Album title</label><input class="input" id="afAlbum" placeholder="-"></div>
+        <div class="field"><label>Track title</label><input class="input" id="afTrack" placeholder="Track title"></div>
+        <div class="field"><label>Asset ID</label><input class="input" id="afAssetId" placeholder="e.g. A724776324629729"></div>
+        <div class="field"><label>Other party</label><input class="input" id="afOther" placeholder="e.g. Injaz Teqani"></div>
+        <div class="field"><label>UPC</label><input class="input" id="afUpc" placeholder="e.g. 3618112447377"></div>
+        <div class="field"><label>ISRC</label><input class="input" id="afIsrc" placeholder="e.g. FRX282650939"></div>
+        <div class="field"><label>Video URL</label><input class="input" id="afUrl" placeholder="https://..."></div>
+        <div class="field"><label>Daily views</label><input class="input" id="afViews" type="number" placeholder="0"></div>
+        <div class="field"><label>Expiry date</label><input class="input" id="afExpiry" type="date"></div>
+      </div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('aIssueModal')">Cancel</button><button class="btn btn-primary" onclick="SoutRightsAdmin.submitForm()">Save issue</button></div>
+  </div>
+</div>
 <div class="page" data-page="admin_revenue">
       <div class="page-head"><div><div class="page-title">Revenue Reports</div><div class="page-sub">Platform revenue across all client accounts</div></div>
       <button class="btn btn-ghost" data-action="export-csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export CSV</button></div>
@@ -513,7 +568,7 @@ svg[stroke="currentColor"]{stroke-width:2}
 function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
-  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','UGC & Claims'],admin_conflicts:['Rights','Ownership Conflicts'],admin_takedowns:['Rights','Takedowns'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
+  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
   var c=L[p]||['','']; document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
   document.querySelector('.content').scrollTop=0; clearSel(); if(window.innerWidth<=1024)closeSidebar();}
 document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>go(it.dataset.page)));
@@ -525,6 +580,9 @@ function toggleAll(el){var on=!el.classList.contains('on');el.classList.toggle('
 function updateBulk(){var n=document.querySelectorAll('.page.active tbody .cbx.on:not(.perm)').length;var bb=document.getElementById('bulkbar');if(bb){document.getElementById('bulkCount').textContent=n;bb.classList.toggle('show',n>0);}}
 function clearSel(){document.querySelectorAll('tbody .cbx.on:not(.perm)').forEach(c=>c.classList.remove('on'));var bb=document.getElementById('bulkbar');if(bb)bb.classList.remove('show');}
 document.addEventListener('click',e=>{var t=e.target.closest('.tab');if(t){t.parentElement.querySelectorAll('.tab').forEach(x=>x.classList.remove('active'));t.classList.add('active');}});
+function openModal(id){document.getElementById(id).classList.add('show');}
+function closeModal(id){document.getElementById(id).classList.remove('show');}
+document.querySelectorAll('.modal-bg').forEach(m=>m.addEventListener('click',e=>{if(e.target===m)m.classList.remove('show');}));
 var toastT;function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2400);}
 go('admin_overview');
 </script>

@@ -699,12 +699,12 @@ svg[stroke="currentColor"]{stroke-width:2}
       <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
         <div class="field"><label>Platform</label><select class="ctrl" id="rqPlat" style="width:100%"><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option></select></div>
         <div class="field"><label>Video URL *</label><input class="input" id="rqUrl" placeholder="https://..."></div>
-        <div class="field"><label>Track / Asset title *</label><input class="input" id="rqTitle2" placeholder="Track title"></div>
-        <div class="field"><label>Artist</label><input class="input" id="rqArtist" placeholder="Artist name"></div>
-        <div class="field"><label>ISRC</label><input class="input" id="rqIsrc" placeholder="e.g. FRX282650939"></div>
-        <div class="field"><label>UPC</label><input class="input" id="rqUpc" placeholder="e.g. 3618112447377"></div>
+        <div class="field"><label>UPC</label><input class="input" id="rqUpc" placeholder="e.g. 3618112447377" onblur="SoutRights.lookup()"></div>
+        <div class="field"><label>ISRC</label><input class="input" id="rqIsrc" placeholder="e.g. FRX282650939" onblur="SoutRights.lookup()"></div>
         <div class="field full" style="grid-column:1/-1"><label>Note (optional)</label><input class="input" id="rqNote" placeholder="Anything the rights team should know"></div>
       </div>
+      <div class="cell-sub" style="margin-top:12px">Enter the UPC or ISRC of your release — the track will be matched from your catalog automatically.</div>
+      <div id="rqMatch" style="margin-top:10px"></div>
     </div>
     <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('requestModal')">Cancel</button><button class="btn btn-primary" onclick="SoutRights.submitRequest()">Submit request</button></div>
   </div>

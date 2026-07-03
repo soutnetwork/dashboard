@@ -265,25 +265,39 @@
       this._reqKind = kind;
       document.getElementById('rqTitle').textContent = kind === 'manual_claim' ? 'Manual Claim' : 'Release Claim';
       document.getElementById('rqActions').style.display = kind === 'manual_claim' ? '' : 'none';
-      ['rqUrl', 'rqTitle2', 'rqArtist', 'rqIsrc', 'rqUpc', 'rqNote'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      ['rqUrl', 'rqIsrc', 'rqUpc', 'rqNote'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+      const m = document.getElementById('rqMatch'); if (m) m.innerHTML = '';
       openModal('requestModal');
+    },
+
+    async lookup() {
+      const val = id => ((document.getElementById(id) || {}).value || '').trim();
+      const upc = val('rqUpc'), isrc = val('rqIsrc');
+      const m = document.getElementById('rqMatch'); if (!m) return;
+      if (!upc && !isrc) { m.innerHTML = ''; return; }
+      try {
+        const r = await API.call('/claims/lookup?upc=' + encodeURIComponent(upc) + '&isrc=' + encodeURIComponent(isrc));
+        m.innerHTML = `<div class="card card-pad" style="display:flex;gap:10px;align-items:center;border-color:var(--accent)">${art(initials(r.asset_title))}<div><div class="cell-main">${esc(r.asset_title)}</div><div class="cell-sub">${esc(r.artist || '')} · matched from your catalog ✓</div></div></div>`;
+      } catch (e) {
+        m.innerHTML = `<div class="cell-sub" style="color:var(--red)">This UPC/ISRC was not found in your catalog. Check the code and try again.</div>`;
+      }
     },
 
     async submitRequest() {
       const kind = this._reqKind;
-      const val = id => (document.getElementById(id) || {}).value || '';
-      const video_url = val('rqUrl').trim(), asset_title = val('rqTitle2').trim();
-      if (!video_url || !asset_title) { toast && toast('Video URL and track title are required'); return; }
+      const val = id => ((document.getElementById(id) || {}).value || '').trim();
+      const video_url = val('rqUrl'), upc = val('rqUpc'), isrc = val('rqIsrc');
+      if (!video_url) { toast && toast('Video URL is required'); return; }
+      if (!upc && !isrc) { toast && toast('Enter the UPC or ISRC of your track'); return; }
       const body = {
         kind, platform: val('rqPlat') || 'youtube',
         action: kind === 'manual_claim' ? (document.querySelector('input[name="rqAct"]:checked') || {}).value : null,
-        video_url, asset_title, artist: val('rqArtist').trim(),
-        isrc: val('rqIsrc').trim(), upc: val('rqUpc').trim(), note: val('rqNote').trim()
+        video_url, upc, isrc, note: val('rqNote')
       };
       try {
-        await API.call('/claims', { method: 'POST', body });
+        const r = await API.call('/claims', { method: 'POST', body });
         closeModal('requestModal');
-        toast && toast('Request sent to the rights team');
+        toast && toast('Request sent — ' + (r.asset_title || 'track matched'));
         await this.loadRequests();
       } catch (e) { toast && toast(e.message); }
     },
