@@ -40,8 +40,13 @@ body{font-family:'Inter',-apple-system,sans-serif;background:var(--bg);color:var
     <div class="field"><label>Email</label><input type="email" id="email" placeholder="you@company.com" autocomplete="username"></div>
     <div class="field"><label>Password</label><input type="password" id="password" placeholder="Your password" autocomplete="current-password"></div>
     <button class="btn" id="btn" onclick="doLogin()">Sign in</button>
+    <div id="pwChange" style="display:none">
+      <div class="field"><label>New password (8+ characters)</label><input type="password" id="np1" placeholder="New password" autocomplete="new-password"></div>
+      <div class="field"><label>Confirm new password</label><input type="password" id="np2" placeholder="Repeat new password" autocomplete="new-password"></div>
+      <button class="btn" id="btnPw" onclick="doChangePw()">Set new password</button>
+    </div>
   </div>
-  <div class="foot">Protected area. Authorized access only.</div>
+  <div class="foot">Don’t have an account? <a href="/apply.html" style="color:var(--accent);font-weight:600;text-decoration:none">Apply for one</a><div style="margin-top:8px">Protected area. Authorized access only.</div></div>
 </div>
 <script>
 const $=id=>document.getElementById(id);
@@ -54,12 +59,33 @@ async function doLogin(){
     const r=await fetch('/api/login',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({email,password})});
     const d=await r.json();
     if(!r.ok){showErr(d.error||'Login failed');$('btn').disabled=false;$('btn').textContent='Sign in';return}
-    // redirect by role
+    if(d.user.must_change){
+      // first login → force a new password before entering
+      window.__role=d.user.role; window.__oldpw=password;
+      document.querySelector('.card h1').textContent='Set a new password';
+      document.querySelector('.card p.sub').textContent='For your security, choose a new password before continuing.';
+      $('email').parentElement.style.display='none';$('password').parentElement.style.display='none';
+      $('btn').style.display='none';$('pwChange').style.display='block';$('np1').focus();
+      return;
+    }
     window.location.href = d.user.role==='admin' ? '/admin.html' : '/dashboard.html';
   }catch(e){showErr('Connection error. Try again.');$('btn').disabled=false;$('btn').textContent='Sign in'}
 }
 $('password').addEventListener('keydown',e=>{if(e.key==='Enter')doLogin()});
 $('email').addEventListener('keydown',e=>{if(e.key==='Enter')$('password').focus()});
+async function doChangePw(){
+  const p1=$('np1').value,p2=$('np2').value;
+  if(!p1||p1.length<8){showErr('Password must be 8+ characters');return}
+  if(p1!==p2){showErr('Passwords do not match');return}
+  $('btnPw').disabled=true;$('btnPw').textContent='Saving...';$('err').classList.remove('show');
+  try{
+    const r=await fetch('/api/change-password',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({current:window.__oldpw,next:p1})});
+    const d=await r.json();
+    if(!r.ok){showErr(d.error||'Failed');$('btnPw').disabled=false;$('btnPw').textContent='Set new password';return}
+    window.location.href = window.__role==='admin' ? '/admin.html' : '/dashboard.html';
+  }catch(e){showErr('Connection error. Try again.');$('btnPw').disabled=false;$('btnPw').textContent='Set new password'}
+}
+$('np2')&&$('np2').addEventListener('keydown',e=>{if(e.key==='Enter')doChangePw()});
 </script>
 </body>
 </html>

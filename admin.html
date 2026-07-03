@@ -329,6 +329,7 @@ svg[stroke="currentColor"]{stroke-width:2}
       <div class="sb-item" data-page="admin_distribution"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span>Distribution</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">Accounts</div>
+      <div class="sb-item" data-page="admin_applications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg><span>Applications</span><span class="badge" id="aAppsBadge" style="display:none">0</span></div>
       <div class="sb-item" data-page="admin_users"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 010 5.8M21 20c0-2.5-1.5-4.7-3.7-5.6"/></svg><span>User Management</span></div>
       <div class="sb-item" data-page="admin_permissions"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Permissions</span></div>
       <div class="sb-item" data-page="admin_clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8"/><path d="M3 21h18"/></svg><span>Client Accounts</span></div>
@@ -412,6 +413,13 @@ svg[stroke="currentColor"]{stroke-width:2}
         <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
         <td>Anghami</td><td><span class="chip red">Failed</span></td>
         <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr></tbody></table></div></div></div>
+<div class="page" data-page="admin_applications">
+      <div class="page-head"><div><div class="page-title">Account Applications</div><div class="page-sub">Review applications — approving creates the account and emails the login details</div></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table>
+        <thead><tr><th>Company / Label</th><th>Contact</th><th>Phone</th><th>Catalog</th><th>Message</th><th>Date</th><th>Status</th><th></th></tr></thead>
+        <tbody id="aAppsBody"><tr><td colspan="8"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+      </table></div></div>
+    </div>
 <div class="page" data-page="admin_users">
       <div class="page-head"><div><div class="page-title">User Management</div><div class="page-sub">Create and manage users, plans and limits</div></div>
       <button class="btn btn-primary" onclick="toast('Create user form')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Create User</button></div>
@@ -568,7 +576,7 @@ svg[stroke="currentColor"]{stroke-width:2}
 function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
-  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
+  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_applications:['Accounts','Applications'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
   var c=L[p]||['','']; document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
   document.querySelector('.content').scrollTop=0; clearSel(); if(window.innerWidth<=1024)closeSidebar();}
 document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>go(it.dataset.page)));

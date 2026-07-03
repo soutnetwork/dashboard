@@ -91,7 +91,7 @@ app.post('/api/login', loginLimiter, (req, res) => {
   const token = sign(user);
   res.cookie('token', token, { httpOnly: true, sameSite: 'lax', secure: true, maxAge: 7 * 864e5 });
   audit({ user: { email: user.email }, ip: req.ip }, 'auth.login', user.email);
-  res.json({ ok: true, user: { name: user.name, email: user.email, role: user.role, client_id: user.client_id } });
+  res.json({ ok: true, user: { name: user.name, email: user.email, role: user.role, client_id: user.client_id, must_change: user.must_change_password === 1 } });
 });
 
 app.post('/api/logout', (req, res) => {
@@ -109,7 +109,7 @@ app.post('/api/change-password', auth, (req, res) => {
   if (!newPass || newPass.length < 8) return res.status(400).json({ error: 'New password must be 8+ characters' });
   const user = db.prepare('SELECT * FROM users WHERE id = ?').get(req.user.id);
   if (!bcrypt.compareSync(current || '', user.password_hash)) return res.status(400).json({ error: 'Current password is wrong' });
-  db.prepare('UPDATE users SET password_hash = ? WHERE id = ?').run(bcrypt.hashSync(newPass, 12), req.user.id);
+  db.prepare('UPDATE users SET password_hash = ?, must_change_password = 0 WHERE id = ?').run(bcrypt.hashSync(newPass, 12), req.user.id);
   audit(req, 'auth.password_change', req.user.email);
   res.json({ ok: true });
 });
@@ -745,6 +745,98 @@ app.get('/api/admin/rights/export.csv', auth, adminOnly, (req, res) => {
   res.send('\uFEFF' + lines.join('\n'));
 });
 
+
+// ============================================================
+// ACCOUNT APPLICATIONS (public apply → admin approve → email)
+// ============================================================
+function smtpConfig() {
+  try { return JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'smtp.json'), 'utf8')); }
+  catch { return null; }
+}
+async function sendWelcomeEmail(to, name, tempPass) {
+  const cfg = smtpConfig(); if (!cfg || !cfg.host || !cfg.user) return false;
+  let nodemailer; try { nodemailer = require('nodemailer'); } catch { return false; }
+  try {
+    const port = Number(cfg.port) || 465;
+    const t = nodemailer.createTransport({ host: cfg.host, port, secure: port === 465, auth: { user: cfg.user, pass: cfg.pass } });
+    await t.sendMail({
+      from: cfg.from || `"Sout Network" <${cfg.user}>`,
+      to,
+      subject: 'Your Sout Network account is ready',
+      html: `<div style="font-family:Arial,sans-serif;max-width:520px;margin:auto;padding:24px;border:1px solid #eaecef;border-radius:12px">
+        <h2 style="color:#4f46e5;margin:0 0 12px">Welcome to Sout Network</h2>
+        <p>Hi ${name},</p>
+        <p>Your account application has been <b>approved</b>. Here are your login details:</p>
+        <table style="background:#f6f7f9;border-radius:8px;padding:8px;width:100%" cellpadding="8">
+          <tr><td><b>Login page</b></td><td><a href="https://app.soutnetwork.com">app.soutnetwork.com</a></td></tr>
+          <tr><td><b>Email</b></td><td>${to}</td></tr>
+          <tr><td><b>Temporary password</b></td><td><code>${tempPass}</code></td></tr>
+        </table>
+        <p>For your security, you will be asked to <b>set a new password</b> on your first sign-in.</p>
+        <p style="color:#939aa8;font-size:12px">Sout Network — Distribution &amp; Rights Management</p>
+      </div>`
+    });
+    return true;
+  } catch (e) { console.error('mail error:', e.message); return false; }
+}
+function genTempPassword() {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789';
+  let p = ''; const rb = require('crypto').randomBytes(12);
+  for (let i = 0; i < 12; i++) p += chars[rb[i] % chars.length];
+  return p;
+}
+
+// public application form (rate-limited)
+const applyLimiter = rateLimit({ windowMs: 60 * 60 * 1000, max: 10, message: { error: 'Too many applications, try later' } });
+app.post('/api/apply', applyLimiter, (req, res) => {
+  const b = req.body || {};
+  const company = (b.company || '').trim(), name = (b.name || '').trim(), email = (b.email || '').trim().toLowerCase();
+  if (!company || !name || !email) return res.status(400).json({ error: 'Company, contact name and email are required' });
+  if (!/^[^@\s]+@[^@\s]+\.[^@\s]+$/.test(email)) return res.status(400).json({ error: 'Enter a valid email address' });
+  const dupUser = db.prepare('SELECT id FROM users WHERE email = ?').get(email);
+  const dupApp = db.prepare(`SELECT id FROM applications WHERE email = ? AND status = 'pending'`).get(email);
+  if (dupUser) return res.status(400).json({ error: 'This email already has an account. Try signing in.' });
+  if (dupApp) return res.status(400).json({ error: 'An application with this email is already under review.' });
+  db.prepare(`INSERT INTO applications (company, name, email, phone, catalog_size, message) VALUES (?,?,?,?,?,?)`)
+    .run(company, name, email, (b.phone || '').trim(), (b.catalog_size || '').trim(), (b.message || '').trim());
+  audit({ user: null, ip: req.ip }, 'application.submit', email);
+  res.json({ ok: true });
+});
+
+// admin: list applications
+app.get('/api/admin/applications', auth, adminOnly, (req, res) => {
+  const rows = db.prepare('SELECT * FROM applications ORDER BY created_at DESC').all();
+  res.json({ applications: rows });
+});
+
+// admin: approve → creates client + user with temp password + must_change flag, tries to email
+app.post('/api/admin/applications/:id/approve', auth, adminOnly, async (req, res) => {
+  const a = db.prepare('SELECT * FROM applications WHERE id = ?').get(req.params.id);
+  if (!a) return res.status(404).json({ error: 'Not found' });
+  if (a.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
+  if (db.prepare('SELECT id FROM users WHERE email = ?').get(a.email)) return res.status(400).json({ error: 'A user with this email already exists' });
+  const info = db.prepare('INSERT INTO clients (name, plan) VALUES (?,?)').run(a.company, 'Label');
+  const clientId = info.lastInsertRowid;
+  const temp = genTempPassword();
+  db.prepare(`INSERT INTO users (email, password_hash, name, role, client_id, must_change_password) VALUES (?,?,?,?,?,1)`)
+    .run(a.email, bcrypt.hashSync(temp, 12), a.name, 'client', clientId);
+  db.prepare(`UPDATE applications SET status='approved', processed_at=datetime('now'), processed_by=? WHERE id=?`).run(req.user.email, a.id);
+  const emailed = await sendWelcomeEmail(a.email, a.name, temp);
+  audit(req, 'application.approve', a.email);
+  res.json({ ok: true, email: a.email, temp_password: temp, emailed });
+});
+
+// admin: reject
+app.post('/api/admin/applications/:id/reject', auth, adminOnly, (req, res) => {
+  const a = db.prepare('SELECT * FROM applications WHERE id = ?').get(req.params.id);
+  if (!a) return res.status(404).json({ error: 'Not found' });
+  if (a.status !== 'pending') return res.status(400).json({ error: 'Already processed' });
+  db.prepare(`UPDATE applications SET status='rejected', note=?, processed_at=datetime('now'), processed_by=? WHERE id=?`)
+    .run((req.body || {}).note || '', req.user.email, a.id);
+  audit(req, 'application.reject', a.email);
+  res.json({ ok: true });
+});
+
 // ---------- health ----------
 app.get('/api/health', (req, res) => res.json({ ok: true, ts: Date.now() }));
 
@@ -756,6 +848,15 @@ async function main() {
   db.pragma('foreign_keys = ON');
   // tiny idempotent migrations
   try { db.exec('ALTER TABLE releases ADD COLUMN artwork TEXT'); } catch { }
+  try { db.exec('ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0'); } catch { }
+  db.exec(`CREATE TABLE IF NOT EXISTS applications (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    company TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
+    phone TEXT, catalog_size TEXT, message TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    note TEXT, processed_at TEXT, processed_by TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
   app.listen(PORT, '127.0.0.1', () => console.log(`Sout backend running on 127.0.0.1:${PORT}`));
 }
 main().catch(e => { console.error('startup error:', e); process.exit(1); });

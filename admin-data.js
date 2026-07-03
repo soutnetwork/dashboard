@@ -289,15 +289,62 @@
   };
   window.SoutRightsAdmin = SoutRightsAdmin;
 
+
+  // ============================================================
+  // ACCOUNT APPLICATIONS (admin)
+  // ============================================================
+  const SoutApps = {
+    async load() {
+      let apps = [];
+      try { apps = (await API.call('/admin/applications')).applications || []; } catch (e) { toast && toast(e.message); return; }
+      const tbody = document.getElementById('aAppsBody');
+      const pend = apps.filter(a => a.status === 'pending').length;
+      const b = document.getElementById('aAppsBadge'); if (b) { b.textContent = pend; b.style.display = pend ? '' : 'none'; }
+      if (!tbody) return;
+      if (!apps.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><h4>No applications yet</h4><div class="cell-sub">New applications from apply.soutnetwork appear here.</div></div></td></tr>`; return; }
+      const st = s => ({ pending: ['Pending', 'amber'], approved: ['Approved', 'green'], rejected: ['Rejected', 'red'] }[s] || [s, 'gray']);
+      tbody.innerHTML = apps.map(a => {
+        const [l, cl] = st(a.status);
+        return `<tr>
+          <td><div class="row-flex">${art(initials(a.company))}<div class="cell-main">${esc(a.company)}</div></div></td>
+          <td><div class="cell-main">${esc(a.name)}</div><div class="cell-sub">${esc(a.email)}</div></td>
+          <td class="cell-mono">${esc(a.phone || '—')}</td>
+          <td><span class="chip gray">${esc(a.catalog_size || '—')}</span></td>
+          <td><div class="cell-sub" style="max-width:220px">${esc(a.message || '—')}</div></td>
+          <td class="cell-mono">${esc((a.created_at || '').slice(0, 10))}</td>
+          <td><span class="chip ${cl}">${l}</span>${a.note ? `<div class="cell-sub">${esc(a.note)}</div>` : ''}</td>
+          <td style="text-align:right;white-space:nowrap">${a.status === 'pending' ? `
+            <button class="btn btn-primary btn-sm" onclick="SoutApps.approve(${a.id})">Approve</button>
+            <button class="btn btn-danger btn-sm" onclick="SoutApps.reject(${a.id})">Reject</button>` : ''}
+          </td></tr>`;
+      }).join('');
+    },
+    async approve(id) {
+      if (!confirm('Approve this application? An account will be created and the login details emailed to the applicant.')) return;
+      try {
+        const r = await API.call('/admin/applications/' + id + '/approve', { method: 'POST' });
+        if (r.emailed) toast && toast('Approved — login details emailed to ' + r.email);
+        else alert('Approved \u2714\n\nEmail is not configured yet, so send these details to the client manually:\n\nEmail: ' + r.email + '\nTemporary password: ' + r.temp_password + '\n\nThey will be asked to change it on first sign-in.');
+        await this.load();
+      } catch (e) { toast && toast(e.message); }
+    },
+    async reject(id) {
+      const note = prompt('Rejection reason (optional, saved internally):') || '';
+      try { await API.call('/admin/applications/' + id + '/reject', { method: 'POST', body: { note } }); toast && toast('Application rejected'); await this.load(); }
+      catch (e) { toast && toast(e.message); }
+    }
+  };
+  window.SoutApps = SoutApps;
+
   // ---------- router hook ----------
   window.SoutPage = {
     onReady() {
-      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load();
+      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load(); SoutApps.load();
       if (window.go && !window.__goWrapped) {
         const _go = window.go;
         window.go = function (p) {
           _go(p);
-          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load() }[p] || (() => { }))();
+          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load() }[p] || (() => { }))();
           // wire CSV export button on revenue/distribution pages
         };
         window.__goWrapped = true;
