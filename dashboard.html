@@ -344,17 +344,11 @@ svg[stroke="currentColor"]{stroke-width:2}
     </div>
     <div class="sb-group">
       <div class="sb-label">Catalog</div>
-      <div class="sb-item" data-page="releases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="2.5"/></svg><span>Manage Releases</span></div>
-      <div class="sb-item" data-page="drafts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg><span>Drafts</span></div>
-      <div class="sb-item" data-page="corrections"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg><span>Needs Correction</span><span class="badge">1</span></div>
-      <div class="sb-item" data-page="tracks"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Tracks</span></div>
+      <div class="sb-item" data-page="releases"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><span>Manage Music</span></div>
       <div class="sb-item" data-page="artists"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="9" cy="8" r="3.2"/><path d="M3 20c0-3.3 2.7-6 6-6s6 2.7 6 6"/><path d="M16 5.5a3 3 0 010 5.8M21 20c0-2.5-1.5-4.7-3.7-5.6"/></svg><span>Artists &amp; Labels</span></div>
-      <div class="sb-item" data-page="delivery"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span>Delivery</span></div>
       <div class="sb-item" data-page="newrelease"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg><span>New Release</span></div>
     <div class="sb-label">Rights</div>
-      <div class="sb-item" data-page="rights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Rights Manager</span><span class="badge">63</span></div>
-      <div class="sb-item" data-page="claims"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg><span>UGC Claims</span></div>
-      <div class="sb-item" data-page="assets"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><span>Assets</span></div>
+      <div class="sb-item" data-page="rights"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Rights Manager</span><span class="badge" id="rightsBadge" style="display:none">0</span></div>
     </div>
     <div class="sb-group">
       <div class="sb-label">Business</div>
@@ -395,13 +389,9 @@ svg[stroke="currentColor"]{stroke-width:2}
           <div class="svc-head"><div class="ico red" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
           <div><div class="svc-name">Rights Manager</div><div class="svc-desc">UGC claims & disputes</div></div></div>
           <div class="svc-stats"><div class="svc-stat"><div class="svc-v">63</div><div class="svc-l">Open</div></div><div class="svc-stat"><div class="svc-v">2</div><div class="svc-l">Conflicts</div></div><div class="svc-stat"><div class="svc-v">148</div><div class="svc-l">Resolved</div></div><div class="svc-stat"><div class="svc-v">0</div><div class="svc-l">Failed</div></div></div>
-        </div><div class="svc-card" onclick="go('claims')">
-          <div class="svc-head"><div class="ico blue" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg></div>
-          <div><div class="svc-name">UGC Claims</div><div class="svc-desc">Monetize / block / takedown</div></div></div>
-          <div class="svc-stats"><div class="svc-stat"><div class="svc-v">2481</div><div class="svc-l">Monetized</div></div><div class="svc-stat"><div class="svc-v">312</div><div class="svc-l">Blocked</div></div><div class="svc-stat"><div class="svc-v">63</div><div class="svc-l">Disputed</div></div><div class="svc-stat"><div class="svc-v">0</div><div class="svc-l">Failed</div></div></div>
-        </div><div class="svc-card" onclick="go('delivery')">
+        </div><div class="svc-card" onclick="go('releases')">
           <div class="svc-head"><div class="ico amber" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div>
-          <div><div class="svc-name">Delivery</div><div class="svc-desc">Track store deliveries</div></div></div>
+          <div><div class="svc-name">Delivery Status</div><div class="svc-desc">Per-release status in Manage Music</div></div></div>
           <div class="svc-stats"><div class="svc-stat"><div class="svc-v">38</div><div class="svc-l">Queued</div></div><div class="svc-stat"><div class="svc-v">12</div><div class="svc-l">Processing</div></div><div class="svc-stat"><div class="svc-v">1847</div><div class="svc-l">Delivered</div></div><div class="svc-stat"><div class="svc-v">3</div><div class="svc-l">Failed</div></div></div>
         </div><div class="svc-card" onclick="go('finance')">
           <div class="svc-head"><div class="ico green" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg></div>
@@ -488,13 +478,15 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
     </div>
 <div class="page" data-page="releases">
-      <div class="page-head"><div><div class="page-title">Manage Releases</div><div class="page-sub">Track releases through review, approval and delivery</div></div>
+      <div class="page-head"><div><div class="page-title">Manage Music</div><div class="page-sub">All your releases in one place — drafts, review, approval and delivery</div></div>
       <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toast('Exporting catalog')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button><button class="btn btn-primary" onclick="go('newrelease')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Release</button></div></div>
       <div class="tabs">
         <div class="tab active" data-cat="all" onclick="catTab(this,'all')">All</div>
-        <div class="tab" data-cat="review" onclick="catTab(this,'review')">Under Review</div>
+        <div class="tab" data-cat="draft" onclick="catTab(this,'draft')">Drafts</div>
+        <div class="tab" data-cat="pending" onclick="catTab(this,'pending')">Pending</div>
         <div class="tab" data-cat="approved" onclick="catTab(this,'approved')">Approved</div>
         <div class="tab" data-cat="delivered" onclick="catTab(this,'delivered')">Delivered</div>
+        <div class="tab" data-cat="correction" onclick="catTab(this,'correction')">Needs Correction<span id="corrTabBadge"></span></div>
         <div class="tab" data-cat="rejected" onclick="catTab(this,'rejected')">Rejected</div>
       </div>
       <div class="table-wrap">
@@ -505,161 +497,8 @@ svg[stroke="currentColor"]{stroke-width:2}
         </div>
         <div class="table-scroll"><table>
           <thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Release</th><th>Label</th><th>Status</th><th>Type</th><th>UPC</th><th>Date</th><th></th></tr></thead>
-          <tbody id="relReview" data-cat="review" style="display:none"><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">BH</div><div><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></div></div></td>
-            <td class="cell-mono">Injaz Teqani</td><td><span class="chip amber">Under Review</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618110286015</td><td class="cell-mono">2026-06-28</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">FO</div><div><div class="cell-main">Fy Oyonak</div><div class="cell-sub">Khaled Nabil</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip gray">Submitted</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113317280</td><td class="cell-mono">2026-06-23</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr></tbody>
-          <tbody id="relApproved" data-cat="approved" style="display:none"><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">RR</div><div><div class="cell-main">Rahmak Ya Rab</div><div class="cell-sub">Ahmed ELmndrawy</div></div></div></td>
-            <td class="cell-mono">Injaz Teqani</td><td><span class="chip blue">Approved</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618111876178</td><td class="cell-mono">2026-06-26</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr></tbody>
-          <tbody id="relDelivered" data-cat="delivered" style="display:none"><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">TM</div><div><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants Egypt</div></div></div></td>
-            <td class="cell-mono">PNDA Media</td><td><span class="chip green">Live</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113369104</td><td class="cell-mono">2026-06-29</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618112527093</td><td class="cell-mono">2026-06-29</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618112527081</td><td class="cell-mono">2026-06-28</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">EM</div><div><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">EP</span></td>
-            <td class="cell-mono">3618112460871</td><td class="cell-mono">2026-06-27</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">EK</div><div><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618027067509</td><td class="cell-mono">2026-06-25</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YK</div><div><div class="cell-main">Yasbah El Kheir</div><div class="cell-sub">Yassmin</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113369128</td><td class="cell-mono">2026-06-21</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr></tbody>
-          <tbody id="relRejected" data-cat="rejected" style="display:none"><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">LY</div><div><div class="cell-main">Layali</div><div class="cell-sub">Omar Khaled</div><div class="cell-sub" style="color:var(--red);margin-top:2px">Cover art contains third-party logo. Remove and resubmit.</div></div></div></td>
-            <td class="cell-mono">PNDA Media</td><td><span class="chip red">Rejected</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">—</td><td class="cell-mono">2026-06-20</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Opening editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button></td></tr></tbody>
-          <tbody id="relAll" data-cat="all"><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">TM</div><div><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants Egypt</div></div></div></td>
-            <td class="cell-mono">PNDA Media</td><td><span class="chip green">Live</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113369104</td><td class="cell-mono">2026-06-29</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618112527093</td><td class="cell-mono">2026-06-29</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618112527081</td><td class="cell-mono">2026-06-28</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">BH</div><div><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></div></div></td>
-            <td class="cell-mono">Injaz Teqani</td><td><span class="chip amber">Under Review</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618110286015</td><td class="cell-mono">2026-06-28</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">EM</div><div><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">EP</span></td>
-            <td class="cell-mono">3618112460871</td><td class="cell-mono">2026-06-27</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">WA</div><div><div class="cell-main">Wahed Asy</div><div class="cell-sub">Omar El Prince</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip gray">Scheduled</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">—</td><td class="cell-mono">2026-07-03</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">RR</div><div><div class="cell-main">Rahmak Ya Rab</div><div class="cell-sub">Ahmed ELmndrawy</div></div></div></td>
-            <td class="cell-mono">Injaz Teqani</td><td><span class="chip blue">Approved</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618111876178</td><td class="cell-mono">2026-06-26</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">EK</div><div><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618027067509</td><td class="cell-mono">2026-06-25</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">TE</div><div><div class="cell-main">Takbirat El Eid</div><div class="cell-sub">Dalia Helal</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip gray">Draft</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">—</td><td class="cell-mono">2026-06-24</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Opening editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">FO</div><div><div class="cell-main">Fy Oyonak</div><div class="cell-sub">Khaled Nabil</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip gray">Submitted</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113317280</td><td class="cell-mono">2026-06-23</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">AA</div><div><div class="cell-main">Ana Aaqely</div><div class="cell-sub">Mona Saber</div><div class="cell-sub" style="color:var(--red);margin-top:2px">Artwork resolution below 3000×3000. Re-upload cover art.</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip amber">Correction Requested</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113369111</td><td class="cell-mono">2026-06-22</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Opening editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">YK</div><div><div class="cell-main">Yasbah El Kheir</div><div class="cell-sub">Yassmin</div></div></div></td>
-            <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">3618113369128</td><td class="cell-mono">2026-06-21</td><td style="text-align:right"><span class="cell-sub">Contact support</span></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">LY</div><div><div class="cell-main">Layali</div><div class="cell-sub">Omar Khaled</div><div class="cell-sub" style="color:var(--red);margin-top:2px">Cover art contains third-party logo. Remove and resubmit.</div></div></div></td>
-            <td class="cell-mono">PNDA Media</td><td><span class="chip red">Rejected</span></td><td><span class="chip gray">Single</span></td>
-            <td class="cell-mono">—</td><td class="cell-mono">2026-06-20</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Opening editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button></td></tr><tr>
-            <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-            <td><div class="row-flex"><div class="art">EH</div><div><div class="cell-main">Ehsas</div><div class="cell-sub">Nour Adel</div></div></div></td>
-            <td class="cell-mono">Injaz Teqani</td><td><span class="chip gray">Draft</span></td><td><span class="chip gray">EP</span></td>
-            <td class="cell-mono">—</td><td class="cell-mono">2026-06-19</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Opening editor')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button></td></tr></tbody>
+          <tbody id="relAll" data-cat="all"><tr><td colspan="8"><div class="empty"><h4>Loading releases…</h4></div></td></tr></tbody>
         </table></div>
-      </div>
-    </div>
-<div class="page" data-page="drafts">
-      <div class="page-head"><div><div class="page-title">Drafts</div><div class="page-sub">Unsubmitted releases · editable and deletable</div></div>
-      <button class="btn btn-primary" onclick="go('newrelease')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Release</button></div>
-      <div class="table-wrap"><div class="table-scroll"><table>
-        <thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Release</th><th>Label</th><th>Type</th><th>Date</th><th></th></tr></thead>
-        <tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art">TE</div><div><div class="cell-main">Takbirat El Eid</div><div class="cell-sub">Dalia Helal</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip gray">Single</span></td><td class="cell-mono">2026-06-24</td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="go('newrelease')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button> <button class="btn btn-danger btn-sm" onclick="toast('Draft deleted')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art">EH</div><div><div class="cell-main">Ehsas</div><div class="cell-sub">Nour Adel</div></div></div></td>
-        <td class="cell-mono">Injaz Teqani</td><td><span class="chip gray">EP</span></td><td class="cell-mono">2026-06-19</td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="go('newrelease')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Edit</button> <button class="btn btn-danger btn-sm" onclick="toast('Draft deleted')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg> Delete</button></td></tr></tbody></table></div></div>
-    </div>
-<div class="page" data-page="corrections">
-      <div class="page-head"><div><div class="page-title">Needs Correction</div><div class="page-sub">Releases returned by review · edit only the requested fields</div></div></div>
-      <div class="table-wrap"><div class="table-scroll"><table>
-        <thead><tr><th>Release</th><th>Label</th><th>Requested correction</th><th></th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">AA</div><div><div class="cell-main">Ana Aaqely</div><div class="cell-sub">Mona Saber</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><div class="cell-main" style="color:var(--red)">Artwork resolution below 3000×3000. Re-upload cover art.</div></td>
-        <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="go('newrelease')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg> Fix & Resubmit</button></td></tr></tbody></table></div></div>
-    </div>
-<div class="page" data-page="tracks">
-      <div class="page-head"><div><div class="page-title">Tracks</div><div class="page-sub">1,284 tracks across your catalog</div></div>
-      <button class="btn btn-ghost" onclick="toast('Exporting tracks...')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button></div>
-      <div class="table-wrap">
-        <div class="table-toolbar"><div class="tb-search" style="max-width:280px;flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input class="input" style="padding-left:36px" placeholder="Search by title or ISRC..."></div>
-        <select class="ctrl"><option>All Genres</option><option>Arabic - Pop</option><option>Arabic - Rap</option><option>Arabic - Religious</option></select></div>
-        <div class="table-scroll"><table><thead><tr><th style="width:40px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Track</th><th>ISRC</th><th>Genre</th><th>Duration</th><th>Type</th><th>Language</th><th>Year</th></tr></thead><tbody><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants Egypt</div></div></div></td>
-        <td class="cell-mono">Generated by Believe</td><td>Arabic - Egyptian Chaabiat</td><td class="cell-mono">3:42</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">A506140261612420</td><td>Arabic - Pop</td><td class="cell-mono">2:58</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">A505850426081701</td><td>Arabic - Pop</td><td class="cell-mono">3:15</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></div></div></td>
-        <td class="cell-mono">A915517302174028</td><td>Arabic - Rap</td><td class="cell-mono">3:05</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">Rahmak Ya Rab</div><div class="cell-sub">Ahmed ELmndrawy</div></div></div></td>
-        <td class="cell-mono">A142083574991188</td><td>Arabic - Religious</td><td class="cell-mono">4:20</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></div></div></td>
-        <td class="cell-mono">A420081734727147</td><td>Arabic - Religious</td><td class="cell-mono">5:01</td>
-        <td><span class="chip gray">Original</span></td><td class="cell-mono">Arabic</td><td class="cell-mono">2026</td></tr></tbody></table></div>
       </div>
     </div>
 <div class="page" data-page="artists">
@@ -692,33 +531,9 @@ svg[stroke="currentColor"]{stroke-width:2}
         <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">15 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">1.1M streams</span></div></div>
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div></div>
     </div>
-<div class="page" data-page="delivery">
-      <div class="page-head"><div><div class="page-title">Delivery</div><div class="page-sub">Track deliveries to 30+ platforms in real time</div></div>
-      <div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="go('bulk')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg> Bulk Deliver</button><button class="btn btn-primary" onclick="toast('Delivery job started')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> New Delivery</button></div></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">Delivered (30d)</div><div class="val">1,847</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Processing</div><div class="val">12</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div><div class="lbl">Queued</div><div class="val">38</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></div><div class="lbl">Failed</div><div class="val">3</div></div>
-      </div>
-      <div class="sec-title">Delivery Queue</div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Platform</th><th>Status</th><th>Updated</th><th></th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td>Spotify</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Delivered</span></td><td class="cell-mono">2h ago</td>
-        <td></td></tr><tr><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td>Apple Music</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Delivered</span></td><td class="cell-mono">2h ago</td>
-        <td></td></tr><tr><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td>YouTube Music</td><td><div class="bar" style="width:120px"><i style="width:62%"></i></div></td><td class="cell-mono">now</td>
-        <td></td></tr><tr><td><div class="row-flex"><div class="art">KA</div><div class="cell-main">Kan Wedy Naltaqy</div></div></td>
-        <td>TikTok</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Delivered</span></td><td class="cell-mono">5h ago</td>
-        <td></td></tr><tr><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
-        <td>Deezer</td><td><span class="chip gray"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Queued</span></td><td class="cell-mono">pending</td>
-        <td></td></tr><tr><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
-        <td>Anghami</td><td><span class="chip red"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>Failed</span></td><td class="cell-mono">1h ago</td>
-        <td><button class="btn btn-ghost btn-sm" onclick="toast(&quot;Redelivering...&quot;)">Retry</button></td></tr></tbody></table></div></div>
-    </div>
 <div class="page" data-page="newrelease">
       <div class="page-head"><div><div class="page-title">New Release</div><div class="page-sub">Single-page release builder · all details on one screen</div></div>
-      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="go('drafts')">Save Draft</button><button class="btn btn-ghost" onclick="go('releases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cancel</button><button class="btn btn-primary" onclick="toast('Release submitted for review')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button></div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toast('Saved as draft');go('releases')">Save Draft</button><button class="btn btn-ghost" onclick="go('releases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cancel</button><button class="btn btn-primary" onclick="toast('Release submitted for review')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button></div></div>
 
       <datalist id="labelList"><option value="ELshamrany"><option value="Injaz Teqani"><option value="PNDA Media"><option value="Echo EG"><option value="Sout Network"></datalist><datalist id="instrList"><option value="Voice"><option value="Oud"><option value="Qanun"><option value="Ney"><option value="Violin"><option value="Piano"><option value="Guitar"><option value="Bass"><option value="Drums"><option value="Percussion"><option value="Synthesizer"><option value="Accordion"><option value="Tabla"><option value="Riq"></datalist>
 
@@ -802,153 +617,98 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
 
       <div class="row-flex" style="justify-content:flex-end;gap:8px;margin-top:18px">
-        <button class="btn btn-ghost" onclick="go('drafts')">Save Draft</button>
+        <button class="btn btn-ghost" onclick="toast('Saved as draft');go('releases')">Save Draft</button>
         <button class="btn btn-primary" onclick="toast('Release submitted for review')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button>
       </div>
     </div>
 <div class="page" data-page="rights">
-      <div class="page-head"><div><div class="page-title">Rights Manager</div><div class="page-sub">Manage claims, disputes and ownership across platforms</div></div>
-      <button class="btn btn-primary" onclick="openClaim('')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Send Request Form</button></div>
-      <div class="tabs"><div class="tab active">Pending Issues</div><div class="tab">Analytics</div><div class="tab">Resources</div></div>
-      <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap">
-        <div class="card card-pad" style="display:flex;align-items:center;gap:12px;min-width:180px"><div class="art" style="width:36px;height:36px"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-sub">YouTube</div><div style="display:flex;gap:8px;margin-top:2px"><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg> 63</span><span class="chip gray">0</span></div></div></div>
-        <div class="card card-pad" style="flex:1;min-width:200px"><div class="cell-sub">Disputed claims</div><div class="page-title" style="font-size:1.4rem">63</div></div>
-        <div class="card card-pad" style="flex:1;min-width:200px"><div class="cell-sub">Ownership conflicts</div><div class="page-title" style="font-size:1.4rem">2</div></div>
-        <div class="card card-pad" style="flex:1;min-width:200px"><div class="cell-sub">Resolved (30d)</div><div class="page-title" style="font-size:1.4rem">148</div></div>
+      <div class="page-head"><div><div class="page-title">Rights Manager</div><div class="page-sub">Rights issues, claims and disputes across YouTube, Facebook &amp; TikTok</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="SoutRights.openRequest('manual_claim')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg> Manual Claim</button>
+        <button class="btn btn-primary" onclick="SoutRights.openRequest('release_claim')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Release Claim</button>
+      </div></div>
+      <div class="tabs">
+        <div class="tab active" onclick="SoutRights.tab(this,'issues')">Pending rights issues</div>
+        <div class="tab" onclick="SoutRights.tab(this,'requests')">My Requests</div>
+        <div class="tab" onclick="SoutRights.tab(this,'analytics')">Analytics</div>
       </div>
-      <div class="table-wrap">
-        <div class="table-toolbar">
-          <select class="ctrl"><option>My action: All (65)</option></select>
-          <select class="ctrl"><option>Category: All</option><option>Disputed claims</option><option>Ownership conflict</option></select>
-          <select class="ctrl"><option>All Labels</option></select>
-          <select class="ctrl"><option>All Artists</option></select>
+
+      <div id="rightsIssuesView">
+        <div style="display:flex;gap:14px;margin-bottom:20px;flex-wrap:wrap" id="rPlatCards"></div>
+        <div class="table-wrap">
+          <div class="table-toolbar">
+            <select class="ctrl" id="rFltAction" onchange="SoutRights.render()">
+              <option value="all">My action: All</option>
+              <option value="new">New</option>
+              <option value="answered">Answered</option>
+              <option value="resolved">Resolved</option>
+              <option value="rejected">Rejected</option>
+            </select>
+            <select class="ctrl" id="rFltCat" onchange="SoutRights.render()"><option value="all">Category: All</option></select>
+            <select class="ctrl" id="rFltPlat" onchange="SoutRights.render()">
+              <option value="all">All platforms</option>
+              <option value="youtube">YouTube</option>
+              <option value="facebook">Facebook</option>
+              <option value="tiktok">TikTok</option>
+            </select>
+          </div>
+          <div class="table-scroll"><table>
+            <thead><tr><th>Store</th><th>Category</th><th>Asset Title</th><th>Album / Track</th><th>Artist / Asset ID</th><th>UPC</th><th>Other Party</th><th>Daily Views</th><th>Expiry</th><th>Status</th><th></th></tr></thead>
+            <tbody id="rIssuesBody"><tr><td colspan="11"><div class="empty"><h4>Loading rights issues…</h4></div></td></tr></tbody>
+          </table></div>
         </div>
-        <div class="table-scroll"><table><thead><tr><th style="width:40px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Store / Category</th><th>Asset</th><th>Asset ID</th><th>UPC</th><th>Other Party</th><th>Daily Views</th><th>Expiry</th><th>Status</th><th></th></tr></thead><tbody><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></td>
-        <td class="cell-mono">A506140261612420</td><td class="cell-mono">3618112527093</td>
-        <td>-</td><td class="cell-mono">1,024</td>
-        <td><span class="chip amber">9d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Kan Wedy Naltaqy')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Beytaolouly</div><div class="cell-sub">Habiba Samir</div></td>
-        <td class="cell-mono">A194765951586322</td><td class="cell-mono">3618112482378</td>
-        <td>ghassen gh</td><td class="cell-mono">10</td>
-        <td><span class="chip amber">10d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Beytaolouly')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></td>
-        <td class="cell-mono">A505850426081701</td><td class="cell-mono">3618112527093</td>
-        <td>-</td><td class="cell-mono">512</td>
-        <td><span class="chip amber">6d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Shok El Ghadr')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">El Malek</div><div class="cell-sub">Bilal El Hamawy</div></td>
-        <td class="cell-mono">A995248825342427</td><td class="cell-mono">3618110286015</td>
-        <td>Injaz Teqani</td><td class="cell-mono">0</td>
-        <td><span class="chip amber">7d</span></td>
-        <td><span class="chip amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>In Review</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('El Malek')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></td>
-        <td class="cell-mono">A915517302174028</td><td class="cell-mono">3618112460871</td>
-        <td>-</td><td class="cell-mono">10</td>
-        <td><span class="chip amber">7d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('El Mafrod')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Ownership conflict</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Wahed Asy</div><div class="cell-sub">Omar El Prince</div></td>
-        <td class="cell-mono">A386793333387844</td><td class="cell-mono">3618026410221</td>
-        <td>-</td><td class="cell-mono">10</td>
-        <td><span class="chip amber">12d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Wahed Asy')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Rahmak Ya Rab</div><div class="cell-sub">Ahmed ELmndrawy</div></td>
-        <td class="cell-mono">A142083574991188</td><td class="cell-mono">3618111876178</td>
-        <td>Injaz Teqani</td><td class="cell-mono">0</td>
-        <td><span class="chip amber">8d</span></td>
-        <td><span class="chip amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>In Review</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Rahmak Ya Rab')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></td>
-        <td class="cell-mono">A420081734727147</td><td class="cell-mono">3618027067509</td>
-        <td>Injaz Teqani</td><td class="cell-mono">50</td>
-        <td><span class="chip amber">8d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('El Kahf')">Resolve</button></td></tr><tr>
-        <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><div class="art"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M8 5v14l11-7z"/></svg></div><div><div class="cell-main">Disputed claim</div><a class="cell-sub" style="color:var(--accent)">Link to video</a></div></div></td>
-        <td><div class="cell-main">Takbirat El Eid</div><div class="cell-sub">Dalia Helal</div></td>
-        <td class="cell-mono">A265613340787298</td><td class="cell-mono">3618029670332</td>
-        <td>-</td><td class="cell-mono">750</td>
-        <td><span class="chip amber">12d</span></td>
-        <td><span class="chip red"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg>New</span></td>
-        <td><button class="btn btn-primary btn-sm" onclick="openClaim('Takbirat El Eid')">Resolve</button></td></tr></tbody></table></div>
       </div>
-    </div>
-<div class="page" data-page="claims">
-      <div class="page-head"><div><div class="page-title">UGC Claims</div><div class="page-sub">Monetize, block or take down user-generated content</div></div></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lbl">Monetized</div><div class="val">2,481</div><div class="chg up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> Active claims</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></div><div class="lbl">Blocked</div><div class="val">312</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg></div><div class="lbl">Disputed</div><div class="val">63</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="lbl">UGC Views (30d)</div><div class="val">4.8M</div></div>
+
+      <div id="rightsRequestsView" style="display:none">
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>Type</th><th>Platform</th><th>Action</th><th>Asset</th><th>Video</th><th>Status</th><th>Date</th></tr></thead>
+          <tbody id="rReqBody"><tr><td colspan="7"><div class="empty"><h4>No requests yet</h4></div></td></tr></tbody>
+        </table></div></div>
       </div>
-      <div class="card card-pad">
-        <div class="sec-title">Claim a UGC video</div>
-        <div style="color:var(--fg-soft);margin-bottom:18px;font-size:.88rem">Select an action to apply to matched user-generated content.</div>
-        <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px">
-          <div class="card card-pad claim-opt" onclick="selClaim(this)" style="cursor:pointer"><div class="row-flex" style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg><b>Monetize</b></div><div class="cell-sub">Run ads on the video and collect revenue.</div></div>
-          <div class="card card-pad claim-opt" onclick="selClaim(this)" style="cursor:pointer"><div class="row-flex" style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg><b>Block</b></div><div class="cell-sub">Make the video unavailable to viewers.</div></div>
-          <div class="card card-pad claim-opt" onclick="selClaim(this)" style="cursor:pointer"><div class="row-flex" style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M8 6V4a1 1 0 011-1h6a1 1 0 011 1v2M19 6l-1 14a2 2 0 01-2 2H8a2 2 0 01-2-2L5 6"/></svg><b>Takedown</b></div><div class="cell-sub">Remove the video from the platform.</div></div>
-          <div class="card card-pad claim-opt" onclick="selClaim(this)" style="cursor:pointer"><div class="row-flex" style="margin-bottom:8px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg><b>Release claim</b></div><div class="cell-sub">Withdraw your claim on the content.</div></div>
+
+      <div id="rightsAnalyticsView" style="display:none">
+        <div class="page-sub" style="margin-bottom:14px">Your rights activity over the last 90 days</div>
+        <div class="stat-grid">
+          <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div><div class="lbl">Ownership conflicts</div><div class="val" id="anConf">—</div></div>
+          <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 2c1 3-1 5-2 6-1.5 1.5-3 3-3 6a5 5 0 0010 0c0-2-1-3.5-2-5 0 1.5-1 2-1.5 2 .5-3-1-6-1.5-9z"/></svg></div><div class="lbl">Disputed claims</div><div class="val" id="anDisp">—</div></div>
+          <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg></div><div class="lbl">Release claims</div><div class="val" id="anRel">—</div></div>
+          <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div><div class="lbl">Disputes accepted (Yes)</div><div class="val" id="anYes">—</div></div>
         </div>
-        <div style="margin-top:18px"><button class="btn btn-primary" onclick="toast('Claim policy applied')">Apply policy</button></div>
+        <div class="card card-pad"><div class="sec-title">How it works</div><div class="cell-sub" style="line-height:1.7">Ownership conflicts and disputed claims are added to your account by the Sout Network rights team. Release claims count every release-claim request you made, including the ones created automatically when you accept a dispute with "Yes".</div></div>
       </div>
     </div>
-<div class="page" data-page="assets">
-      <div class="page-head"><div><div class="page-title">Assets</div><div class="page-sub">Your reference assets and match policies</div></div>
-      <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Asset</button></div>
-      <div class="table-wrap"><div class="table-toolbar"><div class="tb-search" style="max-width:280px;flex:1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input class="input" style="padding-left:36px" placeholder="Search assets..."></div>
-      <select class="ctrl"><option>All Types</option><option>Sound Recording</option><option>Composition</option></select></div>
-      <div class="table-scroll"><table><thead><tr><th style="width:40px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Asset</th><th>ISRC</th><th>Type</th><th>Owner</th><th>Status</th><th>Match Policy</th></tr></thead><tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td class="cell-mono">Generated by Believe</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">Hadrmout Restaurants Egypt</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">Kan Wedy Naltaqy</div></div></td>
-        <td class="cell-mono">A506140261612420</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">Yara Gamal</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">Shok El Ghadr</div></div></td>
-        <td class="cell-mono">A505850426081701</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">Yara Gamal</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">El Mafrod</div></div></td>
-        <td class="cell-mono">A915517302174028</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">Planko, Echo EG</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">Rahmak Ya Rab</div></div></td>
-        <td class="cell-mono">A142083574991188</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">Ahmed ELmndrawy</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5z"/><path d="M2 17l10 5 10-5M2 12l10 5 10-5"/></svg><div class="cell-main">El Kahf</div></div></td>
-        <td class="cell-mono">A420081734727147</td><td><span class="chip blue">Sound Recording</span></td>
-        <td class="cell-mono">El Monshed Salah</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Active</span></td>
-        <td><span class="chip gray">Match Policy: Monetize</span></td></tr></tbody></table></div></div>
+
+<div class="modal-bg" id="issueModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head"><h3 id="imTitle">Resolve issue</h3><button class="icon-btn" onclick="closeModal('issueModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="imBody"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('issueModal')">Cancel</button><button class="btn btn-primary" id="imSubmit" onclick="SoutRights.submitAnswer()">Submit answer</button></div>
+  </div>
+</div>
+
+<div class="modal-bg" id="requestModal">
+  <div class="modal" style="max-width:640px">
+    <div class="modal-head"><h3 id="rqTitle">Manual Claim</h3><button class="icon-btn" onclick="closeModal('requestModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div id="rqActions" style="display:flex;flex-direction:column;gap:10px;margin-bottom:16px">
+        <div class="cell-sub" style="font-weight:600">Select action to be performed</div>
+        <label class="card card-pad" style="display:flex;align-items:center;gap:12px;cursor:pointer"><input type="radio" name="rqAct" value="ugc_monetize" checked> <div><b>Claim UGC video : monetize</b><div class="cell-sub">Run ads and collect revenue from the video.</div></div></label>
+        <label class="card card-pad" style="display:flex;align-items:center;gap:12px;cursor:pointer"><input type="radio" name="rqAct" value="ugc_block"> <div><b>Claim UGC video : block</b><div class="cell-sub">Make the video unavailable to viewers.</div></div></label>
+        <label class="card card-pad" style="display:flex;align-items:center;gap:12px;cursor:pointer"><input type="radio" name="rqAct" value="takedown"> <div><b>Takedown video</b><div class="cell-sub">Request removal of the video from the platform.</div></div></label>
+      </div>
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field"><label>Platform</label><select class="ctrl" id="rqPlat" style="width:100%"><option value="youtube">YouTube</option><option value="facebook">Facebook</option><option value="tiktok">TikTok</option></select></div>
+        <div class="field"><label>Video URL *</label><input class="input" id="rqUrl" placeholder="https://..."></div>
+        <div class="field"><label>Track / Asset title *</label><input class="input" id="rqTitle2" placeholder="Track title"></div>
+        <div class="field"><label>Artist</label><input class="input" id="rqArtist" placeholder="Artist name"></div>
+        <div class="field"><label>ISRC</label><input class="input" id="rqIsrc" placeholder="e.g. FRX282650939"></div>
+        <div class="field"><label>UPC</label><input class="input" id="rqUpc" placeholder="e.g. 3618112447377"></div>
+        <div class="field full" style="grid-column:1/-1"><label>Note (optional)</label><input class="input" id="rqNote" placeholder="Anything the rights team should know"></div>
+      </div>
     </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('requestModal')">Cancel</button><button class="btn btn-primary" onclick="SoutRights.submitRequest()">Submit request</button></div>
+  </div>
+</div>
 <div class="page" data-page="finance">
       <div class="page-head"><div><div class="page-title">Finance & Royalties</div><div class="page-sub">Earnings, statements and revenue breakdown</div></div>
       <div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="toast('Generating statement...')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> Statement</button><button class="btn btn-primary" onclick="go('payouts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h3v-4z"/></svg> Request Payout</button></div></div>
@@ -1126,7 +886,7 @@ function go(p){
   document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
-  var labels={overview:['Overview','Dashboard'],analytics:['Overview','Analytics'],releases:['Catalog','Manage Releases'],drafts:['Catalog','Drafts'],corrections:['Catalog','Needs Correction'],tracks:['Catalog','Tracks'],artists:['Catalog','Artists & Labels'],delivery:['Catalog','Delivery'],newrelease:['Catalog','New Release'],rights:['Rights','Rights Manager'],claims:['Rights','UGC Claims'],assets:['Rights','Assets'],finance:['Business','Finance & Royalties'],payouts:['Business','Payouts'],promotion:['Business','Promotion'],bulk:['Tools','Bulk Operations'],clients:['Tools','Client Accounts'],settings:['Tools','Settings']};
+  var labels={overview:['Overview','Dashboard'],analytics:['Overview','Analytics'],releases:['Catalog','Manage Music'],artists:['Catalog','Artists & Labels'],newrelease:['Catalog','New Release'],rights:['Rights','Rights Manager'],finance:['Business','Finance & Royalties'],payouts:['Business','Payouts'],promotion:['Business','Promotion'],bulk:['Tools','Bulk Operations'],clients:['Tools','Client Accounts'],settings:['Tools','Settings']};
   var c=labels[p]||['',''];
   document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
   document.querySelector('.content').scrollTop=0;
@@ -1173,10 +933,7 @@ var toastT;
 function toast(m){var t=document.getElementById('toast');document.getElementById('toastMsg').textContent=m;t.classList.add('show');clearTimeout(toastT);toastT=setTimeout(()=>t.classList.remove('show'),2600);}
 
 
-function catTab(el,cat){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');
-  document.querySelectorAll('#relReview,#relApproved,#relDelivered,#relRejected,#relAll').forEach(b=>b.style.display='none');
-  var map={all:'relAll',review:'relReview',approved:'relApproved',delivered:'relDelivered',rejected:'relRejected'};
-  var b=document.getElementById(map[cat]); if(b)b.style.display='';clearSel();}
+function catTab(el,cat){el.parentElement.querySelectorAll('.tab').forEach(t=>t.classList.remove('active'));el.classList.add('active');clearSel();}
 function toggleAsset(el){el.closest('.asset').classList.toggle('collapsed');}
 var trackN=1;
 function addTrack(){trackN++;var tpl=document.querySelector('.asset').outerHTML;
