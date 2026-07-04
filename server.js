@@ -161,7 +161,8 @@ app.post('/api/releases', auth, (req, res) => {
   // save label for autocomplete
   if (b.label) { try { db.prepare('INSERT OR IGNORE INTO labels (client_id,name) VALUES (?,?)').run(clientId, b.label); } catch { } }
   audit(req, 'release.create', b.title || ('#' + relId));
-  res.json({ ok: true, id: relId });
+  const createdTracks = db.prepare('SELECT id, title, track_no FROM tracks WHERE release_id = ? ORDER BY track_no').all(relId);
+  res.json({ ok: true, id: relId, tracks: createdTracks });
 });
 
 // edit release — only if editable (draft/rejected/correction) unless admin
@@ -260,7 +261,10 @@ app.post('/api/admin/users/:id/reset-password', auth, adminOnly, (req, res) => {
 });
 
 app.get('/api/admin/clients', auth, adminOnly, (req, res) => {
-  const rows = db.prepare(`SELECT c.*, (SELECT COUNT(*) FROM releases WHERE client_id=c.id) AS releases FROM clients c ORDER BY c.created_at DESC`).all();
+  const rows = db.prepare(`SELECT c.*,
+    (SELECT COUNT(*) FROM releases WHERE client_id=c.id) AS releases,
+    (SELECT COUNT(*) FROM users WHERE client_id=c.id) AS users
+    FROM clients c ORDER BY c.created_at DESC`).all();
   res.json({ clients: rows });
 });
 
@@ -270,6 +274,33 @@ app.post('/api/admin/clients', auth, adminOnly, (req, res) => {
   const info = db.prepare('INSERT INTO clients (name, plan) VALUES (?,?)').run(name, plan || 'Label');
   audit(req, 'client.create', name);
   res.json({ ok: true, id: info.lastInsertRowid });
+});
+
+
+// client full details (info + users + stats) for the Manage modal
+app.get('/api/admin/clients/:id', auth, adminOnly, (req, res) => {
+  const cli = db.prepare('SELECT * FROM clients WHERE id = ?').get(req.params.id);
+  if (!cli) return res.status(404).json({ error: 'Not found' });
+  const users = db.prepare(`SELECT id, email, name, role, status, must_change_password, created_at FROM users WHERE client_id = ? ORDER BY created_at`).all(cli.id);
+  const stats = {
+    releases: db.prepare('SELECT COUNT(*) AS n FROM releases WHERE client_id = ?').get(cli.id).n,
+    live: db.prepare(`SELECT COUNT(*) AS n FROM releases WHERE client_id = ? AND status IN ('delivered','live')`).get(cli.id).n,
+    pending: db.prepare(`SELECT COUNT(*) AS n FROM releases WHERE client_id = ? AND status IN ('submitted','review')`).get(cli.id).n,
+    rights_open: db.prepare(`SELECT COUNT(*) AS n FROM rights_issues WHERE client_id = ? AND status IN ('new','answered')`).get(cli.id).n
+  };
+  res.json({ client: cli, users, stats });
+});
+
+// effective capabilities of a user (role defaults + per-user overrides)
+app.get('/api/admin/users/:id/permissions', auth, adminOnly, (req, res) => {
+  const u = db.prepare('SELECT * FROM users WHERE id = ?').get(req.params.id);
+  if (!u) return res.status(404).json({ error: 'Not found' });
+  const caps = {};
+  db.prepare('SELECT capability, allowed FROM role_permissions WHERE role = ?').all(u.role)
+    .forEach(p => caps[p.capability] = { allowed: !!p.allowed, override: false });
+  db.prepare('SELECT capability, allowed FROM user_permissions WHERE user_id = ?').all(u.id)
+    .forEach(p => caps[p.capability] = { allowed: !!p.allowed, override: true });
+  res.json({ user: { id: u.id, email: u.email, role: u.role }, capabilities: caps });
 });
 
 // ============================================================

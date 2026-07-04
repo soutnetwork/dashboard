@@ -50,19 +50,141 @@
     if (btn) btn.onclick = () => SoutAdmin.createUser();
   }
 
-  // ---------- Clients ----------
+  // ---------- Clients (real management, no prompts) ----------
   async function loadClients() {
     const d = await API.call('/admin/clients');
-    const page = document.querySelector('.page[data-page="admin_clients"]');
-    if (!page) return; const tbody = page.querySelector('tbody'); if (!tbody) return;
-    tbody.innerHTML = (d.clients || []).map(c => `<tr>
-      <td><div class="row-flex">${art(initials(c.name))}<div class="cell-main">${esc(c.name)}</div></div></td>
-      <td class="cell-mono">${c.releases} releases</td><td><span class="chip blue">${esc(c.plan)}</span></td>
-      <td><span class="chip ${c.status === 'active' ? 'green' : 'gray'}">${esc(c.status)}</span></td>
-      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="SoutAdmin.editClient(${c.id})">Manage</button></td></tr>`).join('');
-    const btn = page.querySelector('.btn-primary');
-    if (btn) btn.onclick = () => SoutAdmin.createClient();
+    const tbody = document.getElementById('aClientsBody'); if (!tbody) return;
+    const rows = d.clients || [];
+    if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><h4>No clients yet</h4></div></td></tr>`; return; }
+    tbody.innerHTML = rows.map(cl => `<tr>
+      <td><div class="row-flex">${art(initials(cl.name))}<div class="cell-main">${esc(cl.name)}</div></div></td>
+      <td class="cell-mono">${cl.releases} releases</td>
+      <td class="cell-mono">${cl.users} user${cl.users == 1 ? '' : 's'}</td>
+      <td><span class="chip blue">${esc(cl.plan)}</span></td>
+      <td><span class="chip ${cl.status === 'active' ? 'green' : 'gray'}">${esc(cl.status)}</span></td>
+      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="SoutClients.manage(${cl.id})">Manage</button></td></tr>`).join('');
   }
+
+  const MC_CAPS = { upload_releases: 'Upload releases', edit_releases: 'Edit releases', deliver_releases: 'Deliver releases', metadata_edits: 'Metadata edits', takedowns: 'Takedowns', financial_access: 'Financial access', rights_access: 'Rights access', analytics_access: 'Analytics access', team_access: 'Team access' };
+
+  const SoutClients = {
+    _id: null,
+    openCreate() {
+      this._id = null;
+      document.getElementById('cmTitle2').textContent = 'Add Client';
+      document.getElementById('cfName').value = '';
+      document.getElementById('cfPlan').value = 'Label';
+      document.getElementById('cfStatus').value = 'active';
+      openModal('clientModal');
+    },
+    async submitCreate() {
+      const name = document.getElementById('cfName').value.trim();
+      const plan = document.getElementById('cfPlan').value, status = document.getElementById('cfStatus').value;
+      if (!name) { toast && toast('Client name is required'); return; }
+      try {
+        if (this._id) { await API.call('/admin/clients/' + this._id, { method: 'PUT', body: { name, plan, status } }); toast && toast('Client updated'); }
+        else { await API.call('/admin/clients', { method: 'POST', body: { name, plan } }); toast && toast('Client created'); }
+        closeModal('clientModal'); await loadClients();
+        if (this._id) await this.manage(this._id);
+      } catch (e) { toast && toast(e.message); }
+    },
+
+    // ---------- full manage modal ----------
+    async manage(id) {
+      this._id = id;
+      let d; try { d = await API.call('/admin/clients/' + id); } catch (e) { toast && toast(e.message); return; }
+      const cl = d.client, users = d.users || [], st = d.stats || {};
+      document.getElementById('mcTitle').textContent = cl.name;
+      const userRows = users.map(u => `
+        <tr>
+          <td><div class="row-flex">${art(initials(u.name))}<div><div class="cell-main">${esc(u.name)}</div><div class="cell-sub">${esc(u.email)}</div></div></div></td>
+          <td><span class="chip ${u.status === 'active' ? 'green' : 'gray'}">${esc(u.status)}</span>${u.must_change_password ? '<div class="cell-sub">must change password</div>' : ''}</td>
+          <td style="text-align:right;white-space:nowrap">
+            <button class="btn btn-ghost btn-sm" onclick="SoutClients.togglePerms(${u.id},this)">Permissions</button>
+            <button class="btn btn-ghost btn-sm" onclick="SoutClients.resetPwRow(${u.id},this)">Reset password</button>
+            <button class="btn btn-ghost btn-sm" onclick="SoutClients.toggleUser(${u.id})">${u.status === 'active' ? 'Disable' : 'Enable'}</button>
+          </td>
+        </tr>
+        <tr class="permsRow" data-u="${u.id}" style="display:none"><td colspan="3"><div class="permsBox" style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 4px"></div></td></tr>
+        <tr class="pwRow" data-u="${u.id}" style="display:none"><td colspan="3"><div class="row-flex" style="gap:8px;padding:4px"><input class="input" type="text" placeholder="New password (8+ chars)" style="max-width:280px"><button class="btn btn-primary btn-sm" onclick="SoutClients.resetPwSave(${u.id},this)">Save</button></div></td></tr>`).join('');
+      document.getElementById('mcBody').innerHTML = `
+        <div class="stat-grid" style="margin-bottom:16px">
+          <div class="stat"><div class="lbl">Releases</div><div class="val">${st.releases || 0}</div></div>
+          <div class="stat"><div class="lbl">Live</div><div class="val">${st.live || 0}</div></div>
+          <div class="stat"><div class="lbl">Pending review</div><div class="val">${st.pending || 0}</div></div>
+          <div class="stat"><div class="lbl">Open rights issues</div><div class="val">${st.rights_open || 0}</div></div>
+        </div>
+        <div class="sec-title" style="margin-bottom:8px">Client info</div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:18px">
+          <div class="field" style="margin:0"><label>Name</label><input class="input" id="mcName" value="${esc(cl.name)}"></div>
+          <div class="field" style="margin:0"><label>Plan</label><select class="ctrl" id="mcPlan" style="width:100%"><option${cl.plan === 'Label' ? ' selected' : ''}>Label</option><option${cl.plan === 'Artist' ? ' selected' : ''}>Artist</option><option${cl.plan === 'Partner' ? ' selected' : ''}>Partner</option><option${cl.plan === 'Pro' ? ' selected' : ''}>Pro</option></select></div>
+          <div class="field" style="margin:0"><label>Status</label><select class="ctrl" id="mcStatus" style="width:100%"><option value="active"${cl.status === 'active' ? ' selected' : ''}>Active</option><option value="disabled"${cl.status === 'disabled' ? ' selected' : ''}>Disabled</option></select></div>
+          <button class="btn btn-primary" onclick="SoutClients.saveInfo()">Save</button>
+        </div>
+        <div class="row-flex" style="justify-content:space-between;margin-bottom:8px">
+          <div class="sec-title" style="margin:0">Users (${users.length})</div>
+          <button class="btn btn-ghost btn-sm" onclick="SoutClients.toggleAddUser()">+ Add user</button>
+        </div>
+        <div id="mcAddUser" style="display:none;margin-bottom:10px"><div style="display:grid;grid-template-columns:1fr 1fr 1fr auto;gap:8px">
+          <input class="input" id="nuName" placeholder="Full name">
+          <input class="input" id="nuEmail" placeholder="Email">
+          <input class="input" id="nuPass" type="text" placeholder="Password (8+)">
+          <button class="btn btn-primary btn-sm" onclick="SoutClients.addUser()">Create</button>
+        </div></div>
+        <div class="table-wrap"><div class="table-scroll"><table><tbody>${userRows || '<tr><td><div class="empty"><h4>No users yet — add the first one</h4></div></td></tr>'}</tbody></table></div></div>`;
+      openModal('manageClientModal');
+    },
+    async saveInfo() {
+      const body = { name: document.getElementById('mcName').value.trim(), plan: document.getElementById('mcPlan').value, status: document.getElementById('mcStatus').value };
+      if (!body.name) { toast && toast('Name required'); return; }
+      try { await API.call('/admin/clients/' + this._id, { method: 'PUT', body }); toast && toast('Client updated — applied to the client account'); await loadClients(); }
+      catch (e) { toast && toast(e.message); }
+    },
+    toggleAddUser() { const el = document.getElementById('mcAddUser'); el.style.display = el.style.display === 'none' ? '' : 'none'; },
+    async addUser() {
+      const name = document.getElementById('nuName').value.trim(), email = document.getElementById('nuEmail').value.trim(), password = document.getElementById('nuPass').value;
+      if (!name || !email || !password || password.length < 8) { toast && toast('Name, email and 8+ char password required'); return; }
+      try { await API.call('/admin/users', { method: 'POST', body: { name, email, password, role: 'client', client_id: this._id } }); toast && toast('User created — they can sign in now'); await this.manage(this._id); await loadUsers().catch(() => { }); }
+      catch (e) { toast && toast(e.message); }
+    },
+    resetPwRow(uid, btn) {
+      const row = btn.closest('tr').parentElement.querySelector(`.pwRow[data-u="${uid}"]`);
+      if (row) row.style.display = row.style.display === 'none' ? '' : 'none';
+    },
+    async resetPwSave(uid, btn) {
+      const inp = btn.previousElementSibling; const p = inp.value;
+      if (!p || p.length < 8) { toast && toast('Password must be 8+ characters'); return; }
+      try { await API.call('/admin/users/' + uid + '/reset-password', { method: 'POST', body: { password: p } }); toast && toast('Password reset — user can sign in with it now'); inp.value = ''; btn.closest('tr').style.display = 'none'; }
+      catch (e) { toast && toast(e.message); }
+    },
+    async toggleUser(uid) {
+      try { const r = await API.call('/admin/users/' + uid + '/disable', { method: 'POST' }); toast && toast('User ' + r.status); await this.manage(this._id); }
+      catch (e) { toast && toast(e.message); }
+    },
+    async togglePerms(uid, btn) {
+      const row = btn.closest('tr').parentElement.querySelector(`.permsRow[data-u="${uid}"]`);
+      if (!row) return;
+      if (row.style.display !== 'none') { row.style.display = 'none'; return; }
+      row.style.display = '';
+      const box = row.querySelector('.permsBox');
+      box.innerHTML = '<span class="cell-sub">Loading…</span>';
+      try {
+        const d = await API.call('/admin/users/' + uid + '/permissions');
+        box.innerHTML = Object.keys(MC_CAPS).map(cap => {
+          const on = d.capabilities[cap] && d.capabilities[cap].allowed;
+          return `<label class="chip ${on ? 'green' : 'gray'}" style="cursor:pointer;user-select:none"><input type="checkbox"${on ? ' checked' : ''} style="margin-right:5px" onchange="SoutClients.setPerm(${uid},'${cap}',this)">${MC_CAPS[cap]}</label>`;
+        }).join('');
+      } catch (e) { box.innerHTML = `<span class="cell-sub" style="color:var(--red)">${esc(e.message)}</span>`; }
+    },
+    async setPerm(uid, cap, cb) {
+      try {
+        await API.call('/admin/users/' + uid + '/permission', { method: 'POST', body: { capability: cap, allowed: cb.checked } });
+        cb.parentElement.className = 'chip ' + (cb.checked ? 'green' : 'gray');
+        toast && toast('Permission saved — applied to the user immediately');
+      } catch (e) { toast && toast(e.message); cb.checked = !cb.checked; }
+    }
+  };
+  window.SoutClients = SoutClients;
 
   // ---------- Permissions matrix ----------
   async function loadPermissions() {

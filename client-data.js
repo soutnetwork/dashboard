@@ -8,7 +8,33 @@
   let CACHE = { releases: [], issues: [], claims: [], rightsApiMissing: false };
 
   function art(label) { return `<div class="art">${esc(label)}</div>`; }
-  function thumb(title) { return art(initials(title)); }
+  function thumb(title, artwork) {
+    if (artwork) return `<img class="art" src="/uploads/${esc(artwork)}" style="object-fit:cover" onerror="this.outerHTML='<div class=&quot;art&quot;>${esc(initials(title))}</div>'">`;
+    return art(initials(title));
+  }
+  // file upload helper (multipart — API.call is JSON-only)
+  async function uploadFile(path, fieldName, file) {
+    const fd = new FormData(); fd.append(fieldName, file);
+    const r = await fetch('/api' + path, { method: 'POST', credentials: 'same-origin', body: fd });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'Upload failed');
+    return d;
+  }
+  // picker feedback (used by the builder markup)
+  window.artPicked = function (input) {
+    const f = input.files[0]; if (!f) return;
+    const nameEl = document.getElementById('nrArtName');
+    if (!/\.jpe?g$/i.test(f.name)) { toast && toast('Artwork must be JPG or JPEG'); input.value = ''; if (nameEl) nameEl.textContent = 'JPG only · exactly 3000×3000 px · click to browse'; return; }
+    if (nameEl) nameEl.textContent = f.name + ' — will be checked (3000×3000) on save';
+    const img = document.getElementById('nrArtPreview');
+    if (img) { img.src = URL.createObjectURL(f); img.style.display = ''; }
+  };
+  window.audioPicked = function (input) {
+    const f = input.files[0]; if (!f) return;
+    const nameEl = input.parentElement.querySelector('.audioName');
+    if (!/\.wav$/i.test(f.name)) { toast && toast('Audio must be a WAV file'); input.value = ''; if (nameEl) nameEl.textContent = 'WAV only · click to browse'; return; }
+    if (nameEl) nameEl.textContent = f.name + ' ✓';
+  };
 
   // ============================================================
   // MANAGE MUSIC — one page, tabs: All / Drafts / Pending /
@@ -51,7 +77,7 @@
         actions = `<span class="cell-sub">Contact support</span>`;
       return `<tr>
         <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-        <td><div class="row-flex">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div>${note}</div></div></td>
+        <td><div class="row-flex" style="cursor:pointer" onclick="SoutClient.viewRelease(${r.id})">${thumb(r.title, r.artwork)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div>${note}</div></div></td>
         <td class="cell-mono">${esc(r.label)}</td><td>${chip(r.status)}</td><td><span class="chip gray">${esc(r.type)}</span></td>
         <td class="cell-mono">${esc(r.upc || '—')}</td><td class="cell-mono">${esc((r.created_at || '').slice(0, 10))}</td>
         <td style="text-align:right;white-space:nowrap">${actions}</td></tr>`;
@@ -354,30 +380,169 @@
   // ============================================================
   // Actions
   // ============================================================
+  const CATALOG_EDITABLE = ['draft', 'rejected', 'correction'];
   const SoutClient = {
     async editRelease(id) { window.__editId = id; if (window.go) go('newrelease'); toast && toast('Loading release...'); await fillBuilder(id); },
+
+    // ---------- collect the builder + save (create or edit) ----------
+    async saveRelease(status) {
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      const title = v('nrTitle');
+      if (!title) { toast && toast('Release title is required'); return; }
+      let upc = v('nrUpc'); if (/^generated/i.test(upc)) upc = '';
+      // tracks from the builder
+      const tracks = [];
+      document.querySelectorAll('#assetList .asset').forEach(asset => {
+        const f = sel => { const el = asset.querySelector(`[data-f="${sel}"]`); return el ? el.value.trim() : ''; };
+        const t = {
+          title: f('t_title'), c_line: f('c_line'), p_line: f('p_line'),
+          isrc: /^auto/i.test(f('isrc')) ? '' : f('isrc'),
+          version: f('version') || 'Original', lyrics_lang: f('lyrics_lang'),
+          content_type: f('content_type') || 'Not Explicit', production_year: f('prod_year'),
+          contributors: []
+        };
+        asset.querySelectorAll('.contrib-row').forEach(row => {
+          const role = (row.querySelector('.chip') || {}).textContent || 'Main Artist';
+          const name = (row.querySelector('input') || {}).value || '';
+          if (name.trim()) t.contributors.push({ role: role.trim(), name: name.trim(), is_composer: /composer/i.test(role) ? 1 : 0, is_author: /author/i.test(role) ? 1 : 0 });
+        });
+        if (t.title) tracks.push(t);
+      });
+      if (!tracks.length) { toast && toast('Add at least one track with a title'); return; }
+      const firstArtist = (tracks[0].contributors.find(x => /main/i.test(x.role)) || tracks[0].contributors[0] || {}).name || '';
+      const body = {
+        title, artist: firstArtist, label: v('nrLabel'), upc,
+        type: v('nrType') || 'Single', genre: v('nrGenre'), status,
+        digital_date: v('nrDigital'), original_date: v('nrOriginal'),
+        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || 'All', tracks
+      };
+      const btn = document.getElementById(status === 'draft' ? 'nrSaveBtn' : 'nrSubmitBtn');
+      if (btn) { btn.disabled = true; }
+      try {
+        let relId = window.__editId, createdTracks = [];
+        if (relId) {
+          await API.call('/releases/' + relId, { method: 'PUT', body });
+          if (status === 'submitted') await API.call('/releases/' + relId + '/submit', { method: 'POST' });
+          createdTracks = ((await API.call('/releases/' + relId)).tracks) || [];
+        } else {
+          const r = await API.call('/releases', { method: 'POST', body });
+          relId = r.id; createdTracks = r.tracks || [];
+        }
+        // artwork (validated server-side: JPG + 3000x3000)
+        const artInput = document.getElementById('nrArtFile');
+        if (artInput && artInput.files[0]) {
+          try { await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0]); toast && toast('Artwork uploaded ✓'); }
+          catch (e) { toast && toast('Artwork: ' + e.message); }
+        }
+        // per-track WAV files (matched by position)
+        const audioInputs = document.querySelectorAll('#assetList .asset .audioFile');
+        for (let i = 0; i < audioInputs.length; i++) {
+          const file = audioInputs[i].files[0];
+          const trackRow = createdTracks[i];
+          if (file && trackRow) {
+            try { await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file); }
+            catch (e) { toast && toast('Track ' + (i + 1) + ' audio: ' + e.message); }
+          }
+        }
+        toast && toast(status === 'draft' ? 'Saved as draft' : 'Release submitted for review');
+        window.__editId = null;
+        await loadReleases(); if (window.go) go('releases');
+      } catch (e) { toast && toast(e.message); }
+      if (btn) { btn.disabled = false; }
+    },
+
+    // ---------- release details modal (all info + tracks + artwork zoom) ----------
+    async viewRelease(id) {
+      let d; try { d = await API.call('/releases/' + id); } catch (e) { toast && toast(e.message); return; }
+      const r = d.release, tracks = d.tracks || [];
+      const editable = CATALOG_EDITABLE.includes(r.status);
+      document.getElementById('rmTitle').textContent = r.title;
+      const artSrc = r.artwork ? '/uploads/' + esc(r.artwork) : '';
+      const info = (l, val) => `<div><div class="cell-sub">${l}</div><div class="cell-main">${esc(val || '—')}</div></div>`;
+      const trackRows = tracks.map(t => {
+        const contribs = (t.contributors || []).map(x => `${esc(x.name)} <span class="cell-sub">(${esc(x.role)})</span>`).join(', ');
+        const audio = t.audio_file
+          ? `<span class="chip green">Audio ✓</span>`
+          : `<span class="chip amber">No audio</span>`;
+        const up = editable ? ` <label class="btn btn-ghost btn-sm" style="cursor:pointer">Upload WAV<input type="file" accept=".wav" style="display:none" onchange="SoutClient.uploadTrackAudio(${t.id},this,${r.id})"></label>` : '';
+        return `<tr>
+          <td class="cell-mono">${t.track_no}</td>
+          <td><div class="cell-main">${esc(t.title)}</div><div class="cell-sub">${contribs || ''}</div></td>
+          <td class="cell-mono">${esc(t.isrc || '—')}</td>
+          <td><span class="chip gray">${esc(t.version || 'Original')}</span></td>
+          <td>${audio}${up}</td></tr>`;
+      }).join('');
+      const artBlock = artSrc
+        ? `<img src="${artSrc}" onclick="SoutClient.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge">`
+        : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div>`;
+      const artUp = editable ? `<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin-top:8px;display:inline-flex">${artSrc ? 'Replace artwork' : 'Upload artwork'}<input type="file" accept=".jpg,.jpeg" style="display:none" onchange="SoutClient.uploadArt(${r.id},this)"></label><div class="cell-sub" style="margin-top:4px">JPG · 3000×3000</div>` : '';
+      const note = (r.note && ['rejected', 'correction'].includes(r.status)) ? `<div class="card card-pad" style="border-color:var(--red);color:var(--red);margin-top:12px;font-size:.85rem">${esc(r.note)}</div>` : '';
+      document.getElementById('rmBody').innerHTML = `
+        <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:16px">
+          <div style="text-align:center">${artBlock}${artUp}</div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr;gap:12px">
+            ${info('Artist', r.artist)}
+            ${info('Label', r.label)}
+            ${info('Type', r.type)}
+            ${info('Genre', r.genre)}
+            ${info('UPC', r.upc || 'Generated automatically')}
+            ${info('Digital release date', r.digital_date)}
+            ${info('Territories', r.territories)}
+            ${info('Stores', r.stores)}
+          </div>
+        </div>
+        <div class="row-flex" style="gap:8px;margin-bottom:12px">${chip(r.status)}<span class="cell-sub">Created ${esc((r.created_at || '').slice(0, 10))}${r.delivered_at ? ' · Delivered ' + esc(r.delivered_at.slice(0, 10)) : ''}</span></div>
+        ${note}
+        <div class="sec-title" style="margin:14px 0 8px">Tracks (${tracks.length})</div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>#</th><th>Title</th><th>ISRC</th><th>Version</th><th>Audio</th></tr></thead>
+          <tbody>${trackRows || '<tr><td colspan="5"><div class="empty"><h4>No tracks</h4></div></td></tr>'}</tbody>
+        </table></div></div>`;
+      // fix the empty status cell (first info slot)
+      openModal('relModal');
+    },
+    zoom(src) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; lb.style.display = 'grid'; },
+    async uploadArt(relId, input) {
+      const f = input.files[0]; if (!f) return;
+      try { await uploadFile('/releases/' + relId + '/artwork', 'artwork', f); toast && toast('Artwork uploaded ✓'); await loadReleases(); await this.viewRelease(relId); }
+      catch (e) { toast && toast(e.message); }
+    },
+    async uploadTrackAudio(trackId, input, relId) {
+      const f = input.files[0]; if (!f) return;
+      try { await uploadFile('/tracks/' + trackId + '/audio', 'audio', f); toast && toast('Audio uploaded ✓'); await this.viewRelease(relId); }
+      catch (e) { toast && toast(e.message); }
+    },
     async deleteRelease(id) {
       if (!confirm('Delete this draft?')) return;
       try { await API.call('/releases/' + id, { method: 'DELETE' }); toast && toast('Draft deleted'); await loadReleases(); }
       catch (e) { toast && toast(e.message); }
     },
-    async submitNew(payload) {
-      try { const r = await API.call('/releases', { method: 'POST', body: payload }); toast && toast('Release submitted'); await loadReleases(); return r; }
-      catch (e) { toast && toast(e.message); }
-    }
   };
   window.SoutClient = SoutClient;
 
   async function fillBuilder(id) {
     try {
       const d = await API.call('/releases/' + id);
-      const r = d.release; const page = document.querySelector('.page[data-page="newrelease"]');
-      if (!page) return;
-      const set = (label, val) => {
-        const fields = page.querySelectorAll('.field');
-        fields.forEach(f => { const l = f.querySelector('label'); if (l && l.textContent.trim().toLowerCase().startsWith(label.toLowerCase())) { const inp = f.querySelector('input,select'); if (inp) inp.value = val || ''; } });
-      };
-      set('Release title', r.title); set('Label', r.label); set('UPC', r.upc); set('Genre', r.genre);
+      const r = d.release;
+      const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.value = val || ''; };
+      set('nrTitle', r.title); set('nrLabel', r.label); set('nrUpc', r.upc); set('nrType', r.type);
+      set('nrGenre', r.genre); set('nrDigital', r.digital_date); set('nrOriginal', r.original_date);
+      // existing artwork preview
+      const img = document.getElementById('nrArtPreview');
+      if (img && r.artwork) { img.src = '/uploads/' + r.artwork; img.style.display = ''; }
+      // first track into the builder (full track editing lives in the release details modal)
+      const t = (d.tracks || [])[0];
+      if (t) {
+        const asset = document.querySelector('#assetList .asset');
+        if (asset) {
+          const sf = (sel, val) => { const el = asset.querySelector(`[data-f="${sel}"]`); if (el) el.value = val || ''; };
+          sf('t_title', t.title); sf('c_line', t.c_line); sf('p_line', t.p_line); sf('isrc', t.isrc);
+          sf('version', t.version); sf('content_type', t.content_type); sf('prod_year', t.production_year);
+          const nameEl = document.getElementById('assetName1'); if (nameEl) nameEl.textContent = t.title || 'Untitled track';
+          const c0 = (t.contributors || [])[0];
+          if (c0) { const inp = asset.querySelector('.contrib-row input'); if (inp) inp.value = c0.name; }
+        }
+      }
     } catch (e) { /* ignore */ }
   }
 
