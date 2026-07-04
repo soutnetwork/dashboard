@@ -12,13 +12,22 @@
     if (artwork) return `<img class="art" src="/uploads/${esc(artwork)}" style="object-fit:cover" onerror="this.outerHTML='<div class=&quot;art&quot;>${esc(initials(title))}</div>'">`;
     return art(initials(title));
   }
-  // file upload helper (multipart — API.call is JSON-only)
-  async function uploadFile(path, fieldName, file) {
-    const fd = new FormData(); fd.append(fieldName, file);
-    const r = await fetch('/api' + path, { method: 'POST', credentials: 'same-origin', body: fd });
-    const d = await r.json().catch(() => ({}));
-    if (!r.ok) throw new Error(d.error || 'Upload failed');
-    return d;
+  // file upload helper with REAL progress (XHR — fetch has no upload progress)
+  function uploadFile(path, fieldName, file, onProgress) {
+    return new Promise((resolve, reject) => {
+      const fd = new FormData(); fd.append(fieldName, file);
+      const xhr = new XMLHttpRequest();
+      xhr.open('POST', '/api' + path);
+      xhr.withCredentials = true;
+      xhr.upload.onprogress = e => { if (e.lengthComputable && onProgress) onProgress(Math.round(e.loaded / e.total * 100)); };
+      xhr.onload = () => {
+        let d = {}; try { d = JSON.parse(xhr.responseText); } catch { }
+        if (xhr.status >= 200 && xhr.status < 300) resolve(d);
+        else reject(new Error(d.error || 'Upload failed'));
+      };
+      xhr.onerror = () => reject(new Error('Connection error during upload'));
+      xhr.send(fd);
+    });
   }
   // picker feedback (used by the builder markup)
   window.artPicked = function (input) {
@@ -416,9 +425,14 @@
         digital_date: v('nrDigital'), original_date: v('nrOriginal'),
         territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || 'All', tracks
       };
-      const btn = document.getElementById(status === 'draft' ? 'nrSaveBtn' : 'nrSubmitBtn');
-      if (btn) { btn.disabled = true; }
+      const btnSave = document.getElementById('nrSaveBtn'), btnSubmit = document.getElementById('nrSubmitBtn');
+      const btn = status === 'draft' ? btnSave : btnSubmit;
+      const btnHTML = btn ? btn.innerHTML : '';
+      const setBtn = t => { if (btn) btn.textContent = t; };
+      if (btnSave) btnSave.disabled = true; if (btnSubmit) btnSubmit.disabled = true;
+      const uploadErrors = [];
       try {
+        setBtn('Saving release…');
         let relId = window.__editId, createdTracks = [];
         if (relId) {
           await API.call('/releases/' + relId, { method: 'PUT', body });
@@ -428,11 +442,14 @@
           const r = await API.call('/releases', { method: 'POST', body });
           relId = r.id; createdTracks = r.tracks || [];
         }
+        toast && toast('Release data saved ✓ (#' + relId + ')');
         // artwork (validated server-side: JPG + 3000x3000)
         const artInput = document.getElementById('nrArtFile');
         if (artInput && artInput.files[0]) {
-          try { await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0]); toast && toast('Artwork uploaded ✓'); }
-          catch (e) { toast && toast('Artwork: ' + e.message); }
+          try {
+            await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0], p => setBtn('Uploading artwork… ' + p + '%'));
+            toast && toast('Artwork uploaded ✓');
+          } catch (e) { uploadErrors.push('Artwork: ' + e.message); }
         }
         // per-track WAV files (matched by position)
         const audioInputs = document.querySelectorAll('#assetList .asset .audioFile');
@@ -440,15 +457,23 @@
           const file = audioInputs[i].files[0];
           const trackRow = createdTracks[i];
           if (file && trackRow) {
-            try { await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file); }
-            catch (e) { toast && toast('Track ' + (i + 1) + ' audio: ' + e.message); }
+            try {
+              await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file, p => setBtn('Uploading track ' + (i + 1) + ' audio… ' + p + '%'));
+              toast && toast('Track ' + (i + 1) + ' audio uploaded ✓');
+            } catch (e) { uploadErrors.push('Track ' + (i + 1) + ' audio: ' + e.message); }
           }
         }
-        toast && toast(status === 'draft' ? 'Saved as draft' : 'Release submitted for review');
         window.__editId = null;
-        await loadReleases(); if (window.go) go('releases');
+        await loadReleases();
+        if (uploadErrors.length) {
+          alert('The release was saved, but some files were NOT accepted:\n\n' + uploadErrors.join('\n') + '\n\nOpen the release from Manage Music to re-upload them.');
+        } else {
+          toast && toast(status === 'draft' ? 'Saved as draft ✓' : 'Release submitted for review ✓');
+        }
+        if (window.go) go('releases');
       } catch (e) { toast && toast(e.message); }
-      if (btn) { btn.disabled = false; }
+      if (btn) btn.innerHTML = btnHTML;
+      if (btnSave) btnSave.disabled = false; if (btnSubmit) btnSubmit.disabled = false;
     },
 
     // ---------- release details modal (all info + tracks + artwork zoom) ----------
@@ -504,13 +529,19 @@
     zoom(src) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; lb.style.display = 'grid'; },
     async uploadArt(relId, input) {
       const f = input.files[0]; if (!f) return;
-      try { await uploadFile('/releases/' + relId + '/artwork', 'artwork', f); toast && toast('Artwork uploaded ✓'); await loadReleases(); await this.viewRelease(relId); }
-      catch (e) { toast && toast(e.message); }
+      const lbl = input.parentElement; const orig = lbl.firstChild.textContent;
+      try {
+        await uploadFile('/releases/' + relId + '/artwork', 'artwork', f, p => lbl.firstChild.textContent = 'Uploading ' + p + '%');
+        toast && toast('Artwork uploaded ✓'); await loadReleases(); await this.viewRelease(relId);
+      } catch (e) { lbl.firstChild.textContent = orig; alert('Artwork not accepted:\n' + e.message); }
     },
     async uploadTrackAudio(trackId, input, relId) {
       const f = input.files[0]; if (!f) return;
-      try { await uploadFile('/tracks/' + trackId + '/audio', 'audio', f); toast && toast('Audio uploaded ✓'); await this.viewRelease(relId); }
-      catch (e) { toast && toast(e.message); }
+      const lbl = input.parentElement; const orig = lbl.firstChild.textContent;
+      try {
+        await uploadFile('/tracks/' + trackId + '/audio', 'audio', f, p => lbl.firstChild.textContent = 'Uploading ' + p + '%');
+        toast && toast('Audio uploaded ✓'); await this.viewRelease(relId);
+      } catch (e) { lbl.firstChild.textContent = orig; alert('Audio not accepted:\n' + e.message); }
     },
     async deleteRelease(id) {
       if (!confirm('Delete this draft?')) return;
