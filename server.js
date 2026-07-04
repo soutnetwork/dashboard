@@ -260,8 +260,14 @@ app.post('/api/admin/releases/:id/status', auth, adminOnly, (req, res) => {
   if (!r) return res.status(404).json({ error: 'Not found' });
   db.prepare(`UPDATE releases SET status=?, note=?, delivered_at=${status === 'delivered' ? "datetime('now')" : 'delivered_at'}, updated_at=datetime('now') WHERE id=?`)
     .run(status, note || null, r.id);
+  // approving a release automatically generates its UPC/ISRC and renames files
+  let codes = null;
+  if (status === 'approved') {
+    try { codes = generateCodesFor(r.id); audit(req, 'codes.generate', `#${r.id} UPC ${codes.upc}`); }
+    catch (e) { console.error('auto-generate codes:', e.message); }
+  }
   audit(req, 'release.' + status, r.title);
-  res.json({ ok: true });
+  res.json({ ok: true, codes });
 });
 
 // ============================================================
@@ -641,6 +647,103 @@ app.get('/api/roster', auth, (req, res) => {
 app.get('/api/clients-list', auth, adminOnly, (req, res) => {
   const rows = db.prepare('SELECT id, name FROM clients ORDER BY name').all();
   res.json({ clients: rows });
+});
+
+// ============================================================
+// UPC / ISRC GENERATOR — sequential, never repeats, platform-valid
+//   ISRC: EGSUT + YY + 5-digit counter   (EG country + SUT registrant)
+//   UPC : 12-digit UPC-A with a valid check digit + sequential counter
+//   Counters live in the settings table; DB is double-checked for
+//   collisions so a code can NEVER be issued twice.
+// ============================================================
+function getSetting(k) { const r = db.prepare('SELECT value FROM settings WHERE key = ?').get(k); return r ? r.value : null; }
+function setSetting(k, v) {
+  db.prepare(`INSERT INTO settings (key, value) VALUES (?, ?)
+    ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(k, String(v));
+}
+function upcCheckDigit(d11) {
+  let sum = 0;
+  for (let i = 0; i < 11; i++) { const n = Number(d11[i]); sum += (i % 2 === 0) ? n * 3 : n; }
+  return String((10 - (sum % 10)) % 10);
+}
+const UPC_PREFIX = '82997'; // Sout Network internal prefix (5 digits) + 6-digit counter + check digit = 12
+function nextUPC() {
+  for (let guard = 0; guard < 1000; guard++) {
+    const seq = Number(getSetting('upc_seq') || '0') + 1;
+    setSetting('upc_seq', seq);
+    const body = UPC_PREFIX + String(seq).padStart(6, '0');
+    const code = body + upcCheckDigit(body);
+    const exists = db.prepare('SELECT 1 FROM releases WHERE upc = ?').get(code);
+    if (!exists) return code;
+  }
+  throw new Error('UPC generator exhausted');
+}
+function nextISRC() {
+  const yy = String(new Date().getFullYear() % 100).padStart(2, '0');
+  const key = 'isrc_seq_' + yy;
+  for (let guard = 0; guard < 1000; guard++) {
+    const seq = Number(getSetting(key) || '0') + 1;
+    if (seq > 99999) throw new Error('ISRC yearly capacity reached');
+    setSetting(key, seq);
+    const code = 'EGSUT' + yy + String(seq).padStart(5, '0');
+    const exists = db.prepare('SELECT 1 FROM tracks WHERE UPPER(isrc) = ?').get(code);
+    if (!exists) return code;
+  }
+  throw new Error('ISRC generator exhausted');
+}
+// generate missing codes for a release + rename files to UPC-based names
+function generateCodesFor(relId) {
+  const r = db.prepare('SELECT * FROM releases WHERE id = ?').get(relId);
+  if (!r) throw new Error('Release not found');
+  let upc = (r.upc || '').trim();
+  if (!upc) {
+    upc = nextUPC();
+    db.prepare(`UPDATE releases SET upc = ?, updated_at = datetime('now') WHERE id = ?`).run(upc, relId);
+  }
+  // artwork → UPC.jpeg
+  if (r.artwork) {
+    const target = upc + '.jpeg';
+    if (r.artwork !== target) {
+      const from = path.join(__dirname, 'uploads', r.artwork);
+      const to = path.join(__dirname, 'uploads', target);
+      try {
+        if (fs.existsSync(from)) { try { fs.unlinkSync(to); } catch { } fs.renameSync(from, to); }
+        db.prepare('UPDATE releases SET artwork = ? WHERE id = ?').run(target, relId);
+      } catch (e) { console.error('artwork rename:', e.message); }
+    }
+  }
+  // tracks → ISRC + audio UPC_N.wav
+  const isrcs = [];
+  const tracks = db.prepare('SELECT * FROM tracks WHERE release_id = ? ORDER BY track_no').all(relId);
+  for (const t of tracks) {
+    let isrc = (t.isrc || '').trim();
+    if (!isrc) {
+      isrc = nextISRC();
+      db.prepare('UPDATE tracks SET isrc = ? WHERE id = ?').run(isrc, t.id);
+    }
+    isrcs.push({ track_no: t.track_no, title: t.title, isrc });
+    if (t.audio_file) {
+      const target = upc + '_' + t.track_no + '.wav';
+      if (t.audio_file !== target) {
+        const from = path.join(__dirname, 'uploads', t.audio_file);
+        const to = path.join(__dirname, 'uploads', target);
+        try {
+          if (fs.existsSync(from)) { try { fs.unlinkSync(to); } catch { } fs.renameSync(from, to); }
+          db.prepare('UPDATE tracks SET audio_file = ? WHERE id = ?').run(target, t.id);
+        } catch (e) { console.error('audio rename:', e.message); }
+      }
+    }
+  }
+  return { upc, isrcs };
+}
+
+// manual trigger (admin) — only fills what is missing, never overwrites
+app.post('/api/admin/releases/:id/generate-codes', auth, adminOnly, (req, res) => {
+  try {
+    const out = generateCodesFor(Number(req.params.id));
+    audit(req, 'codes.generate', `#${req.params.id} UPC ${out.upc}`);
+    res.json({ ok: true, ...out });
+  } catch (e) { res.status(400).json({ error: e.message }); }
 });
 
 // ============================================================

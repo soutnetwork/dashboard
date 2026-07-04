@@ -283,7 +283,7 @@
             ${info('Label', r.label)}
             ${info('Type', r.type)}
             ${info('Genre', r.genre)}
-            ${info('UPC', r.upc || 'To be generated')}
+            ${info('UPC', r.upc || 'Generated on approval')}
             ${info('Digital date', r.digital_date)}
             ${info('Territories', r.territories)}
             ${info('Stores', r.stores)}
@@ -296,8 +296,10 @@
           <tbody>${trackRows || '<tr><td colspan="5"><div class="empty"><h4>No tracks</h4></div></td></tr>'}</tbody>
         </table></div></div>`;
       const canAct = ['submitted', 'review'].includes(r.status);
+      const missingCodes = !r.upc || tracks.some(t => !t.isrc);
       document.getElementById('arFoot').innerHTML = `
         <button class="btn btn-ghost" onclick="closeModal('aRelModal')">Close</button>
+        ${missingCodes ? `<button class="btn btn-ghost" onclick="SoutAdmin.generateCodes(${r.id})">Generate UPC &amp; ISRC</button>` : ''}
         ${canAct ? `<button class="btn btn-ghost" onclick="closeModal('aRelModal');SoutAdmin.correction(${r.id})">Correction</button>
         <button class="btn btn-danger" onclick="closeModal('aRelModal');SoutAdmin.reject(${r.id})">Reject</button>
         <button class="btn btn-primary" onclick="closeModal('aRelModal');SoutAdmin.setStatus(${r.id},'approved')">Approve</button>` : ''}`;
@@ -306,8 +308,22 @@
     zoom(src) { const lb = document.getElementById('aLightbox'); document.getElementById('aLightboxImg').src = src; lb.style.display = 'grid'; },
 
     async setStatus(id, status, note) {
-      try { await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status, note } }); toast && toast('Release ' + status); await loadModeration(); await loadAdminOverview(); }
+      try {
+        const r = await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status, note } });
+        if (r.codes && r.codes.upc) toast && toast('Approved ✓ — UPC ' + r.codes.upc + ' & ISRC generated, files renamed');
+        else toast && toast('Release ' + status);
+        await loadModeration(); await loadAdminOverview();
+        if (window.SoutDist) SoutDist.load().catch(() => { });
+      }
       catch (e) { toast && toast(e.message); }
+    },
+    async generateCodes(id) {
+      try {
+        const r = await API.call('/admin/releases/' + id + '/generate-codes', { method: 'POST' });
+        toast && toast('Generated — UPC ' + r.upc + ' + ' + r.isrcs.length + ' ISRC(s), files renamed');
+        await this.viewRelease(id);
+        if (window.SoutDist) SoutDist.load().catch(() => { });
+      } catch (e) { toast && toast(e.message); }
     },
     reject(id) { ask('Reject release', [{ id: 'note', label: 'Rejection reason (the client will see this)', type: 'textarea' }], 'Reject', v => { if (!v.note.trim()) { toast && toast('Write the reason'); return; } closeModal('askModal'); this.setStatus(id, 'rejected', v.note.trim()); }); },
     correction(id) { ask('Request correction', [{ id: 'note', label: 'What needs correction? (the client will see this)', type: 'textarea' }], 'Send', v => { if (!v.note.trim()) { toast && toast('Write what needs correction'); return; } closeModal('askModal'); this.setStatus(id, 'correction', v.note.trim()); }); },
