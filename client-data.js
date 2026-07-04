@@ -179,6 +179,17 @@
       } catch (e) { CACHE.issues = []; CACHE.rightsApiMissing = true; }
       this.buildCatFilter(); this.renderCards(); this.render(); this.badge();
       this.loadRequests(); this.loadAnalytics();
+      // rights numbers on the overview service card
+      const rc = document.querySelectorAll('.page[data-page="overview"] .svc-card')[1];
+      if (rc) {
+        const v = rc.querySelectorAll('.svc-v'), l = rc.querySelectorAll('.svc-l');
+        const set2 = (i, lab, val) => { if (l[i]) l[i].textContent = lab; if (v[i]) v[i].textContent = val; };
+        const iss = CACHE.issues || [];
+        set2(0, 'New', iss.filter(i => i.status === 'new').length);
+        set2(1, 'Answered', iss.filter(i => i.status === 'answered').length);
+        set2(2, 'Resolved', iss.filter(i => i.status === 'resolved').length);
+        set2(3, 'Requests', (CACHE.claims || []).length);
+      }
     },
 
     badge() {
@@ -385,6 +396,27 @@
     const delivered = ov.latest_delivered || [];
     const page = document.querySelector('.page[data-page="overview"]');
     if (!page) return;
+    // real stat cards: Pending / Processing / Delivered / Rejected / Total
+    const s = ov.stats || {};
+    const pending = (s.submitted || 0) + (s.review || 0);
+    const processing = s.approved || 0;
+    const done = (s.delivered || 0) + (s.live || 0);
+    const total = pending + processing + done + (s.draft || 0) + (s.rejected || 0) + (s.correction || 0);
+    const vals = page.querySelectorAll('.stat .val');
+    const lbls = page.querySelectorAll('.stat .lbl');
+    const setStat = (i, l, v) => { if (lbls[i]) lbls[i].textContent = l; if (vals[i]) vals[i].textContent = v; };
+    setStat(0, 'Pending review', pending);
+    setStat(1, 'Approved', processing);
+    setStat(2, 'Delivered', done);
+    setStat(3, 'Needs attention', (s.rejected || 0) + (s.correction || 0));
+    setStat(4, 'Total releases', total);
+    // Music Distribution service card numbers
+    const svc = page.querySelector('.svc-card .svc-stats');
+    if (svc) {
+      const v = svc.querySelectorAll('.svc-v'), l = svc.querySelectorAll('.svc-l');
+      const set2 = (i, lab, val) => { if (l[i]) l[i].textContent = lab; if (v[i]) v[i].textContent = val; };
+      set2(0, 'Pending', pending); set2(1, 'Approved', processing); set2(2, 'Delivered', done); set2(3, 'Drafts', s.draft || 0);
+    }
     const tables = page.querySelectorAll('.table-wrap tbody');
     if (tables[0]) {
       tables[0].innerHTML = delivered.length ? delivered.map(r => {
@@ -394,6 +426,48 @@
       }).join('') : `<tr><td colspan="5"><div class="empty"><h4>No delivered releases yet</h4></div></td></tr>`;
     }
   }
+
+  // ============================================================
+  // Artists & Labels (real roster from catalog data)
+  // ============================================================
+  async function loadRoster() {
+    let d; try { d = await API.call('/roster'); } catch { return; }
+    window.__roster = d;
+    renderRoster(window.__rosterView || 'artists');
+  }
+  function renderRoster(view) {
+    window.__rosterView = view;
+    const grid = document.getElementById('rosterGrid'); if (!grid) return;
+    const rows = (window.__roster || {})[view] || [];
+    if (!rows.length) { grid.innerHTML = `<div class="card card-pad" style="grid-column:1/-1"><div class="empty"><h4>No ${view} yet</h4><div class="cell-sub">They appear here automatically from your releases.</div></div></div>`; return; }
+    grid.innerHTML = rows.map(a => `<div class="card card-pad" style="display:flex;align-items:center;gap:14px">
+      <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:${view === 'artists' ? '50%' : '14px'}">${esc(initials(a.name))}</div>
+      <div style="flex:1"><div class="cell-main" style="font-size:.98rem">${esc(a.name)}</div>
+      <div style="display:flex;gap:14px;margin-top:6px"><span class="cell-mono" style="font-size:.74rem">${a.releases} release${a.releases == 1 ? '' : 's'}</span></div></div>
+    </div>`).join('');
+  }
+  window.rosterTab = function (el, view) {
+    el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+    el.classList.add('active');
+    renderRoster(view);
+  };
+
+  // ============================================================
+  // Settings — real change password
+  // ============================================================
+  window.SoutSettings = {
+    async changePw() {
+      const v = id => ((document.getElementById(id) || {}).value || '');
+      const cur = v('spCurrent'), n1 = v('spNew'), n2 = v('spConfirm');
+      if (!n1 || n1.length < 8) { toast && toast('New password must be 8+ characters'); return; }
+      if (n1 !== n2) { toast && toast('Passwords do not match'); return; }
+      try {
+        await API.call('/change-password', { method: 'POST', body: { current: cur, next: n1 } });
+        ['spCurrent', 'spNew', 'spConfirm'].forEach(id => { const el = document.getElementById(id); if (el) el.value = ''; });
+        toast && toast('Password changed ✓');
+      } catch (e) { toast && toast(e.message); }
+    }
+  };
 
   // ============================================================
   // Actions
@@ -559,7 +633,7 @@
           <td>${audio}${up}</td></tr>`;
       }).join('');
       const artBlock = artSrc
-        ? `<img src="${artSrc}" onclick="SoutClient.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge">`
+        ? `<img src="${artSrc}" onclick="SoutClient.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="cell-sub" style="color:var(--accent)" href="${artSrc}" download>Download JPG</a></div>`
         : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div>`;
       const artUp = editable ? `<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin-top:8px;display:inline-flex">${artSrc ? 'Replace artwork' : 'Upload artwork'}<input type="file" accept=".jpg,.jpeg" style="display:none" onchange="SoutClient.uploadArt(${r.id},this)"></label><div class="cell-sub" style="margin-top:4px">JPG · 3000×3000</div>` : '';
       const note = (r.note && ['rejected', 'correction'].includes(r.status)) ? `<div class="card card-pad" style="border-color:var(--red);color:var(--red);margin-top:12px;font-size:.85rem">${esc(r.note)}</div>` : '';
@@ -647,6 +721,7 @@
       loadReleases().catch(() => { });
       loadOverview().catch(() => { });
       SoutRights.load().catch(() => { });
+      loadRoster().catch(() => { });
       if (window.go && !window.__goWrapped) {
         const _go = window.go;
         window.go = function (p) {
@@ -654,6 +729,7 @@
           if (p === 'releases') loadReleases();
           else if (p === 'overview') loadOverview();
           else if (p === 'rights') SoutRights.load();
+          else if (p === 'artists') loadRoster();
         };
         window.__goWrapped = true;
       }

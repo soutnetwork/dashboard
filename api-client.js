@@ -46,6 +46,9 @@
     document.querySelectorAll('.tb-user .un').forEach(el => el.textContent = u.name || 'User');
     document.querySelectorAll('.tb-user .uc').forEach(el => el.textContent = u.role === 'admin' ? 'Administrator' : ('Client #' + (u.client_id || '—')));
     document.querySelectorAll('.tb-avatar').forEach(el => el.textContent = initials(u.name));
+    // settings page account fields
+    const stN = document.getElementById('stName'), stE = document.getElementById('stEmail');
+    if (stN) stN.value = u.name || ''; if (stE) stE.value = u.email || '';
     // wire logout if a logout button exists
     document.querySelectorAll('[data-action="logout"]').forEach(b => b.addEventListener('click', async () => {
       await API.call('/logout', { method: 'POST' }); window.location.href = '/login.html';

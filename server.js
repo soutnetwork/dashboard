@@ -238,6 +238,12 @@ app.delete('/api/releases/:id', auth, (req, res) => {
   if (!r) return res.status(404).json({ error: 'Not found' });
   if (req.user.role !== 'admin' && r.client_id !== req.user.client_id) return res.status(403).json({ error: 'Forbidden' });
   if (req.user.role !== 'admin' && r.status !== 'draft') return res.status(403).json({ error: 'Only drafts can be deleted. Contact support.' });
+  // remove files from disk too
+  try { if (r.artwork) fs.unlinkSync(path.join(__dirname, 'uploads', r.artwork)); } catch { }
+  db.prepare('SELECT audio_file FROM tracks WHERE release_id = ?').all(r.id).forEach(t => {
+    try { if (t.audio_file) fs.unlinkSync(path.join(__dirname, 'uploads', t.audio_file)); } catch { }
+  });
+  db.prepare('DELETE FROM tracks WHERE release_id = ?').run(r.id);
   db.prepare('DELETE FROM releases WHERE id = ?').run(r.id);
   audit(req, 'release.delete', r.title);
   res.json({ ok: true });
@@ -617,6 +623,19 @@ app.get('/api/tracks', auth, (req, res) => {
       WHERE r.client_id = ? ORDER BY t.id DESC`).all(req.user.client_id);
   }
   res.json({ tracks: rows });
+});
+
+// roster: real artists (from contributors) + labels (from releases)
+app.get('/api/roster', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  const W = cid ? 'AND r.client_id = ' + cid : '';
+  const artists = db.prepare(`SELECT co.name, COUNT(DISTINCT r.id) AS releases
+    FROM contributors co JOIN tracks t ON t.id = co.track_id JOIN releases r ON r.id = t.release_id
+    WHERE co.role LIKE '%Main%' ${W} GROUP BY co.name ORDER BY releases DESC, co.name`).all();
+  const labels = db.prepare(`SELECT r.label AS name, COUNT(*) AS releases
+    FROM releases r WHERE r.label IS NOT NULL AND r.label != ''
+    ${cid ? 'AND r.client_id = ' + cid : ''} GROUP BY r.label ORDER BY releases DESC`).all();
+  res.json({ artists, labels });
 });
 
 app.get('/api/clients-list', auth, adminOnly, (req, res) => {

@@ -5,7 +5,10 @@
   const { chip, esc, initials } = window.SoutUI;
   const API = window.SoutAPI;
   function art(l) { return `<div class="art">${esc(l)}</div>`; }
-  function thumb(t) { return art(initials(t)); }
+  function thumb(t, artwork) {
+    if (artwork) return `<img class="art" src="/uploads/${esc(artwork)}" style="object-fit:cover" onerror="this.outerHTML='<div class=&quot;art&quot;>${esc(initials(t))}</div>'">`;
+    return art(initials(t));
+  }
   const CAPS = ['upload_releases', 'edit_releases', 'deliver_releases', 'metadata_edits', 'takedowns', 'financial_access', 'rights_access', 'analytics_access', 'team_access'];
   const CAP_LABELS = { upload_releases: 'Upload releases', edit_releases: 'Edit releases', deliver_releases: 'Deliver releases', metadata_edits: 'Metadata edits', takedowns: 'Takedowns', financial_access: 'Financial access', rights_access: 'Rights access', analytics_access: 'Analytics access', team_access: 'Team access' };
   const ROLES = ['admin', 'client', 'label_manager', 'operations', 'finance', 'analyst'];
@@ -20,7 +23,7 @@
     if (!tbody) return;
     tbody.innerHTML = queue.length ? queue.map(r => `<tr>
       <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-      <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)} · ${esc(r.client_name || '')}</div></div></div></td>
+      <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title, r.artwork)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)} · ${esc(r.client_name || '')}</div></div></div></td>
       <td>${chip(r.status)}</td><td><span class="chip gray">${esc(r.type)}</span></td>
       <td style="text-align:right">
         <button class="btn btn-ghost btn-sm" onclick="SoutAdmin.viewRelease(${r.id})">Details</button>
@@ -225,11 +228,24 @@
       // Pending review / Awaiting delivery / Open rights / Payouts / Active users / Failed
       if (vals[0]) vals[0].textContent = cnt(['submitted', 'review']);
       if (vals[1]) vals[1].textContent = cnt('approved');
+      try {
+        const ri = (await API.call('/rights/issues')).issues || [];
+        if (vals[2]) vals[2].textContent = ri.filter(i => ['new', 'answered'].includes(i.status)).length;
+      } catch { }
+      try {
+        const cl = (await API.call('/claims')).claims || [];
+        if (vals[3]) { vals[3].textContent = cl.filter(x => x.status === 'pending').length; const lbl = vals[3].parentElement.querySelector('.lbl'); if (lbl) lbl.textContent = 'Claim requests pending'; }
+      } catch { }
+      try {
+        const us = (await API.call('/admin/users')).users || [];
+        if (vals[4]) vals[4].textContent = us.filter(u => u.status === 'active').length;
+      } catch { }
+      if (vals[5]) { vals[5].textContent = cnt('rejected'); const lbl = vals[5].parentElement.querySelector('.lbl'); if (lbl) lbl.textContent = 'Rejected'; }
       // review queue preview table
       const tbody = page.querySelector('tbody');
       if (tbody) {
         const q = rels.filter(r => ['submitted', 'review'].includes(r.status)).slice(0, 5);
-        tbody.innerHTML = q.length ? q.map(r => `<tr><td><div class="row-flex">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div></div></div></td><td>${chip(r.status)}</td><td>${chip('review')}</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="go('admin_moderation')">Review</button></td></tr>`).join('') : `<tr><td colspan="4"><div class="empty"><h4>Queue empty</h4></div></td></tr>`;
+        tbody.innerHTML = q.length ? q.map(r => `<tr><td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title, r.artwork)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div></div></div></td><td>${chip(r.status)}</td><td>${chip('review')}</td><td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="go('admin_moderation')">Review</button></td></tr>`).join('') : `<tr><td colspan="4"><div class="empty"><h4>Queue empty</h4></div></td></tr>`;
       }
     } catch { }
   }
@@ -256,7 +272,7 @@
           <td>${audio}</td></tr>`;
       }).join('');
       const artBlock = artSrc
-        ? `<img src="${artSrc}" onclick="SoutAdmin.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge">`
+        ? `<img src="${artSrc}" onclick="SoutAdmin.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="cell-sub" style="color:var(--accent)" href="${artSrc}" download>Download JPG</a></div>`
         : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div><div class="cell-sub" style="margin-top:6px;color:var(--red)">No artwork</div>`;
       document.getElementById('arBody').innerHTML = `
         <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:14px">
@@ -558,7 +574,7 @@
       if (!rows.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><h4>${this._view === 'approved' ? 'Nothing waiting for delivery' : 'Nothing delivered yet'}</h4><div class="cell-sub">${this._view === 'approved' ? 'Approve releases from the Review Queue and they collect here.' : ''}</div></div></td></tr>`; this.selCount(); return; }
       tbody.innerHTML = rows.map(r => `<tr>
         <td>${this._view === 'approved' ? `<input type="checkbox" class="distSel" value="${r.id}" onchange="SoutDist.selCount()">` : ''}</td>
-        <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist || '')}</div></div></div></td>
+        <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title, r.artwork)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist || '')}</div></div></div></td>
         <td>${esc(r.client_name || '')}</td>
         <td><span class="chip gray">${esc(r.type)}</span></td>
         <td class="cell-mono">${esc(r.upc || '—')}</td>

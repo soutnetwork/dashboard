@@ -502,34 +502,14 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
     </div>
 <div class="page" data-page="artists">
-      <div class="page-head"><div><div class="page-title">Artists & Labels</div><div class="page-sub">Manage roster and rights holders</div></div>
-      <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Artist</button></div>
-      <div class="tabs"><div class="tab active">Artists</div><div class="tab">Labels</div><div class="tab">Contributors</div></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px"><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">YG</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">Yara Gamal</div><div class="cell-sub">ELshamrany</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">18 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">2.4M streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">AM</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">Ahmed ELmndrawy</div><div class="cell-sub">Injaz Teqani</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">12 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">1.8M streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">PL</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">Planko</div><div class="cell-sub">ELshamrany</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">24 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">5.1M streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">MS</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">El Monshed Salah</div><div class="cell-sub">ELshamrany</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">31 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">3.2M streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">DH</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">Dalia Helal</div><div class="cell-sub">ELshamrany</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">9 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">890K streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div><div class="card card-pad" style="display:flex;align-items:center;gap:14px">
-        <div class="art" style="width:54px;height:54px;font-size:.9rem;border-radius:50%">BH</div>
-        <div style="flex:1"><div class="cell-main" style="font-size:.98rem">Bilal El Hamawy</div><div class="cell-sub">Injaz Teqani</div>
-        <div style="display:flex;gap:14px;margin-top:8px"><span class="cell-mono" style="font-size:.74rem">15 releases</span><span class="cell-mono" style="font-size:.74rem;color:var(--green)">1.1M streams</span></div></div>
-        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg></div></div>
+      <div class="page-head"><div><div class="page-title">Artists &amp; Labels</div><div class="page-sub">Your roster — built automatically from your releases</div></div></div>
+      <div class="tabs">
+        <div class="tab active" onclick="rosterTab(this,'artists')">Artists</div>
+        <div class="tab" onclick="rosterTab(this,'labels')">Labels</div>
+      </div>
+      <div id="rosterGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px">
+        <div class="card card-pad" style="grid-column:1/-1"><div class="empty"><h4>Loading…</h4></div></div>
+      </div>
     </div>
 <div class="page" data-page="newrelease">
       <div class="page-head"><div><div class="page-title">New Release</div><div class="page-sub">Single-page release builder · all details on one screen</div></div>
@@ -836,19 +816,26 @@ svg[stroke="currentColor"]{stroke-width:2}
         <td><span class="chip amber">Pending</span></td><td><button class="btn btn-ghost btn-sm">Manage</button></td></tr></tbody></table></div></div>
     </div>
 <div class="page" data-page="settings">
-      <div class="page-head"><div><div class="page-title">Settings</div><div class="page-sub">Account, team and distribution preferences</div></div></div>
-      <div class="tabs"><div class="tab active">Account</div><div class="tab">Team</div><div class="tab">Stores</div><div class="tab">Billing</div></div>
-      <div class="card card-pad" style="max-width:640px">
+      <div class="page-head"><div><div class="page-title">Settings</div><div class="page-sub">Your account &amp; security</div></div></div>
+      <div class="card card-pad" style="max-width:640px;margin-bottom:18px">
+        <div class="sec-title" style="margin-bottom:12px">Account</div>
         <div class="fgrid">
-          <div class="field"><label>Company name</label><input class="input" value="Sout Network"></div>
-          <div class="field"><label>Client number</label><input class="input" value="1055037" disabled></div>
-          <div class="field"><label>Contact email</label><input class="input" value="support@soutnetwork.com"></div>
-          <div class="field"><label>Country</label><select class="input"><option>Egypt</option><option>UAE</option><option>Saudi Arabia</option></select></div>
-          <div class="field full"><label>Default label</label><input class="input" value="Sout Network"></div>
+          <div class="field"><label>Name</label><input class="input" id="stName" disabled></div>
+          <div class="field"><label>Email</label><input class="input" id="stEmail" disabled></div>
         </div>
-        <div style="margin-top:20px"><button class="btn btn-primary" onclick="toast('Settings saved')">Save changes</button></div>
+        <div class="cell-sub" style="margin-top:8px">To change your account details, contact the Sout Network team.</div>
       </div>
-    </div></div></div></div>
+      <div class="card card-pad" style="max-width:640px">
+        <div class="sec-title" style="margin-bottom:12px">Change password</div>
+        <div class="fgrid">
+          <div class="field full"><label>Current password</label><input class="input" id="spCurrent" type="password" autocomplete="current-password"></div>
+          <div class="field"><label>New password (8+ characters)</label><input class="input" id="spNew" type="password" autocomplete="new-password"></div>
+          <div class="field"><label>Confirm new password</label><input class="input" id="spConfirm" type="password" autocomplete="new-password"></div>
+        </div>
+        <div style="margin-top:18px"><button class="btn btn-primary" onclick="SoutSettings.changePw()">Change password</button></div>
+      </div>
+    </div>
+</div></div></div>
 <div class="modal-bg" id="releaseModal">
   <div class="modal" style="max-width:760px">
     <div class="modal-head"><h3 id="rmTitle">Release</h3><button class="icon-btn" onclick="closeModal('releaseModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
