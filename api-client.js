@@ -37,6 +37,11 @@
     let me;
     try { me = await API.call('/me'); } catch { return; }
     const u = me.user;
+    // ---- role guards ----
+    const onAdminPage = window.location.pathname.indexOf('admin.html') !== -1;
+    if (onAdminPage && u.role !== 'admin') { window.location.href = '/dashboard.html'; return; }
+    const adminLink = document.getElementById('adminLink');
+    if (adminLink && u.role === 'admin') adminLink.style.display = '';
     // set user name/role in topbar if elements exist
     document.querySelectorAll('.tb-user .un').forEach(el => el.textContent = u.name || 'User');
     document.querySelectorAll('.tb-user .uc').forEach(el => el.textContent = u.role === 'admin' ? 'Administrator' : ('Client #' + (u.client_id || '—')));

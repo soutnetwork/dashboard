@@ -41,6 +41,14 @@ app.use((req, res, next) => {
   }
   next();
 });
+// admin.html is served ONLY to logged-in admins (server-side protection)
+app.get('/admin.html', (req, res, next) => {
+  try {
+    const u = jwt.verify(req.cookies.token, JWT_SECRET);
+    if (u.role === 'admin') return next();
+  } catch { }
+  res.redirect('/login.html');
+});
 app.use(express.static(__dirname, { dotfiles: 'deny', index: 'login.html' }));
 
 // ---------- helpers ----------
