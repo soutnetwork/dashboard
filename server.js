@@ -661,12 +661,14 @@ function setSetting(k, v) {
   db.prepare(`INSERT INTO settings (key, value) VALUES (?, ?)
     ON CONFLICT(key) DO UPDATE SET value = excluded.value`).run(k, String(v));
 }
-function upcCheckDigit(d11) {
+function ean13CheckDigit(d12) { // EAN-13 check digit
   let sum = 0;
-  for (let i = 0; i < 11; i++) { const n = Number(d11[i]); sum += (i % 2 === 0) ? n * 3 : n; }
+  for (let i = 0; i < 12; i++) { const n = Number(d12[i]); sum += (i % 2 === 0) ? n : n * 3; }
   return String((10 - (sum % 10)) % 10);
 }
-const UPC_PREFIX = '82997'; // Sout Network internal prefix (5 digits) + 6-digit counter + check digit = 12
+// Sout Network series: 62298 (622 GS1 Egypt range + high unallocated block) + 7-digit counter + check digit = 13-digit EAN.
+// Changeable anytime via settings key 'upc_prefix'.
+function upcPrefix() { return (getSetting('upc_prefix') || '62298').replace(/[^0-9]/g, '') || '62298'; }
 function codeExists(code, kind) {
   if (db.prepare('SELECT 1 FROM codes_registry WHERE code = ?').get(code)) return true;
   if (kind === 'upc') return !!db.prepare('SELECT 1 FROM releases WHERE upc = ?').get(code);
@@ -678,11 +680,13 @@ function registerCode(code, kind, meta) {
     meta.note || null, meta.release_id || null, meta.track_id || null, meta.assigned_to || null, meta.created_by || 'system');
 }
 function nextUPC(meta) {
+  const prefix = upcPrefix();
+  const pad = 12 - prefix.length; // body = 12 digits, then EAN-13 check digit → 13 total
   for (let guard = 0; guard < 100000; guard++) {
     const seq = Number(getSetting('upc_seq') || '0') + 1;
     setSetting('upc_seq', seq);
-    const body = UPC_PREFIX + String(seq).padStart(6, '0');
-    const code = body + upcCheckDigit(body);
+    const body = prefix + String(seq).padStart(pad, '0');
+    const code = body + ean13CheckDigit(body);
     if (!codeExists(code, 'upc')) { registerCode(code, 'upc', meta || {}); return code; }
   }
   throw new Error('UPC generator exhausted');
