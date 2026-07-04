@@ -326,7 +326,7 @@ svg[stroke="currentColor"]{stroke-width:2}
     <div class="sb-group"><div class="sb-label">Operations</div>
       <div class="sb-item" data-page="admin_overview"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg><span>Overview</span></div>
       <div class="sb-item" data-page="admin_moderation"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg><span>Review Queue</span><span class="badge">12</span></div>
-      <div class="sb-item" data-page="admin_distribution"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span>Distribution</span></div>
+      <div class="sb-item" data-page="admin_distribution"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span>Distribution</span><span class="badge" id="aDistBadge" style="display:none">0</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">Accounts</div>
       <div class="sb-item" data-page="admin_applications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/><path d="M9 15l2 2 4-4"/></svg><span>Applications</span><span class="badge" id="aAppsBadge" style="display:none">0</span></div>
@@ -400,19 +400,26 @@ svg[stroke="currentColor"]{stroke-width:2}
         <td><div class="row-flex" style="gap:5px"><span class="chip gray">Metadata</span><span class="chip gray">Artwork</span><span class="chip gray">Audio</span><span class="chip gray">Copyright</span><span class="chip gray">AI</span><span class="chip gray">Dupe</span></div></td>
         <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="toast('Release approved')">Approve</button> <button class="btn btn-danger btn-sm" onclick="toast('Release rejected')">Reject</button></td></tr></tbody></table></div></div></div>
 <div class="page" data-page="admin_distribution">
-      <div class="page-head"><div><div class="page-title">Distribution</div><div class="page-sub">Deliver, re-deliver and manage store / territory exclusions</div></div>
-      <div style="display:flex;gap:8px"><button class="btn btn-ghost" onclick="toast('Territory rules')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg> Territory Exclusions</button><button class="btn btn-primary" onclick="toast('Bulk deliver started')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Deliver Selected</button></div></div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th style="width:36px"><div class="cbx" onclick="toggleAll(this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></th><th>Release</th><th>Store</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td>Spotify</td><td><span class="chip green">Delivered</span></td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">TA</div><div class="cell-main">Tashat Molokhya</div></div></td>
-        <td>YouTube Music</td><td><span class="chip amber">Processing</span></td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">KA</div><div class="cell-main">Kan Wedy Naltaqy</div></div></td>
-        <td>TikTok</td><td><span class="chip green">Delivered</span></td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
-        <td>Deezer</td><td><span class="chip gray">Queued</span></td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr><tr><td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">El Mafrod</div></div></td>
-        <td>Anghami</td><td><span class="chip red">Failed</span></td>
-        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="toast('Re-delivering')">Re-deliver</button> <button class="btn btn-ghost btn-sm" onclick="toast('Store excluded')">Exclude Store</button></td></tr></tbody></table></div></div></div>
+      <div class="page-head"><div><div class="page-title">Distribution</div><div class="page-sub">Approved releases collected here, ready for bulk export &amp; delivery</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-primary" onclick="SoutDist.exportCSV()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export Approved (CSV)</button>
+      </div></div>
+      <div class="tabs">
+        <div class="tab active" onclick="SoutDist.tab(this,'approved')">Ready to deliver <span id="distReadyCount"></span></div>
+        <div class="tab" onclick="SoutDist.tab(this,'delivered')">Delivered / Live</div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar" id="distBulkBar">
+          <span class="cell-sub" id="distSelCount">0 selected</span>
+          <button class="btn btn-primary btn-sm" onclick="SoutDist.bulk('delivered')">Mark selected Delivered</button>
+          <button class="btn btn-ghost btn-sm" onclick="SoutDist.bulk('live')">Mark selected Live</button>
+        </div>
+        <div class="table-scroll"><table>
+          <thead><tr><th style="width:36px"><input type="checkbox" onchange="SoutDist.selAll(this)"></th><th>Release</th><th>Client</th><th>Type</th><th>UPC</th><th>Digital date</th><th>Status</th><th></th></tr></thead>
+          <tbody id="distBody"><tr><td colspan="8"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
 <div class="page" data-page="admin_applications">
       <div class="page-head"><div><div class="page-title">Account Applications</div><div class="page-sub">Review applications — approving creates the account and emails the login details</div></div></div>
       <div class="table-wrap"><div class="table-scroll"><table>
@@ -517,6 +524,14 @@ svg[stroke="currentColor"]{stroke-width:2}
         </div>
       </div>
     </div>
+
+<div class="modal-bg" id="askModal">
+  <div class="modal" style="max-width:520px">
+    <div class="modal-head"><h3 id="akTitle">Confirm</h3><button class="icon-btn" onclick="closeModal('askModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="akBody"></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('askModal')">Cancel</button><button class="btn btn-primary" id="akOk">OK</button></div>
+  </div>
+</div>
 
 <div class="modal-bg" id="aRelModal">
   <div class="modal" style="max-width:800px">

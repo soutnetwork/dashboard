@@ -293,34 +293,30 @@
       try { await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status, note } }); toast && toast('Release ' + status); await loadModeration(); await loadAdminOverview(); }
       catch (e) { toast && toast(e.message); }
     },
-    reject(id) { const note = prompt('Rejection reason:'); if (note) this.setStatus(id, 'rejected', note); },
-    correction(id) { const note = prompt('What needs correction?'); if (note) this.setStatus(id, 'correction', note); },
-    async resetPw(id) { const p = prompt('New password (8+ chars):'); if (!p) return; try { await API.call('/admin/users/' + id + '/reset-password', { method: 'POST', body: { password: p } }); toast && toast('Password reset'); } catch (e) { toast && toast(e.message); } },
+    reject(id) { ask('Reject release', [{ id: 'note', label: 'Rejection reason (the client will see this)', type: 'textarea' }], 'Reject', v => { if (!v.note.trim()) { toast && toast('Write the reason'); return; } closeModal('askModal'); this.setStatus(id, 'rejected', v.note.trim()); }); },
+    correction(id) { ask('Request correction', [{ id: 'note', label: 'What needs correction? (the client will see this)', type: 'textarea' }], 'Send', v => { if (!v.note.trim()) { toast && toast('Write what needs correction'); return; } closeModal('askModal'); this.setStatus(id, 'correction', v.note.trim()); }); },
+    resetPw(id) { ask('Reset password', [{ id: 'pw', label: 'New password (8+ characters)', type: 'text' }], 'Reset', async v => { if (!v.pw || v.pw.length < 8) { toast && toast('8+ characters required'); return; } try { await API.call('/admin/users/' + id + '/reset-password', { method: 'POST', body: { password: v.pw } }); closeModal('askModal'); toast && toast('Password reset'); } catch (e) { toast && toast(e.message); } }); },
     async toggleUser(id) { try { const r = await API.call('/admin/users/' + id + '/disable', { method: 'POST' }); toast && toast('User ' + r.status); await loadUsers(); } catch (e) { toast && toast(e.message); } },
     async createUser() {
-      const name = prompt('Full name:'); if (!name) return;
-      const email = prompt('Email:'); if (!email) return;
-      const password = prompt('Password (8+ chars):'); if (!password) return;
-      const role = prompt('Role (admin/client/label_manager/operations/finance/analyst):', 'client') || 'client';
-      let client_id = null;
-      if (role !== 'admin') { const cid = prompt('Client ID (leave blank if none):'); client_id = cid ? Number(cid) : null; }
-      try { await API.call('/admin/users', { method: 'POST', body: { name, email, password, role, client_id } }); toast && toast('User created'); await loadUsers(); } catch (e) { toast && toast(e.message); }
+      let clients = []; try { clients = (await API.call('/clients-list')).clients || []; } catch { }
+      const roleOpts = ['client', 'admin', 'label_manager', 'operations', 'finance', 'analyst'].map(r => ({ v: r, l: r }));
+      const clientOpts = [{ v: '', l: '— none —' }].concat(clients.map(cl => ({ v: String(cl.id), l: cl.name })));
+      ask('Create user', [
+        { id: 'name', label: 'Full name' },
+        { id: 'email', label: 'Email' },
+        { id: 'pw', label: 'Password (8+ characters)' },
+        { id: 'role', label: 'Role', type: 'select', options: roleOpts, value: 'client' },
+        { id: 'cid', label: 'Client account', type: 'select', options: clientOpts }
+      ], 'Create', async v => {
+        if (!v.name.trim() || !v.email.trim() || v.pw.length < 8) { toast && toast('Name, email and 8+ char password required'); return; }
+        try { await API.call('/admin/users', { method: 'POST', body: { name: v.name.trim(), email: v.email.trim(), password: v.pw, role: v.role, client_id: v.cid ? Number(v.cid) : null } }); closeModal('askModal'); toast && toast('User created'); await loadUsers(); } catch (e) { toast && toast(e.message); }
+      });
     },
-    async editUser(id, role) {
-      const newRole = prompt('New role (admin/client/label_manager/operations/finance/analyst):', role); if (!newRole) return;
-      try { await API.call('/admin/users/' + id, { method: 'PUT', body: { role: newRole } }); toast && toast('User updated'); await loadUsers(); } catch (e) { toast && toast(e.message); }
-    },
-    async createClient() {
-      const name = prompt('Client / label name:'); if (!name) return;
-      const plan = prompt('Plan:', 'Label') || 'Label';
-      try { await API.call('/admin/clients', { method: 'POST', body: { name, plan } }); toast && toast('Client created'); await loadClients(); } catch (e) { toast && toast(e.message); }
-    },
-    async editClient(id) {
-      const name = prompt('New client name (blank = keep):');
-      const plan = prompt('New plan (blank = keep):');
-      const body = {}; if (name) body.name = name; if (plan) body.plan = plan;
-      if (!Object.keys(body).length) return;
-      try { await API.call('/admin/clients/' + id, { method: 'PUT', body }); toast && toast('Client updated'); await loadClients(); } catch (e) { toast && toast(e.message); }
+    editUser(id, role) {
+      const roleOpts = ['client', 'admin', 'label_manager', 'operations', 'finance', 'analyst'].map(r => ({ v: r, l: r }));
+      ask('Change role', [{ id: 'role', label: 'Role', type: 'select', options: roleOpts, value: role }], 'Save', async v => {
+        try { await API.call('/admin/users/' + id, { method: 'PUT', body: { role: v.role } }); closeModal('askModal'); toast && toast('User updated'); await loadUsers(); } catch (e) { toast && toast(e.message); }
+      });
     },
     async togglePerm(el, role, cap) {
       const on = !el.classList.contains('on'); el.classList.toggle('on', on);
@@ -440,15 +436,15 @@
       try { await API.call('/admin/rights/issues', { method: 'POST', body }); closeModal('aIssueModal'); toast && toast('Rights issue added — visible to the client now'); await this.load(); }
       catch (e) { toast && toast(e.message); }
     },
-    async resolve(id) {
-      const note = prompt('Resolution note (optional):') || '';
-      try { await API.call('/admin/rights/issues/' + id, { method: 'PUT', body: { status: 'resolved', resolution_note: note } }); toast && toast('Issue resolved'); await this.load(); }
-      catch (e) { toast && toast(e.message); }
+    resolve(id) {
+      ask('Resolve rights issue', [{ id: 'note', label: 'Resolution note (optional, visible to the client)', type: 'textarea' }], 'Resolve', async v => {
+        try { await API.call('/admin/rights/issues/' + id, { method: 'PUT', body: { status: 'resolved', resolution_note: v.note.trim() } }); closeModal('askModal'); toast && toast('Issue resolved'); await this.load(); } catch (e) { toast && toast(e.message); }
+      });
     },
-    async reject(id) {
-      const note = prompt('Rejection note (optional):') || '';
-      try { await API.call('/admin/rights/issues/' + id, { method: 'PUT', body: { status: 'rejected', resolution_note: note } }); toast && toast('Issue rejected'); await this.load(); }
-      catch (e) { toast && toast(e.message); }
+    reject(id) {
+      ask('Reject rights issue', [{ id: 'note', label: 'Rejection note (optional)', type: 'textarea' }], 'Reject', async v => {
+        try { await API.call('/admin/rights/issues/' + id, { method: 'PUT', body: { status: 'rejected', resolution_note: v.note.trim() } }); closeModal('askModal'); toast && toast('Issue rejected'); await this.load(); } catch (e) { toast && toast(e.message); }
+      });
     },
     async del(id) {
       if (!confirm('Delete this rights issue? Any auto-created release claim from it will be removed too.')) return;
@@ -456,10 +452,12 @@
       catch (e) { toast && toast(e.message); }
     },
     async claimSt(id, status) {
-      let admin_note;
-      if (status === 'rejected') { admin_note = prompt('Why is this request rejected?') || ''; }
-      try { await API.call('/admin/claims/' + id + '/status', { method: 'POST', body: { status, admin_note } }); toast && toast('Request ' + status.replace('_', ' ')); await this.load(); }
-      catch (e) { toast && toast(e.message); }
+      const doIt = async admin_note => {
+        try { await API.call('/admin/claims/' + id + '/status', { method: 'POST', body: { status, admin_note } }); closeModal('askModal'); toast && toast('Request ' + status.replace('_', ' ')); await this.load(); }
+        catch (e) { toast && toast(e.message); }
+      };
+      if (status === 'rejected') ask('Reject claim request', [{ id: 'note', label: 'Why is this request rejected? (visible to the client)', type: 'textarea' }], 'Reject', v => doIt(v.note.trim()));
+      else doIt(undefined);
     },
     exportCSV() { window.location.href = '/api/admin/rights/export.csv'; }
   };
@@ -504,23 +502,101 @@
         await this.load();
       } catch (e) { toast && toast(e.message); }
     },
-    async reject(id) {
-      const note = prompt('Rejection reason (optional, saved internally):') || '';
-      try { await API.call('/admin/applications/' + id + '/reject', { method: 'POST', body: { note } }); toast && toast('Application rejected'); await this.load(); }
-      catch (e) { toast && toast(e.message); }
+    reject(id) {
+      ask('Reject application', [{ id: 'note', label: 'Rejection reason (optional, saved internally)', type: 'textarea' }], 'Reject', async v => {
+        try { await API.call('/admin/applications/' + id + '/reject', { method: 'POST', body: { note: v.note.trim() } }); closeModal('askModal'); toast && toast('Application rejected'); await this.load(); } catch (e) { toast && toast(e.message); }
+      });
     }
   };
   window.SoutApps = SoutApps;
 
+
+  // ============================================================
+  // In-dashboard input modal — replaces every browser prompt()
+  // ============================================================
+  function ask(title, fields, okLabel, onOk) {
+    document.getElementById('akTitle').textContent = title;
+    document.getElementById('akBody').innerHTML = fields.map(f => {
+      if (f.type === 'select') return `<div class="field"><label>${esc(f.label)}</label><select class="ctrl" id="ak_${f.id}" style="width:100%">${f.options.map(o => `<option value="${esc(o.v)}"${o.v === f.value ? ' selected' : ''}>${esc(o.l)}</option>`).join('')}</select></div>`;
+      if (f.type === 'textarea') return `<div class="field"><label>${esc(f.label)}</label><textarea class="input" id="ak_${f.id}" style="min-height:90px;padding:10px 13px" placeholder="${esc(f.placeholder || '')}"></textarea></div>`;
+      return `<div class="field"><label>${esc(f.label)}</label><input class="input" id="ak_${f.id}" type="${f.type || 'text'}" placeholder="${esc(f.placeholder || '')}" value="${esc(f.value || '')}"></div>`;
+    }).join('');
+    const okBtn = document.getElementById('akOk');
+    okBtn.textContent = okLabel || 'OK';
+    okBtn.onclick = () => {
+      const vals = {}; fields.forEach(f => vals[f.id] = (document.getElementById('ak_' + f.id) || {}).value || '');
+      onOk(vals);
+    };
+    openModal('askModal');
+    setTimeout(() => { const first = document.querySelector('#akBody input, #akBody textarea, #akBody select'); if (first) first.focus(); }, 60);
+  }
+
+  // ============================================================
+  // DISTRIBUTION — approved releases collected for bulk export
+  // ============================================================
+  const SoutDist = {
+    _view: 'approved', _rows: [],
+    async load() {
+      const d = await API.call('/releases');
+      const all = d.releases || [];
+      const approved = all.filter(r => r.status === 'approved');
+      const badge = document.getElementById('aDistBadge');
+      if (badge) { badge.textContent = approved.length; badge.style.display = approved.length ? '' : 'none'; }
+      const cnt = document.getElementById('distReadyCount');
+      if (cnt) cnt.textContent = approved.length ? `(${approved.length})` : '';
+      this._rows = this._view === 'approved' ? approved : all.filter(r => ['delivered', 'live'].includes(r.status));
+      this.render();
+    },
+    tab(el, v) {
+      el.parentElement.querySelectorAll('.tab').forEach(t => t.classList.remove('active')); el.classList.add('active');
+      this._view = v; this.load();
+      document.getElementById('distBulkBar').style.display = v === 'approved' ? '' : 'none';
+    },
+    render() {
+      const tbody = document.getElementById('distBody'); if (!tbody) return;
+      const rows = this._rows;
+      if (!rows.length) { tbody.innerHTML = `<tr><td colspan="8"><div class="empty"><h4>${this._view === 'approved' ? 'Nothing waiting for delivery' : 'Nothing delivered yet'}</h4><div class="cell-sub">${this._view === 'approved' ? 'Approve releases from the Review Queue and they collect here.' : ''}</div></div></td></tr>`; this.selCount(); return; }
+      tbody.innerHTML = rows.map(r => `<tr>
+        <td>${this._view === 'approved' ? `<input type="checkbox" class="distSel" value="${r.id}" onchange="SoutDist.selCount()">` : ''}</td>
+        <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist || '')}</div></div></div></td>
+        <td>${esc(r.client_name || '')}</td>
+        <td><span class="chip gray">${esc(r.type)}</span></td>
+        <td class="cell-mono">${esc(r.upc || '—')}</td>
+        <td class="cell-mono">${esc(r.digital_date || '—')}</td>
+        <td>${chip(r.status)}</td>
+        <td style="text-align:right;white-space:nowrap">
+          <button class="btn btn-ghost btn-sm" onclick="SoutAdmin.viewRelease(${r.id})">Details</button>
+          ${r.status === 'approved' ? `<button class="btn btn-primary btn-sm" onclick="SoutDist.mark(${r.id},'delivered')">Delivered</button>` : ''}
+          ${r.status === 'delivered' ? `<button class="btn btn-primary btn-sm" onclick="SoutDist.mark(${r.id},'live')">Mark Live</button>` : ''}
+        </td></tr>`).join('');
+      this.selCount();
+    },
+    selAll(cb) { document.querySelectorAll('.distSel').forEach(x => x.checked = cb.checked); this.selCount(); },
+    selCount() { const n = document.querySelectorAll('.distSel:checked').length; const el = document.getElementById('distSelCount'); if (el) el.textContent = n + ' selected'; },
+    async mark(id, status) {
+      try { await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status } }); toast && toast('Release marked ' + status + ' — the client sees it now'); await this.load(); }
+      catch (e) { toast && toast(e.message); }
+    },
+    async bulk(status) {
+      const ids = [...document.querySelectorAll('.distSel:checked')].map(x => Number(x.value));
+      if (!ids.length) { toast && toast('Select releases first'); return; }
+      for (const id of ids) { try { await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status } }); } catch (e) { toast && toast('#' + id + ': ' + e.message); } }
+      toast && toast(ids.length + ' release(s) marked ' + status);
+      await this.load();
+    },
+    exportCSV() { window.location.href = '/api/admin/export.csv?status=approved'; }
+  };
+  window.SoutDist = SoutDist;
+
   // ---------- router hook ----------
   window.SoutPage = {
     onReady() {
-      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load(); SoutApps.load();
+      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load(); SoutApps.load(); SoutDist.load();
       if (window.go && !window.__goWrapped) {
         const _go = window.go;
         window.go = function (p) {
           _go(p);
-          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load() }[p] || (() => { }))();
+          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load(), admin_distribution: () => SoutDist.load() }[p] || (() => { }))();
           // wire CSV export button on revenue/distribution pages
         };
         window.__goWrapped = true;

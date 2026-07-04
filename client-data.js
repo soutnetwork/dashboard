@@ -29,20 +29,29 @@
       xhr.send(fd);
     });
   }
-  // picker feedback (used by the builder markup)
+  // ---- eager uploads: files start uploading the moment they are picked ----
+  const STAGING = { pending: [] };
   window.artPicked = function (input) {
     const f = input.files[0]; if (!f) return;
     const nameEl = document.getElementById('nrArtName');
     if (!/\.jpe?g$/i.test(f.name)) { toast && toast('Artwork must be JPG or JPEG'); input.value = ''; if (nameEl) nameEl.textContent = 'JPG only · exactly 3000×3000 px · click to browse'; return; }
-    if (nameEl) nameEl.textContent = f.name + ' — will be checked (3000×3000) on save';
     const img = document.getElementById('nrArtPreview');
     if (img) { img.src = URL.createObjectURL(f); img.style.display = ''; }
+    window.__stagedArt = null;
+    const p = uploadFile('/stage/artwork', 'artwork', f, pct => { if (nameEl) nameEl.textContent = 'Uploading artwork… ' + pct + '%'; })
+      .then(r => { window.__stagedArt = r.file; if (nameEl) nameEl.textContent = f.name + ' — uploaded & checked ✓ (3000×3000)'; })
+      .catch(err => { input.value = ''; if (img) img.style.display = 'none'; if (nameEl) nameEl.textContent = 'JPG only · exactly 3000×3000 px · click to browse'; alert('Artwork not accepted:\n' + err.message); });
+    STAGING.pending.push(p);
   };
   window.audioPicked = function (input) {
     const f = input.files[0]; if (!f) return;
     const nameEl = input.parentElement.querySelector('.audioName');
     if (!/\.wav$/i.test(f.name)) { toast && toast('Audio must be a WAV file'); input.value = ''; if (nameEl) nameEl.textContent = 'WAV only · click to browse'; return; }
-    if (nameEl) nameEl.textContent = f.name + ' ✓';
+    input.dataset.staged = '';
+    const p = uploadFile('/stage/audio', 'audio', f, pct => { if (nameEl) nameEl.textContent = 'Uploading ' + f.name + '… ' + pct + '%'; })
+      .then(r => { input.dataset.staged = r.file; if (nameEl) nameEl.textContent = f.name + ' — uploaded ✓'; })
+      .catch(err => { input.value = ''; input.dataset.staged = ''; if (nameEl) nameEl.textContent = 'WAV only · click to browse'; alert('Audio not accepted:\n' + err.message); });
+    STAGING.pending.push(p);
   };
 
   // ============================================================
@@ -417,6 +426,7 @@
         });
         const audioInput = asset.querySelector('.audioFile');
         trackAudioFiles.push(audioInput && audioInput.files[0] ? audioInput.files[0] : null);
+        t.audio_staged = (audioInput && audioInput.dataset.staged) || undefined;
         tracks.push(t);
       });
 
@@ -462,6 +472,13 @@
       const setBtn = t => { if (btn) btn.textContent = t; };
       allBtns.forEach(b => b.disabled = true);
       try {
+        // 0) files started uploading the moment they were picked — just finish any still in flight
+        if (STAGING.pending.length) {
+          setBtn('Finishing file uploads…');
+          await Promise.allSettled(STAGING.pending);
+          STAGING.pending = [];
+        }
+        if (window.__stagedArt) body.artwork_staged = window.__stagedArt;
         // 1) save data (always as draft first)
         setBtn('Saving release…');
         let relId = window.__editId;
@@ -475,10 +492,10 @@
         const createdTracks = saved.tracks || [];
         toast && toast('Release data saved ✓ (#' + relId + ')');
 
-        // 2) artwork (server validates JPG + exact 3000×3000)
+        // 2) fallback: direct upload ONLY if a picked file wasn't staged (rare)
         const uploadErrors = [];
         const artInput = document.getElementById('nrArtFile');
-        if (artInput && artInput.files[0]) {
+        if (!window.__stagedArt && artInput && artInput.files[0]) {
           try {
             await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0], p => setBtn('Uploading artwork… ' + p + '%'));
             toast && toast('Artwork uploaded ✓');
@@ -487,7 +504,7 @@
         // 3) per-track WAV files (server validates real WAV)
         for (let i = 0; i < trackAudioFiles.length; i++) {
           const file = trackAudioFiles[i]; const trackRow = createdTracks[i];
-          if (file && trackRow) {
+          if (file && trackRow && !trackRow.audio_file) {
             try {
               await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file, p => setBtn('Uploading track ' + (i + 1) + ' audio… ' + p + '%'));
               toast && toast('Track ' + (i + 1) + ' audio uploaded ✓');
@@ -513,7 +530,7 @@
         } else {
           toast && toast('Saved as draft ✓');
         }
-        window.__editId = null; window.__hasArtwork = false;
+        window.__editId = null; window.__hasArtwork = false; window.__stagedArt = null;
         await loadReleases(); if (window.go) go('releases');
       } catch (err) { alert('Error: ' + err.message); }
       allBtns.forEach(b => b.disabled = false);

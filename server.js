@@ -155,11 +155,16 @@ app.post('/api/releases', auth, (req, res) => {
     b.genre || '', 'draft',
     b.digital_date || '', b.original_date || '', b.territories || 'Worldwide', b.stores || 'All');
   const relId = info.lastInsertRowid;
+  // attach pre-uploaded (staged) artwork
+  if (validStaged(b.artwork_staged, 'art', req)) {
+    db.prepare('UPDATE releases SET artwork = ? WHERE id = ?').run(b.artwork_staged, relId);
+  }
   // tracks
   (b.tracks || []).forEach((t, i) => {
-    const tInfo = db.prepare(`INSERT INTO tracks (release_id,title,c_line,p_line,isrc,version,lyrics_lang,content_type,production_year,track_no)
-      VALUES (?,?,?,?,?,?,?,?,?,?)`).run(relId, t.title || '', t.c_line || '', t.p_line || '', t.isrc || '',
-      t.version || 'Original', t.lyrics_lang || '', t.content_type || 'Not Explicit', t.production_year || '', i + 1);
+    const stagedAudio = validStaged(t.audio_staged, 'aud', req) ? t.audio_staged : null;
+    const tInfo = db.prepare(`INSERT INTO tracks (release_id,title,c_line,p_line,isrc,version,lyrics_lang,content_type,production_year,track_no,audio_file)
+      VALUES (?,?,?,?,?,?,?,?,?,?,?)`).run(relId, t.title || '', t.c_line || '', t.p_line || '', t.isrc || '',
+      t.version || 'Original', t.lyrics_lang || '', t.content_type || 'Not Explicit', t.production_year || '', i + 1, stagedAudio);
     const trackId = tInfo.lastInsertRowid;
     (t.contributors || []).forEach(c => {
       db.prepare(`INSERT INTO contributors (track_id,role,name,is_composer,is_author,spotify_url,apple_url) VALUES (?,?,?,?,?,?,?)`)
@@ -186,6 +191,9 @@ app.put('/api/releases/:id', auth, (req, res) => {
     .run(b.title ?? r.title, b.artist ?? r.artist, b.label ?? r.label, b.upc ?? r.upc, b.type ?? r.type,
       b.genre ?? r.genre, b.digital_date ?? r.digital_date, b.original_date ?? r.original_date,
       b.territories ?? r.territories, b.stores ?? r.stores, r.id);
+  if (validStaged(b.artwork_staged, 'art', req)) {
+    db.prepare('UPDATE releases SET artwork = ? WHERE id = ?').run(b.artwork_staged, r.id);
+  }
   audit(req, 'release.edit', r.title);
   res.json({ ok: true });
 });
@@ -420,6 +428,52 @@ app.post('/api/releases/:id/artwork', auth, artUpload.single('artwork'), (req, r
   db.prepare(`UPDATE releases SET artwork=?, updated_at=datetime('now') WHERE id=?`).run(req.file.filename, r.id);
   audit(req, 'release.artwork_upload', req.file.filename);
   res.json({ ok: true, file: req.file.filename });
+});
+
+// ============================================================
+// STAGED UPLOADS — start uploading the moment the client picks a file.
+// Files are validated immediately, stored with an owner-bound name,
+// then attached to the release when it is saved.
+// ============================================================
+function stageName(kind, req, ext) {
+  const owner = req.user.role === 'admin' ? 'adm' : String(req.user.client_id);
+  return `stg-${kind}-${owner}-${Date.now()}-${Math.floor(Math.random() * 1e6)}${ext}`;
+}
+function validStaged(name, kind, req) {
+  if (!name || typeof name !== 'string' || name.includes('/') || name.includes('..')) return false;
+  const owner = req.user.role === 'admin' ? 'adm' : String(req.user.client_id);
+  if (!name.startsWith(`stg-${kind}-${owner}-`)) return false;
+  return fs.existsSync(path.join(__dirname, 'uploads', name));
+}
+
+app.post('/api/stage/artwork', auth, artUpload.single('artwork'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  if (ext !== '.jpg' && ext !== '.jpeg') { removeFile(req.file); return res.status(400).json({ error: 'Artwork must be JPG or JPEG. Other formats are not accepted.' }); }
+  let dims = null;
+  try { dims = jpegSize(fs.readFileSync(req.file.path)); } catch { }
+  if (!dims) { removeFile(req.file); return res.status(400).json({ error: 'Invalid JPG file.' }); }
+  if (dims.width !== 3000 || dims.height !== 3000) {
+    removeFile(req.file);
+    return res.status(400).json({ error: `Artwork must be exactly 3000x3000. Your image is ${dims.width}x${dims.height}.` });
+  }
+  const newName = stageName('art', req, '.jpg');
+  fs.renameSync(req.file.path, path.join(__dirname, 'uploads', newName));
+  res.json({ ok: true, file: newName });
+});
+
+app.post('/api/stage/audio', auth, upload.single('audio'), (req, res) => {
+  if (!req.file) return res.status(400).json({ error: 'No file uploaded' });
+  const ext = path.extname(req.file.originalname).toLowerCase();
+  const head = Buffer.alloc(12);
+  try { const fd = fs.openSync(req.file.path, 'r'); fs.readSync(fd, head, 0, 12, 0); fs.closeSync(fd); } catch { }
+  if (ext !== '.wav' || !isWav(head)) {
+    removeFile(req.file);
+    return res.status(400).json({ error: 'Audio must be a WAV file. Other formats are not accepted.' });
+  }
+  const newName = stageName('aud', req, '.wav');
+  fs.renameSync(req.file.path, path.join(__dirname, 'uploads', newName));
+  res.json({ ok: true, file: newName });
 });
 
 // ============================================================
