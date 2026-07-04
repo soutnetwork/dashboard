@@ -344,6 +344,7 @@ svg[stroke="currentColor"]{stroke-width:2}
       <div class="sb-item" data-page="admin_tax"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg><span>Statements & Tax</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">System</div>
+      <div class="sb-item" data-page="admin_codes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h1M4 12h1M4 17h1M8 7h12M8 12h12M8 17h12"/></svg><span>Codes (UPC/ISRC)</span></div>
       <div class="sb-item" data-page="admin_audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Audit Logs</span></div>
       <div class="sb-item" data-page="admin_settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.7 1.6 1.6 0 01-3.2 0 1.6 1.6 0 00-2.7-.7l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-.7-2.7 1.6 1.6 0 010-3.2 1.6 1.6 0 00.7-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 002.7-.7 1.6 1.6 0 013.2 0 1.6 1.6 0 002.7.7l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00.7 2.7 1.6 1.6 0 010 3.2 1.6 1.6 0 00-1 .9z"/></svg><span>Settings</span></div>
     </div>
@@ -603,6 +604,54 @@ svg[stroke="currentColor"]{stroke-width:2}
       <tr><td class="cell-main">ELshamrany</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
       <tr><td class="cell-main">Injaz Teqani</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
       </tbody></table></div></div></div>
+<div class="page" data-page="admin_codes">
+      <div class="page-head"><div><div class="page-title">Codes Registry — UPC &amp; ISRC</div><div class="page-sub">One ledger for every code — dashboard &amp; external. Same counters, zero collisions.</div></div>
+      <div style="display:flex;gap:8px">
+        <button class="btn btn-ghost" onclick="window.location.href='/api/admin/codes/export.csv'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export All</button>
+        <button class="btn btn-primary" onclick="SoutCodes.openGen()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Generate External Codes</button>
+      </div></div>
+      <div class="stat-grid">
+        <div class="stat"><div class="lbl">UPCs issued</div><div class="val" id="cdUpc">—</div></div>
+        <div class="stat"><div class="lbl">ISRCs issued</div><div class="val" id="cdIsrc">—</div></div>
+        <div class="stat"><div class="lbl">External codes</div><div class="val" id="cdExt">—</div></div>
+        <div class="stat"><div class="lbl">Next in sequence</div><div class="val" id="cdNext" style="font-size:.95rem">—</div></div>
+      </div>
+      <div class="card card-pad" style="margin-bottom:18px">
+        <div class="sec-title" style="margin-bottom:10px">Check a code</div>
+        <div class="row-flex" style="gap:8px">
+          <input class="input" id="cdCheckInput" placeholder="Paste any UPC or ISRC… e.g. 829970000014 or EGSUT2600001" style="max-width:420px" onkeydown="if(event.key==='Enter')SoutCodes.check()">
+          <button class="btn btn-primary" onclick="SoutCodes.check()">Check</button>
+        </div>
+        <div id="cdCheckResult" style="margin-top:10px"></div>
+      </div>
+      <div class="table-wrap">
+        <div class="table-toolbar">
+          <select class="ctrl" id="cdFltKind" onchange="SoutCodes.load()"><option value="">All types</option><option value="upc">UPC</option><option value="isrc">ISRC</option></select>
+          <select class="ctrl" id="cdFltSource" onchange="SoutCodes.load()"><option value="">All sources</option><option value="dashboard">Dashboard</option><option value="external">External</option></select>
+          <input class="input" id="cdSearch" placeholder="Search code / note / title…" style="max-width:260px" onkeydown="if(event.key==='Enter')SoutCodes.load()">
+        </div>
+        <div class="table-scroll"><table>
+          <thead><tr><th>Code</th><th>Type</th><th>Source</th><th>Assigned to</th><th>Note / Batch</th><th>By</th><th>Date</th></tr></thead>
+          <tbody id="cdBody"><tr><td colspan="7"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+        </table></div>
+      </div>
+    </div>
+
+<div class="modal-bg" id="genCodesModal">
+  <div class="modal" style="max-width:560px">
+    <div class="modal-head"><h3>Generate External Codes</h3><button class="icon-btn" onclick="closeModal('genCodesModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body">
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
+        <div class="field"><label>Type</label><select class="ctrl" id="gcKind" style="width:100%"><option value="upc">UPC</option><option value="isrc">ISRC</option></select></div>
+        <div class="field"><label>How many? (1–500)</label><input class="input" id="gcCount" type="number" value="10" min="1" max="500"></div>
+        <div class="field full" style="grid-column:1/-1"><label>Note (who is this batch for?)</label><input class="input" id="gcNote" placeholder="e.g. Tracker sheet — Ahmed's team"></div>
+      </div>
+      <div id="gcResult" style="margin-top:14px"></div>
+    </div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('genCodesModal')">Close</button><button class="btn btn-primary" id="gcGo" onclick="SoutCodes.generate()">Generate</button></div>
+  </div>
+</div>
+
 <div class="page" data-page="admin_audit">
       <div class="page-head"><div><div class="page-title">Audit Logs</div><div class="page-sub">Every action — who changed what and when</div></div>
       <div style="display:flex;gap:8px"><select class="ctrl"><option>All actions</option><option>release.*</option><option>delivery.*</option><option>user.*</option><option>payout.*</option></select><button class="btn btn-ghost" onclick="toast('Exporting logs')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button></div></div>
@@ -625,7 +674,7 @@ svg[stroke="currentColor"]{stroke-width:2}
 function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
-  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_applications:['Accounts','Applications'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
+  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_applications:['Accounts','Applications'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_codes:['System','Codes Registry'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
   var c=L[p]||['','']; document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
   document.querySelector('.content').scrollTop=0; clearSel(); if(window.innerWidth<=1024)closeSidebar();}
 document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>go(it.dataset.page)));

@@ -620,6 +620,88 @@
   };
   window.SoutDist = SoutDist;
 
+
+  // ============================================================
+  // CODES REGISTRY (UPC / ISRC)
+  // ============================================================
+  const SoutCodes = {
+    async load() {
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      const qs = new URLSearchParams();
+      if (v('cdFltKind')) qs.set('kind', v('cdFltKind'));
+      if (v('cdFltSource')) qs.set('source', v('cdFltSource'));
+      if (v('cdSearch')) qs.set('q', v('cdSearch'));
+      let d; try { d = await API.call('/admin/codes?' + qs.toString()); } catch (e) { toast && toast(e.message); return; }
+      const s = d.stats || {};
+      const set = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+      set('cdUpc', s.upc_total || 0); set('cdIsrc', s.isrc_total || 0); set('cdExt', s.external || 0);
+      set('cdNext', 'UPC #' + (s.next_upc_seq || 1) + ' · ISRC #' + (s.next_isrc_seq || 1));
+      const tbody = document.getElementById('cdBody'); if (!tbody) return;
+      const rows = d.codes || [];
+      if (!rows.length) { tbody.innerHTML = `<tr><td colspan="7"><div class="empty"><h4>No codes yet</h4><div class="cell-sub">Codes appear here automatically when releases are approved, or generate a batch for external use.</div></div></td></tr>`; return; }
+      tbody.innerHTML = rows.map(r => `<tr>
+        <td class="cell-mono" style="font-weight:600">${esc(r.code)}</td>
+        <td><span class="chip ${r.kind === 'upc' ? 'blue' : 'green'}">${r.kind.toUpperCase()}</span></td>
+        <td><span class="chip ${r.source === 'external' ? 'amber' : 'gray'}">${esc(r.source)}</span></td>
+        <td><div class="cell-main">${esc(r.assigned_to || r.release_title || '—')}</div>${r.client_name ? `<div class="cell-sub">${esc(r.client_name)}</div>` : ''}</td>
+        <td><div class="cell-sub">${esc(r.note || '')}</div>${r.batch_id ? `<a class="cell-sub cell-mono" style="color:var(--accent)" href="/api/admin/codes/export.csv?batch=${esc(r.batch_id)}">${esc(r.batch_id)} ⬇</a>` : ''}</td>
+        <td class="cell-sub">${esc((r.created_by || '').split('@')[0])}</td>
+        <td class="cell-mono">${esc((r.created_at || '').slice(0, 10))}</td></tr>`).join('');
+    },
+    openGen() {
+      document.getElementById('gcResult').innerHTML = '';
+      document.getElementById('gcNote').value = '';
+      openModal('genCodesModal');
+    },
+    async generate() {
+      const kind = document.getElementById('gcKind').value;
+      const count = Number(document.getElementById('gcCount').value) || 1;
+      const note = document.getElementById('gcNote').value.trim();
+      if (!note) { toast && toast('Write a note — who is this batch for?'); return; }
+      const btn = document.getElementById('gcGo'); btn.disabled = true; btn.textContent = 'Generating…';
+      try {
+        const r = await API.call('/admin/codes/generate', { method: 'POST', body: { kind, count, note } });
+        document.getElementById('gcResult').innerHTML = `
+          <div class="card card-pad" style="border-color:var(--accent)">
+            <div class="row-flex" style="justify-content:space-between;margin-bottom:8px">
+              <b>${r.codes.length} × ${kind.toUpperCase()} generated ✓</b>
+              <div class="row-flex" style="gap:6px">
+                <button class="btn btn-ghost btn-sm" onclick="navigator.clipboard.writeText(document.getElementById('gcList').textContent).then(()=>toast('Copied'))">Copy all</button>
+                <a class="btn btn-primary btn-sm" href="/api/admin/codes/export.csv?batch=${esc(r.batch_id)}">Download CSV</a>
+              </div>
+            </div>
+            <pre id="gcList" class="cell-mono" style="max-height:220px;overflow:auto;background:var(--surface-2);padding:10px;border-radius:10px;margin:0;font-size:.8rem">${r.codes.join('\n')}</pre>
+          </div>`;
+        toast && toast('Batch saved in the registry — collision-proof');
+        await this.load();
+      } catch (e) { toast && toast(e.message); }
+      btn.disabled = false; btn.textContent = 'Generate';
+    },
+    async check() {
+      const code = (document.getElementById('cdCheckInput').value || '').trim();
+      const out = document.getElementById('cdCheckResult');
+      if (!code) { out.innerHTML = ''; return; }
+      out.innerHTML = '<span class="cell-sub">Checking…</span>';
+      try {
+        const d = await API.call('/admin/codes/check?code=' + encodeURIComponent(code));
+        if (!d.found) {
+          out.innerHTML = `<div class="card card-pad" style="border-color:var(--line)"><span class="chip gray">Not ours</span> <span class="cell-sub" style="margin-right:8px">This code was never issued by our system and is not attached to any release here.</span></div>`;
+        } else {
+          const usage = d.assigned_to || d.release_title || (d.source === 'external' ? 'External batch — not attached to a release here' : '—');
+          out.innerHTML = `<div class="card card-pad" style="border-color:var(--accent)">
+            <div class="row-flex" style="gap:8px;flex-wrap:wrap">
+              <span class="chip green">Ours ✓</span>
+              <span class="chip ${d.source === 'external' ? 'amber' : 'blue'}">${esc(d.source || d.where)}</span>
+              <span class="cell-main">${esc(usage)}</span>
+              ${d.client_name ? `<span class="cell-sub">· ${esc(d.client_name)}</span>` : ''}
+              ${d.note ? `<span class="cell-sub">· ${esc(d.note)}</span>` : ''}
+            </div></div>`;
+        }
+      } catch (e) { out.innerHTML = `<span class="cell-sub" style="color:var(--red)">${esc(e.message)}</span>`; }
+    }
+  };
+  window.SoutCodes = SoutCodes;
+
   // ---------- router hook ----------
   window.SoutPage = {
     onReady() {
@@ -628,7 +710,7 @@
         const _go = window.go;
         window.go = function (p) {
           _go(p);
-          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load(), admin_distribution: () => SoutDist.load() }[p] || (() => { }))();
+          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load(), admin_distribution: () => SoutDist.load(), admin_codes: () => SoutCodes.load() }[p] || (() => { }))();
           // wire CSV export button on revenue/distribution pages
         };
         window.__goWrapped = true;

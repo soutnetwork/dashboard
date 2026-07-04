@@ -667,27 +667,35 @@ function upcCheckDigit(d11) {
   return String((10 - (sum % 10)) % 10);
 }
 const UPC_PREFIX = '82997'; // Sout Network internal prefix (5 digits) + 6-digit counter + check digit = 12
-function nextUPC() {
-  for (let guard = 0; guard < 1000; guard++) {
+function codeExists(code, kind) {
+  if (db.prepare('SELECT 1 FROM codes_registry WHERE code = ?').get(code)) return true;
+  if (kind === 'upc') return !!db.prepare('SELECT 1 FROM releases WHERE upc = ?').get(code);
+  return !!db.prepare('SELECT 1 FROM tracks WHERE UPPER(isrc) = ?').get(code);
+}
+function registerCode(code, kind, meta) {
+  db.prepare(`INSERT INTO codes_registry (code, kind, source, batch_id, note, release_id, track_id, assigned_to, created_by)
+    VALUES (?,?,?,?,?,?,?,?,?)`).run(code, kind, meta.source || 'dashboard', meta.batch_id || null,
+    meta.note || null, meta.release_id || null, meta.track_id || null, meta.assigned_to || null, meta.created_by || 'system');
+}
+function nextUPC(meta) {
+  for (let guard = 0; guard < 100000; guard++) {
     const seq = Number(getSetting('upc_seq') || '0') + 1;
     setSetting('upc_seq', seq);
     const body = UPC_PREFIX + String(seq).padStart(6, '0');
     const code = body + upcCheckDigit(body);
-    const exists = db.prepare('SELECT 1 FROM releases WHERE upc = ?').get(code);
-    if (!exists) return code;
+    if (!codeExists(code, 'upc')) { registerCode(code, 'upc', meta || {}); return code; }
   }
   throw new Error('UPC generator exhausted');
 }
-function nextISRC() {
+function nextISRC(meta) {
   const yy = String(new Date().getFullYear() % 100).padStart(2, '0');
   const key = 'isrc_seq_' + yy;
-  for (let guard = 0; guard < 1000; guard++) {
+  for (let guard = 0; guard < 100000; guard++) {
     const seq = Number(getSetting(key) || '0') + 1;
     if (seq > 99999) throw new Error('ISRC yearly capacity reached');
     setSetting(key, seq);
     const code = 'EGSUT' + yy + String(seq).padStart(5, '0');
-    const exists = db.prepare('SELECT 1 FROM tracks WHERE UPPER(isrc) = ?').get(code);
-    if (!exists) return code;
+    if (!codeExists(code, 'isrc')) { registerCode(code, 'isrc', meta || {}); return code; }
   }
   throw new Error('ISRC generator exhausted');
 }
@@ -697,7 +705,7 @@ function generateCodesFor(relId) {
   if (!r) throw new Error('Release not found');
   let upc = (r.upc || '').trim();
   if (!upc) {
-    upc = nextUPC();
+    upc = nextUPC({ source: 'dashboard', release_id: relId, assigned_to: r.title });
     db.prepare(`UPDATE releases SET upc = ?, updated_at = datetime('now') WHERE id = ?`).run(upc, relId);
   }
   // artwork → UPC.jpeg
@@ -718,7 +726,7 @@ function generateCodesFor(relId) {
   for (const t of tracks) {
     let isrc = (t.isrc || '').trim();
     if (!isrc) {
-      isrc = nextISRC();
+      isrc = nextISRC({ source: 'dashboard', release_id: relId, track_id: t.id, assigned_to: (r.title || '') + ' — ' + (t.title || '') });
       db.prepare('UPDATE tracks SET isrc = ? WHERE id = ?').run(isrc, t.id);
     }
     isrcs.push({ track_no: t.track_no, title: t.title, isrc });
@@ -736,6 +744,79 @@ function generateCodesFor(relId) {
   }
   return { upc, isrcs };
 }
+
+// ---------- CODES REGISTRY (admin) ----------
+// list latest codes with filters
+app.get('/api/admin/codes', auth, adminOnly, (req, res) => {
+  const kind = ['upc', 'isrc'].includes(req.query.kind) ? req.query.kind : null;
+  const source = ['dashboard', 'external'].includes(req.query.source) ? req.query.source : null;
+  const q = (req.query.q || '').trim();
+  let sql = `SELECT cr.*, r.title AS release_title, c.name AS client_name
+    FROM codes_registry cr
+    LEFT JOIN releases r ON r.id = cr.release_id
+    LEFT JOIN clients c ON c.id = r.client_id WHERE 1=1`;
+  const params = [];
+  if (kind) { sql += ' AND cr.kind = ?'; params.push(kind); }
+  if (source) { sql += ' AND cr.source = ?'; params.push(source); }
+  if (q) { sql += ' AND (cr.code LIKE ? OR cr.note LIKE ? OR cr.assigned_to LIKE ?)'; params.push('%' + q + '%', '%' + q + '%', '%' + q + '%'); }
+  sql += ' ORDER BY cr.id DESC LIMIT 1000';
+  const rows = db.prepare(sql).all(...params);
+  const stats = {
+    upc_total: db.prepare(`SELECT COUNT(*) AS n FROM codes_registry WHERE kind='upc'`).get().n,
+    isrc_total: db.prepare(`SELECT COUNT(*) AS n FROM codes_registry WHERE kind='isrc'`).get().n,
+    external: db.prepare(`SELECT COUNT(*) AS n FROM codes_registry WHERE source='external'`).get().n,
+    next_upc_seq: Number(getSetting('upc_seq') || '0') + 1,
+    next_isrc_seq: Number(getSetting('isrc_seq_' + String(new Date().getFullYear() % 100).padStart(2, '0')) || '0') + 1
+  };
+  res.json({ codes: rows, stats });
+});
+
+// generate a batch for EXTERNAL use (tracker sheets / manual team) — same counters, zero collision
+app.post('/api/admin/codes/generate', auth, adminOnly, (req, res) => {
+  const b = req.body || {};
+  const kind = b.kind === 'isrc' ? 'isrc' : 'upc';
+  const count = Math.max(1, Math.min(500, Number(b.count) || 1));
+  const note = (b.note || '').trim();
+  const batch_id = 'B' + Date.now();
+  const meta = { source: 'external', batch_id, note, created_by: req.user.email };
+  const codes = [];
+  try {
+    for (let i = 0; i < count; i++) codes.push(kind === 'upc' ? nextUPC(meta) : nextISRC(meta));
+  } catch (e) { return res.status(400).json({ error: e.message, codes }); }
+  audit(req, 'codes.batch', `${count} ${kind} — ${note || batch_id}`);
+  res.json({ ok: true, kind, batch_id, codes });
+});
+
+// check any code: is it ours? used where?
+app.get('/api/admin/codes/check', auth, adminOnly, (req, res) => {
+  const code = (req.query.code || '').trim().toUpperCase();
+  if (!code) return res.status(400).json({ error: 'Enter a code' });
+  const reg = db.prepare(`SELECT cr.*, r.title AS release_title, c.name AS client_name
+    FROM codes_registry cr LEFT JOIN releases r ON r.id = cr.release_id
+    LEFT JOIN clients c ON c.id = r.client_id WHERE UPPER(cr.code) = ?`).get(code);
+  if (reg) return res.json({ found: true, where: 'registry', ...reg });
+  const rel = db.prepare(`SELECT r.id, r.title, c.name AS client_name FROM releases r JOIN clients c ON c.id=r.client_id WHERE UPPER(r.upc) = ?`).get(code);
+  if (rel) return res.json({ found: true, where: 'release', release_title: rel.title, client_name: rel.client_name, source: 'manual' });
+  const trk = db.prepare(`SELECT t.title, r.title AS release_title, c.name AS client_name FROM tracks t JOIN releases r ON r.id=t.release_id JOIN clients c ON c.id=r.client_id WHERE UPPER(t.isrc) = ?`).get(code);
+  if (trk) return res.json({ found: true, where: 'track', assigned_to: trk.release_title + ' — ' + trk.title, client_name: trk.client_name, source: 'manual' });
+  res.json({ found: false });
+});
+
+// export registry (or one batch) as CSV for tracker sheets
+app.get('/api/admin/codes/export.csv', auth, adminOnly, (req, res) => {
+  let sql = `SELECT cr.*, r.title AS release_title, c.name AS client_name FROM codes_registry cr
+    LEFT JOIN releases r ON r.id = cr.release_id LEFT JOIN clients c ON c.id = r.client_id`;
+  const params = [];
+  if (req.query.batch) { sql += ' WHERE cr.batch_id = ?'; params.push(req.query.batch); }
+  sql += ' ORDER BY cr.id';
+  const rows = db.prepare(sql).all(...params);
+  const lines = ['Code,Type,Source,Batch,Note,Assigned To,Client,Created At'];
+  rows.forEach(r => lines.push([r.code, r.kind.toUpperCase(), r.source, r.batch_id, r.note, r.assigned_to || r.release_title, r.client_name, r.created_at].map(csvCell).join(',')));
+  audit(req, 'codes.export', `${rows.length} codes`);
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', `attachment; filename="sout-codes-${req.query.batch || 'all'}.csv"`);
+  res.send('\uFEFF' + lines.join('\n'));
+});
 
 // manual trigger (admin) — only fills what is missing, never overwrites
 app.post('/api/admin/releases/:id/generate-codes', auth, adminOnly, (req, res) => {
@@ -1087,6 +1168,28 @@ async function main() {
   // tiny idempotent migrations
   try { db.exec('ALTER TABLE releases ADD COLUMN artwork TEXT'); } catch { }
   try { db.exec('ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0'); } catch { }
+  db.exec(`CREATE TABLE IF NOT EXISTS codes_registry (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    code TEXT UNIQUE NOT NULL,
+    kind TEXT NOT NULL,                 -- upc | isrc
+    source TEXT NOT NULL,               -- dashboard | external
+    batch_id TEXT,
+    note TEXT,
+    release_id INTEGER,
+    track_id INTEGER,
+    assigned_to TEXT,
+    created_by TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
+  db.exec(`CREATE INDEX IF NOT EXISTS idx_codes_kind ON codes_registry (kind, source);`);
+  // backfill: register previously generated dashboard codes so the ledger is complete
+  try {
+    db.prepare(`INSERT OR IGNORE INTO codes_registry (code, kind, source, release_id, assigned_to, created_by)
+      SELECT upc, 'upc', 'dashboard', id, title, 'backfill' FROM releases WHERE upc LIKE '82997%'`).run();
+    db.prepare(`INSERT OR IGNORE INTO codes_registry (code, kind, source, track_id, release_id, assigned_to, created_by)
+      SELECT UPPER(t.isrc), 'isrc', 'dashboard', t.id, t.release_id, t.title, 'backfill'
+      FROM tracks t WHERE UPPER(t.isrc) LIKE 'EGSUT%'`).run();
+  } catch { }
   db.exec(`CREATE TABLE IF NOT EXISTS applications (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     company TEXT NOT NULL, name TEXT NOT NULL, email TEXT NOT NULL,
