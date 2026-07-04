@@ -134,7 +134,7 @@
 
   const PLAT_ICONS = {
     youtube: '<svg viewBox="0 0 24 24" fill="currentColor" style="color:#f00"><path d="M23 12s0-3.9-.5-5.6c-.3-1-1.1-1.8-2.1-2C18.6 4 12 4 12 4s-6.6 0-8.4.4c-1 .2-1.8 1-2.1 2C1 8.1 1 12 1 12s0 3.9.5 5.6c.3 1 1.1 1.8 2.1 2 1.8.4 8.4.4 8.4.4s6.6 0 8.4-.4c1-.2 1.8-1 2.1-2 .5-1.7.5-5.6.5-5.6zM9.8 15.5v-7l6.2 3.5-6.2 3.5z"/></svg>',
-    facebook: '<svg viewBox="0 0 24 24" fill="currentColor" style="color:#1877f2"><path d="M24 12a12 12 0 10-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0024 12z"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--fg-soft)"><path d="M24 12a12 12 0 10-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0024 12z"/></svg>',
     tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2h3.1c.2 1.8 1.3 3.4 2.9 4.2.9.5 1.9.7 2.9.7v3.2c-1.8 0-3.6-.6-5-1.6v7.3A6.4 6.4 0 019.9 22 6.4 6.4 0 013.5 15.6c0-3.5 2.9-6.4 6.4-6.4.4 0 .7 0 1.1.1v3.3c-.3-.1-.7-.2-1.1-.2a3.2 3.2 0 100 6.4c1.8 0 3.2-1.5 3.2-3.2V2z"/></svg>',
     other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>'
   };
