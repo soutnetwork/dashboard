@@ -518,6 +518,17 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
     </div>
 
+<div class="modal-bg" id="aRelModal">
+  <div class="modal" style="max-width:800px">
+    <div class="modal-head"><h3 id="arTitle">Release details</h3><button class="icon-btn" onclick="closeModal('aRelModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
+    <div class="modal-body" id="arBody"></div>
+    <div class="modal-foot" id="arFoot"><button class="btn btn-ghost" onclick="closeModal('aRelModal')">Close</button></div>
+  </div>
+</div>
+<div id="aLightbox" onclick="this.style.display='none'" style="display:none;position:fixed;inset:0;background:rgba(15,18,30,.88);z-index:300;place-items:center;cursor:zoom-out">
+  <img id="aLightboxImg" alt="" style="max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,.5)">
+</div>
+
 <div class="modal-bg" id="aIssueModal">
   <div class="modal" style="max-width:720px">
     <div class="modal-head"><h3>Add Rights Issue</h3><button class="icon-btn" onclick="closeModal('aIssueModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>

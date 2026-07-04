@@ -394,13 +394,13 @@
     async editRelease(id) { window.__editId = id; if (window.go) go('newrelease'); toast && toast('Loading release...'); await fillBuilder(id); },
 
     // ---------- collect the builder + save (create or edit) ----------
-    async saveRelease(status) {
+    // Flow: save as draft → upload files → then /submit (server verifies EVERYTHING is complete)
+    async saveRelease(status, clickedBtn) {
       const v = id => ((document.getElementById(id) || {}).value || '').trim();
-      const title = v('nrTitle');
-      if (!title) { toast && toast('Release title is required'); return; }
       let upc = v('nrUpc'); if (/^generated/i.test(upc)) upc = '';
-      // tracks from the builder
-      const tracks = [];
+
+      // ----- collect tracks -----
+      const tracks = []; const trackAudioFiles = [];
       document.querySelectorAll('#assetList .asset').forEach(asset => {
         const f = sel => { const el = asset.querySelector(`[data-f="${sel}"]`); return el ? el.value.trim() : ''; };
         const t = {
@@ -411,69 +411,113 @@
           contributors: []
         };
         asset.querySelectorAll('.contrib-row').forEach(row => {
-          const role = (row.querySelector('.chip') || {}).textContent || 'Main Artist';
-          const name = (row.querySelector('input') || {}).value || '';
-          if (name.trim()) t.contributors.push({ role: role.trim(), name: name.trim(), is_composer: /composer/i.test(role) ? 1 : 0, is_author: /author/i.test(role) ? 1 : 0 });
+          const role = ((row.querySelector('.chip') || {}).textContent || 'Main Artist').trim();
+          const name = ((row.querySelector('input') || {}).value || '').trim();
+          if (name) t.contributors.push({ role, name, is_composer: /composer/i.test(role) ? 1 : 0, is_author: /author/i.test(role) ? 1 : 0 });
         });
-        if (t.title) tracks.push(t);
+        const audioInput = asset.querySelector('.audioFile');
+        trackAudioFiles.push(audioInput && audioInput.files[0] ? audioInput.files[0] : null);
+        tracks.push(t);
       });
-      if (!tracks.length) { toast && toast('Add at least one track with a title'); return; }
+
+      // ----- STRICT validation: nothing is sent for review with missing data -----
+      const missing = [];
+      const isEdit = !!window.__editId;
+      if (!v('nrTitle')) missing.push('Release title');
+      if (status === 'submitted') {
+        if (!v('nrLabel')) missing.push('Label');
+        if (!v('nrGenre')) missing.push('Genre');
+        if (!v('nrDigital')) missing.push('Digital release date');
+        const artPicked = document.getElementById('nrArtFile') && document.getElementById('nrArtFile').files[0];
+        if (!artPicked && !window.__hasArtwork) missing.push('Cover artwork (JPG 3000×3000)');
+        tracks.forEach((t, i) => {
+          const n = 'Track ' + (i + 1) + ': ';
+          if (!t.title) missing.push(n + 'title');
+          if (!t.c_line) missing.push(n + 'C Line');
+          if (!t.p_line) missing.push(n + 'P Line');
+          if (!t.contributors.some(x => /main/i.test(x.role))) missing.push(n + 'Main Artist name');
+          if (!trackAudioFiles[i] && !isEdit) missing.push(n + 'WAV audio file');
+        });
+        if (!tracks.length) missing.push('At least one track');
+      } else {
+        if (!tracks.some(t => t.title)) missing.push('At least one track with a title');
+      }
+      if (missing.length) {
+        alert((status === 'submitted' ? 'Cannot submit — the following is missing:' : 'Cannot save yet:') + '\n\n• ' + missing.join('\n• '));
+        return;
+      }
+
       const firstArtist = (tracks[0].contributors.find(x => /main/i.test(x.role)) || tracks[0].contributors[0] || {}).name || '';
       const body = {
-        title, artist: firstArtist, label: v('nrLabel'), upc,
-        type: v('nrType') || 'Single', genre: v('nrGenre'), status,
+        title: v('nrTitle'), artist: firstArtist, label: v('nrLabel'), upc,
+        type: v('nrType') || 'Single', genre: v('nrGenre'), status: 'draft',
         digital_date: v('nrDigital'), original_date: v('nrOriginal'),
-        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || 'All', tracks
+        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || 'All',
+        tracks: tracks.filter(t => t.title)
       };
-      const btnSave = document.getElementById('nrSaveBtn'), btnSubmit = document.getElementById('nrSubmitBtn');
-      const btn = status === 'draft' ? btnSave : btnSubmit;
+
+      const allBtns = document.querySelectorAll('.nr-act');
+      const btn = clickedBtn || document.getElementById(status === 'draft' ? 'nrSaveBtn' : 'nrSubmitBtn');
       const btnHTML = btn ? btn.innerHTML : '';
       const setBtn = t => { if (btn) btn.textContent = t; };
-      if (btnSave) btnSave.disabled = true; if (btnSubmit) btnSubmit.disabled = true;
-      const uploadErrors = [];
+      allBtns.forEach(b => b.disabled = true);
       try {
+        // 1) save data (always as draft first)
         setBtn('Saving release…');
-        let relId = window.__editId, createdTracks = [];
+        let relId = window.__editId;
         if (relId) {
           await API.call('/releases/' + relId, { method: 'PUT', body });
-          if (status === 'submitted') await API.call('/releases/' + relId + '/submit', { method: 'POST' });
-          createdTracks = ((await API.call('/releases/' + relId)).tracks) || [];
         } else {
           const r = await API.call('/releases', { method: 'POST', body });
-          relId = r.id; createdTracks = r.tracks || [];
+          relId = r.id;
         }
+        const saved = await API.call('/releases/' + relId);
+        const createdTracks = saved.tracks || [];
         toast && toast('Release data saved ✓ (#' + relId + ')');
-        // artwork (validated server-side: JPG + 3000x3000)
+
+        // 2) artwork (server validates JPG + exact 3000×3000)
+        const uploadErrors = [];
         const artInput = document.getElementById('nrArtFile');
         if (artInput && artInput.files[0]) {
           try {
             await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0], p => setBtn('Uploading artwork… ' + p + '%'));
             toast && toast('Artwork uploaded ✓');
-          } catch (e) { uploadErrors.push('Artwork: ' + e.message); }
+          } catch (err) { uploadErrors.push('Cover artwork: ' + err.message); }
         }
-        // per-track WAV files (matched by position)
-        const audioInputs = document.querySelectorAll('#assetList .asset .audioFile');
-        for (let i = 0; i < audioInputs.length; i++) {
-          const file = audioInputs[i].files[0];
-          const trackRow = createdTracks[i];
+        // 3) per-track WAV files (server validates real WAV)
+        for (let i = 0; i < trackAudioFiles.length; i++) {
+          const file = trackAudioFiles[i]; const trackRow = createdTracks[i];
           if (file && trackRow) {
             try {
               await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file, p => setBtn('Uploading track ' + (i + 1) + ' audio… ' + p + '%'));
               toast && toast('Track ' + (i + 1) + ' audio uploaded ✓');
-            } catch (e) { uploadErrors.push('Track ' + (i + 1) + ' audio: ' + e.message); }
+            } catch (err) { uploadErrors.push('Track ' + (i + 1) + ' audio: ' + err.message); }
           }
         }
-        window.__editId = null;
-        await loadReleases();
         if (uploadErrors.length) {
-          alert('The release was saved, but some files were NOT accepted:\n\n' + uploadErrors.join('\n') + '\n\nOpen the release from Manage Music to re-upload them.');
-        } else {
-          toast && toast(status === 'draft' ? 'Saved as draft ✓' : 'Release submitted for review ✓');
+          alert('Saved as draft, but these files were NOT accepted:\n\n• ' + uploadErrors.join('\n• ') + '\n\nFix them and submit again.');
+          window.__editId = null; window.__hasArtwork = false;
+          await loadReleases(); if (window.go) go('releases');
+          allBtns.forEach(b => b.disabled = false); if (btn) btn.innerHTML = btnHTML;
+          return;
         }
-        if (window.go) go('releases');
-      } catch (e) { toast && toast(e.message); }
+        // 4) submit — the server double-checks EVERYTHING (files included) before accepting
+        if (status === 'submitted') {
+          setBtn('Submitting for review…');
+          try {
+            await API.call('/releases/' + relId + '/submit', { method: 'POST' });
+            toast && toast('Release submitted for review ✓ — it is now in the review queue');
+          } catch (err) {
+            alert('Saved as draft, but NOT submitted:\n\n' + err.message);
+          }
+        } else {
+          toast && toast('Saved as draft ✓');
+        }
+        window.__editId = null; window.__hasArtwork = false;
+        await loadReleases(); if (window.go) go('releases');
+      } catch (err) { alert('Error: ' + err.message); }
+      allBtns.forEach(b => b.disabled = false);
       if (btn) btn.innerHTML = btnHTML;
-      if (btnSave) btnSave.disabled = false; if (btnSubmit) btnSubmit.disabled = false;
     },
 
     // ---------- release details modal (all info + tracks + artwork zoom) ----------
@@ -560,6 +604,7 @@
       set('nrGenre', r.genre); set('nrDigital', r.digital_date); set('nrOriginal', r.original_date);
       // existing artwork preview
       const img = document.getElementById('nrArtPreview');
+      window.__hasArtwork = !!r.artwork;
       if (img && r.artwork) { img.src = '/uploads/' + r.artwork; img.style.display = ''; }
       // first track into the builder (full track editing lives in the release details modal)
       const t = (d.tracks || [])[0];

@@ -136,7 +136,7 @@ app.get('/api/releases', auth, (req, res) => {
 });
 
 app.get('/api/releases/:id', auth, (req, res) => {
-  const r = db.prepare('SELECT * FROM releases WHERE id = ?').get(req.params.id);
+  const r = db.prepare('SELECT r.*, c.name AS client_name FROM releases r JOIN clients c ON c.id = r.client_id WHERE r.id = ?').get(req.params.id);
   if (!r) return res.status(404).json({ error: 'Not found' });
   if (req.user.role !== 'admin' && r.client_id !== req.user.client_id) return res.status(403).json({ error: 'Forbidden' });
   const tracks = db.prepare('SELECT * FROM tracks WHERE release_id = ? ORDER BY track_no').all(r.id);
@@ -152,7 +152,7 @@ app.post('/api/releases', auth, (req, res) => {
   const info = db.prepare(`INSERT INTO releases (client_id,title,artist,label,upc,type,genre,status,digital_date,original_date,territories,stores)
     VALUES (?,?,?,?,?,?,?,?,?,?,?,?)`).run(
     clientId, b.title || 'Untitled', b.artist || '', b.label || '', b.upc || '', b.type || 'Single',
-    b.genre || '', b.status === 'submitted' ? 'submitted' : 'draft',
+    b.genre || '', 'draft',
     b.digital_date || '', b.original_date || '', b.territories || 'Worldwide', b.stores || 'All');
   const relId = info.lastInsertRowid;
   // tracks
@@ -196,7 +196,30 @@ app.post('/api/releases/:id/submit', auth, (req, res) => {
   if (!r) return res.status(404).json({ error: 'Not found' });
   if (req.user.role !== 'admin' && r.client_id !== req.user.client_id) return res.status(403).json({ error: 'Forbidden' });
   if (!['draft', 'rejected', 'correction'].includes(r.status)) return res.status(400).json({ error: 'Cannot submit in current status' });
-  db.prepare(`UPDATE releases SET status='submitted', updated_at=datetime('now') WHERE id=?`).run(r.id);
+
+  // ----- completeness gate: NOTHING incomplete reaches the review queue -----
+  const missing = [];
+  if (!r.title) missing.push('Release title');
+  if (!r.label) missing.push('Label');
+  if (!r.genre) missing.push('Genre');
+  if (!r.digital_date) missing.push('Digital release date');
+  if (!r.artwork) missing.push('Cover artwork (JPG 3000×3000)');
+  const tracks = db.prepare('SELECT * FROM tracks WHERE release_id = ? ORDER BY track_no').all(r.id);
+  if (!tracks.length) missing.push('At least one track');
+  tracks.forEach(t => {
+    const n = `Track ${t.track_no} (${t.title || 'untitled'}): `;
+    if (!t.title) missing.push(n + 'title');
+    if (!t.c_line) missing.push(n + 'C Line');
+    if (!t.p_line) missing.push(n + 'P Line');
+    if (!t.audio_file) missing.push(n + 'WAV audio file');
+    const hasMain = db.prepare(`SELECT COUNT(*) AS n FROM contributors WHERE track_id = ? AND role LIKE '%Main%'`).get(t.id).n;
+    if (!hasMain) missing.push(n + 'Main Artist');
+  });
+  if (missing.length) {
+    return res.status(400).json({ error: 'Release is not complete — missing:\n• ' + missing.join('\n• ') });
+  }
+
+  db.prepare(`UPDATE releases SET status='submitted', note=NULL, updated_at=datetime('now') WHERE id=?`).run(r.id);
   audit(req, 'release.submit', r.title);
   res.json({ ok: true });
 });

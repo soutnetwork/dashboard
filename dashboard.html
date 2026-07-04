@@ -533,7 +533,7 @@ svg[stroke="currentColor"]{stroke-width:2}
     </div>
 <div class="page" data-page="newrelease">
       <div class="page-head"><div><div class="page-title">New Release</div><div class="page-sub">Single-page release builder · all details on one screen</div></div>
-      <div style="display:flex;gap:8px"><button class="btn btn-ghost" id="nrSaveBtn" onclick="SoutClient.saveRelease('draft')">Save Draft</button><button class="btn btn-ghost" onclick="go('releases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cancel</button><button class="btn btn-primary" id="nrSubmitBtn" onclick="SoutClient.saveRelease('submitted')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button></div></div>
+      <div style="display:flex;gap:8px"><button class="btn btn-ghost nr-act" id="nrSaveBtn" onclick="SoutClient.saveRelease('draft',this)">Save Draft</button><button class="btn btn-ghost" onclick="go('releases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cancel</button><button class="btn btn-primary nr-act" id="nrSubmitBtn" onclick="SoutClient.saveRelease('submitted',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button></div></div>
 
       <datalist id="labelList"><option value="ELshamrany"><option value="Injaz Teqani"><option value="PNDA Media"><option value="Echo EG"><option value="Sout Network"></datalist><datalist id="instrList"><option value="Voice"><option value="Oud"><option value="Qanun"><option value="Ney"><option value="Violin"><option value="Piano"><option value="Guitar"><option value="Bass"><option value="Drums"><option value="Percussion"><option value="Synthesizer"><option value="Accordion"><option value="Tabla"><option value="Riq"></datalist>
 
@@ -623,8 +623,8 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
 
       <div class="row-flex" style="justify-content:flex-end;gap:8px;margin-top:18px">
-        <button class="btn btn-ghost" onclick="toast('Saved as draft');go('releases')">Save Draft</button>
-        <button class="btn btn-primary" onclick="toast('Release submitted for review')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button>
+        <button class="btn btn-ghost nr-act" onclick="SoutClient.saveRelease('draft',this)">Save Draft</button>
+        <button class="btn btn-primary nr-act" onclick="SoutClient.saveRelease('submitted',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button>
       </div>
     </div>
 <div class="page" data-page="rights">

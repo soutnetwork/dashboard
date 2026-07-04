@@ -20,9 +20,10 @@
     if (!tbody) return;
     tbody.innerHTML = queue.length ? queue.map(r => `<tr>
       <td><div class="cbx" onclick="toggleRow(this,event)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg></div></td>
-      <td><div class="row-flex">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)} · ${esc(r.client_name || '')}</div></div></div></td>
+      <td><div class="row-flex" style="cursor:pointer" onclick="SoutAdmin.viewRelease(${r.id})">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)} · ${esc(r.client_name || '')}</div></div></div></td>
       <td>${chip(r.status)}</td><td><span class="chip gray">${esc(r.type)}</span></td>
       <td style="text-align:right">
+        <button class="btn btn-ghost btn-sm" onclick="SoutAdmin.viewRelease(${r.id})">Details</button>
         <button class="btn btn-primary btn-sm" onclick="SoutAdmin.setStatus(${r.id},'approved')">Approve</button>
         <button class="btn btn-ghost btn-sm" onclick="SoutAdmin.correction(${r.id})">Correction</button>
         <button class="btn btn-danger btn-sm" onclick="SoutAdmin.reject(${r.id})">Reject</button>
@@ -235,6 +236,59 @@
 
   // ---------- actions ----------
   const SoutAdmin = {
+    // ---------- full release details (data + tracks + artwork + audio) ----------
+    async viewRelease(id) {
+      let d; try { d = await API.call('/releases/' + id); } catch (e) { toast && toast(e.message); return; }
+      const r = d.release, tracks = d.tracks || [];
+      document.getElementById('arTitle').textContent = r.title;
+      const artSrc = r.artwork ? '/uploads/' + esc(r.artwork) : '';
+      const info = (l, val) => `<div><div class="cell-sub">${l}</div><div class="cell-main">${esc(val || '—')}</div></div>`;
+      const trackRows = tracks.map(t => {
+        const contribs = (t.contributors || []).map(x => `${esc(x.name)} <span class="cell-sub">(${esc(x.role)})</span>`).join(', ');
+        const audio = t.audio_file
+          ? `<audio controls preload="none" style="height:30px;max-width:210px" src="/uploads/${esc(t.audio_file)}"></audio><div><a class="cell-sub" style="color:var(--accent)" href="/uploads/${esc(t.audio_file)}" download>Download WAV</a></div>`
+          : `<span class="chip amber">No audio</span>`;
+        return `<tr>
+          <td class="cell-mono">${t.track_no}</td>
+          <td><div class="cell-main">${esc(t.title)}</div><div class="cell-sub">${contribs || ''}</div><div class="cell-sub cell-mono">${esc(t.c_line || '')}${t.p_line ? ' · ' + esc(t.p_line) : ''}</div></td>
+          <td class="cell-mono">${esc(t.isrc || '—')}</td>
+          <td><span class="chip gray">${esc(t.version || 'Original')}</span><div class="cell-sub">${esc(t.content_type || '')}</div></td>
+          <td>${audio}</td></tr>`;
+      }).join('');
+      const artBlock = artSrc
+        ? `<img src="${artSrc}" onclick="SoutAdmin.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge">`
+        : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div><div class="cell-sub" style="margin-top:6px;color:var(--red)">No artwork</div>`;
+      document.getElementById('arBody').innerHTML = `
+        <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:14px">
+          <div style="text-align:center">${artBlock}</div>
+          <div style="flex:1;display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+            ${info('Client', r.client_name)}
+            ${info('Artist', r.artist)}
+            ${info('Label', r.label)}
+            ${info('Type', r.type)}
+            ${info('Genre', r.genre)}
+            ${info('UPC', r.upc || 'To be generated')}
+            ${info('Digital date', r.digital_date)}
+            ${info('Territories', r.territories)}
+            ${info('Stores', r.stores)}
+          </div>
+        </div>
+        <div class="row-flex" style="gap:8px;margin-bottom:12px">${chip(r.status)}<span class="cell-sub">Created ${esc((r.created_at || '').slice(0, 10))}</span></div>
+        <div class="sec-title" style="margin:10px 0 8px">Tracks (${tracks.length})</div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>#</th><th>Title / Contributors / Lines</th><th>ISRC</th><th>Version</th><th>Audio</th></tr></thead>
+          <tbody>${trackRows || '<tr><td colspan="5"><div class="empty"><h4>No tracks</h4></div></td></tr>'}</tbody>
+        </table></div></div>`;
+      const canAct = ['submitted', 'review'].includes(r.status);
+      document.getElementById('arFoot').innerHTML = `
+        <button class="btn btn-ghost" onclick="closeModal('aRelModal')">Close</button>
+        ${canAct ? `<button class="btn btn-ghost" onclick="closeModal('aRelModal');SoutAdmin.correction(${r.id})">Correction</button>
+        <button class="btn btn-danger" onclick="closeModal('aRelModal');SoutAdmin.reject(${r.id})">Reject</button>
+        <button class="btn btn-primary" onclick="closeModal('aRelModal');SoutAdmin.setStatus(${r.id},'approved')">Approve</button>` : ''}`;
+      openModal('aRelModal');
+    },
+    zoom(src) { const lb = document.getElementById('aLightbox'); document.getElementById('aLightboxImg').src = src; lb.style.display = 'grid'; },
+
     async setStatus(id, status, note) {
       try { await API.call('/admin/releases/' + id + '/status', { method: 'POST', body: { status, note } }); toast && toast('Release ' + status); await loadModeration(); await loadAdminOverview(); }
       catch (e) { toast && toast(e.message); }
