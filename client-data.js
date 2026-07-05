@@ -4,6 +4,43 @@
 // ============================================================
 (function () {
   const { chip, esc, initials } = window.SoutUI;
+  const PLATFORMS = [
+    { id: 'spotify', name: 'Spotify', tier: 'major' },
+    { id: 'apple', name: 'Apple Music', tier: 'major' },
+    { id: 'youtube', name: 'YouTube Music', tier: 'major' },
+    { id: 'youtube_video', name: 'YouTube (Content ID)', tier: 'major' },
+    { id: 'amazon', name: 'Amazon Music', tier: 'major' },
+    { id: 'tiktok', name: 'TikTok', tier: 'major' },
+    { id: 'facebook', name: 'Facebook / Instagram', tier: 'major' },
+    { id: 'deezer', name: 'Deezer', tier: 'major' },
+    { id: 'anghami', name: 'Anghami', tier: 'mena' },
+    { id: 'boomplay', name: 'Boomplay', tier: 'mena' },
+    { id: 'audiomack', name: 'Audiomack', tier: 'mena' },
+    { id: 'soundcloud', name: 'SoundCloud', tier: 'other' },
+    { id: 'tidal', name: 'Tidal', tier: 'other' },
+    { id: 'pandora', name: 'Pandora', tier: 'other' },
+    { id: 'napster', name: 'Napster', tier: 'other' },
+    { id: 'iheart', name: 'iHeartRadio', tier: 'other' },
+    { id: 'shazam', name: 'Shazam', tier: 'other' },
+    { id: 'kkbox', name: 'KKBox', tier: 'other' },
+    { id: 'joox', name: 'JOOX', tier: 'other' },
+    { id: 'qobuz', name: 'Qobuz', tier: 'other' }
+  ];
+  window.PLATFORMS = PLATFORMS;
+  function renderPlatformPicker(selectedIds) {
+    const box = document.getElementById('nrPlatforms'); if (!box) return;
+    const set = new Set(selectedIds || []);
+    box.innerHTML = PLATFORMS.map(p => {
+      const on = set.has(p.id);
+      return `<label class="chip ${on ? 'green' : 'gray'}" style="cursor:pointer;user-select:none;font-size:.75rem"><input type="checkbox" data-plat="${p.id}"${on ? ' checked' : ''} style="margin-inline-end:5px" onchange="SoutClient._platChange(this)">${esc(p.name)}</label>`;
+    }).join('');
+    updatePlatCount();
+  }
+  function updatePlatCount() {
+    const n = document.querySelectorAll('#nrPlatforms input:checked').length;
+    const el = document.getElementById('nrPlatCount'); if (el) el.textContent = n + ' selected';
+  }
+  window.renderPlatformPicker = renderPlatformPicker;
   function money(v) { return '$' + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function knum(v) { v = Number(v) || 0; if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'; if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K'; return String(v); }
   const API = window.SoutAPI;
@@ -639,6 +676,8 @@
         if (!v('nrLabel')) missing.push('Label');
         if (!v('nrGenre')) missing.push('Genre');
         if (!v('nrDigital')) missing.push('Digital release date');
+        const picked = [...document.querySelectorAll('#nrPlatforms input:checked')];
+        if (!picked.length) missing.push('At least one distribution platform');
         const artPicked = document.getElementById('nrArtFile') && document.getElementById('nrArtFile').files[0];
         if (!artPicked && !window.__hasArtwork) missing.push('Cover artwork (JPG 3000×3000)');
         tracks.forEach((t, i) => {
@@ -663,7 +702,8 @@
         title: v('nrTitle'), artist: firstArtist, label: v('nrLabel'), upc,
         type: v('nrType') || 'Single', genre: v('nrGenre'), status: 'draft',
         digital_date: v('nrDigital'), original_date: v('nrOriginal'),
-        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || 'All',
+        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || '',
+        platforms: [...document.querySelectorAll('#nrPlatforms input:checked')].map(x => x.dataset.plat),
         tracks: tracks.filter(t => t.title)
       };
 
@@ -775,6 +815,7 @@
             ${info('UPC', r.upc || 'Generated automatically')}
             ${info('Digital release date', r.digital_date)}
             ${info('Territories', r.territories)}
+            ${info('Platforms', ((() => { try { const p = JSON.parse(r.platforms||'[]'); return p.length ? p.length + ' selected' : ''; } catch { return ''; } })()))}
             ${info('Stores', r.stores)}
           </div>
         </div>
@@ -789,6 +830,16 @@
       openModal('relModal');
     },
     zoom(src) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; lb.style.display = 'grid'; },
+
+    // ---------- platforms picker ----------
+    setPlatforms(preset) {
+      let ids = [];
+      if (preset === 'all') ids = PLATFORMS.map(p => p.id);
+      else if (preset === 'major') ids = PLATFORMS.filter(p => p.tier === 'major').map(p => p.id);
+      else if (preset === 'mena') ids = PLATFORMS.filter(p => p.tier === 'mena').map(p => p.id);
+      renderPlatformPicker(ids);
+    },
+    _platChange() { updatePlatCount(); },
 
     // ---------- catalog search: title / artist / UPC / ISRC ----------
     async search(q) {
@@ -868,6 +919,8 @@
       // existing artwork preview
       const img = document.getElementById('nrArtPreview');
       window.__hasArtwork = !!r.artwork;
+      let plats = []; try { plats = JSON.parse(r.platforms || '[]'); } catch { }
+      renderPlatformPicker(plats);
       if (img && r.artwork) { img.src = '/uploads/' + r.artwork; img.style.display = ''; }
       // first track into the builder (full track editing lives in the release details modal)
       const t = (d.tracks || [])[0];
@@ -907,6 +960,7 @@
           else if (p === 'rights') SoutRights.load();
           else if (p === 'artists') loadRoster();
           else if (p === 'analytics') loadAnalyticsPage();
+          else if (p === 'newrelease') { if (!window.__editId) SoutClient.setPlatforms('major'); }
           else if (p === 'finance') loadFinancePage();
           else if (p === 'payouts') loadPayoutsPage();
         };

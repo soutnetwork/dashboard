@@ -572,8 +572,18 @@ svg[stroke="currentColor"]{stroke-width:2}
         <div class="fgrid">
           <div class="field"><label>Digital release date <span class="req">*</span></label><input class="input" id="nrDigital" type="date"></div>
           <div class="field"><label>Original release date</label><input class="input" id="nrOriginal" type="date"></div>
-          <div class="field"><label>Distributed territories</label><select class="input" id="nrTerr"><option>Worldwide (240 territories)</option><option>MENA only</option><option>Custom…</option></select></div>
-          <div class="field"><label>Distributed stores</label><select class="input" id="nrStores"><option>All stores (30+)</option><option>Streaming only</option><option>Custom…</option></select></div>
+          <input type="hidden" id="nrTerr" value="Worldwide">
+          <input type="hidden" id="nrStores" value="">
+          <div class="field full" style="grid-column:1/-1"><label>Distributed platforms <span class="cell-sub" style="font-weight:400">(pick where this release goes live)</span></label>
+            <div id="nrPlatforms" style="display:flex;flex-wrap:wrap;gap:6px;padding:10px;border:1.5px solid var(--line);border-radius:11px;background:var(--surface-2);min-height:52px"></div>
+            <div class="row-flex" style="gap:8px;margin-top:6px">
+              <button type="button" class="btn btn-ghost btn-sm" onclick="SoutClient.setPlatforms('all')">Select all</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="SoutClient.setPlatforms('major')">Major only</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="SoutClient.setPlatforms('mena')">MENA only</button>
+              <button type="button" class="btn btn-ghost btn-sm" onclick="SoutClient.setPlatforms('clear')">Clear</button>
+              <span class="cell-sub" style="margin-inline-start:auto" id="nrPlatCount">0 selected</span>
+            </div>
+          </div>
         </div>
       </div>
 

@@ -182,6 +182,9 @@ app.post('/api/releases', auth, (req, res) => {
     b.genre || '', 'draft',
     b.digital_date || '', b.original_date || '', b.territories || 'Worldwide', b.stores || 'All');
   const relId = info.lastInsertRowid;
+  if (Array.isArray(b.platforms)) {
+    try { db.prepare('UPDATE releases SET platforms = ? WHERE id = ?').run(JSON.stringify(b.platforms), relId); } catch { }
+  }
   // attach pre-uploaded (staged) artwork
   if (validStaged(b.artwork_staged, 'art', req)) {
     db.prepare('UPDATE releases SET artwork = ? WHERE id = ?').run(b.artwork_staged, relId);
@@ -231,6 +234,9 @@ app.put('/api/releases/:id', auth, (req, res) => {
     .run(b.title ?? r.title, b.artist ?? r.artist, b.label ?? r.label, b.upc ?? r.upc, b.type ?? r.type,
       b.genre ?? r.genre, b.digital_date ?? r.digital_date, b.original_date ?? r.original_date,
       b.territories ?? r.territories, b.stores ?? r.stores, r.id);
+  if (Array.isArray(b.platforms)) {
+    try { db.prepare('UPDATE releases SET platforms = ? WHERE id = ?').run(JSON.stringify(b.platforms), r.id); } catch { }
+  }
   if (validStaged(b.artwork_staged, 'art', req)) {
     db.prepare('UPDATE releases SET artwork = ? WHERE id = ?').run(b.artwork_staged, r.id);
   }
@@ -251,6 +257,8 @@ app.post('/api/releases/:id/submit', auth, (req, res) => {
   if (!r.label) missing.push('Label');
   if (!r.genre) missing.push('Genre');
   if (!r.digital_date) missing.push('Digital release date');
+  let plats = []; try { plats = JSON.parse(r.platforms || '[]'); } catch { }
+  if (!plats.length) missing.push('At least one distribution platform');
   if (!r.artwork) missing.push('Cover artwork (JPG 3000×3000)');
   const tracks = db.prepare('SELECT * FROM tracks WHERE release_id = ? ORDER BY track_no').all(r.id);
   if (!tracks.length) missing.push('At least one track');
@@ -1428,6 +1436,8 @@ async function main() {
   addCli('visible_pages', `visible_pages TEXT`);
   addCli('payout_method', `payout_method TEXT`);
   addCli('payout_details', `payout_details TEXT`);
+  const relCols = db.prepare(`PRAGMA table_info(releases)`).all().map(x => x.name);
+  if (!relCols.includes('platforms')) db.exec(`ALTER TABLE releases ADD COLUMN platforms TEXT`);
   try {
     db.prepare(`INSERT OR IGNORE INTO labels (client_id, name)
       SELECT DISTINCT client_id, label FROM releases WHERE label IS NOT NULL AND label != ''`).run();

@@ -440,10 +440,12 @@
             ${info('UPC', r.upc || 'Generated on approval')}
             ${info('Digital date', r.digital_date)}
             ${info('Territories', r.territories)}
-            ${info('Stores', r.stores)}
+            ${info('Platforms', (() => { try { const p = JSON.parse(r.platforms || '[]'); return p.length ? p.length + ' selected' : '—'; } catch { return '—'; } })())}
           </div>
         </div>
         <div class="row-flex" style="gap:8px;margin-bottom:12px">${chip(r.status)}<span class="cell-sub">Created ${esc((r.created_at || '').slice(0, 10))}</span></div>
+        <div class="sec-title" style="margin:14px 0 8px">Distribution platforms <button class="btn btn-ghost btn-sm" style="margin-inline-start:8px" onclick="SoutAdmin.togglePlatEdit(${r.id})">Edit</button></div>
+        <div id="aRelPlats" data-plats='${esc(r.platforms || '[]')}' style="display:flex;flex-wrap:wrap;gap:6px;margin-bottom:14px"></div>
         <div class="sec-title" style="margin:10px 0 8px">Tracks (${tracks.length})</div>
         <div class="table-wrap"><div class="table-scroll"><table>
           <thead><tr><th>#</th><th>Title / Contributors / Lines</th><th>ISRC</th><th>Version</th><th>Audio</th></tr></thead>
@@ -458,8 +460,54 @@
         <button class="btn btn-danger" onclick="closeModal('aRelModal');SoutAdmin.reject(${r.id})">Reject</button>
         <button class="btn btn-primary" onclick="closeModal('aRelModal');SoutAdmin.setStatus(${r.id},'approved')">Approve</button>` : ''}`;
       openModal('aRelModal');
+      this._relPlatsEditing = false;
+      this._renderRelPlats(true);
     },
     zoom(src) { const lb = document.getElementById('aLightbox'); document.getElementById('aLightboxImg').src = src; lb.style.display = 'grid'; },
+
+    // ---------- release platforms (view + inline edit) ----------
+    _renderRelPlats(readOnly) {
+      const box = document.getElementById('aRelPlats'); if (!box) return;
+      let ids = []; try { ids = JSON.parse(box.dataset.plats || '[]'); } catch { }
+      const set = new Set(ids);
+      const P = window.PLATFORMS || [];
+      if (!P.length) { box.innerHTML = '<span class="cell-sub">Platform catalog not loaded — open the client dashboard once to preload.</span>'; return; }
+      if (readOnly) {
+        const list = P.filter(p => set.has(p.id));
+        box.innerHTML = list.length ? list.map(p => `<span class="chip green">${esc(p.name)}</span>`).join('') : '<span class="cell-sub">No platforms selected — the client left this empty.</span>';
+      } else {
+        box.innerHTML = P.map(p => {
+          const on = set.has(p.id);
+          return `<label class="chip ${on ? 'green' : 'gray'}" style="cursor:pointer;user-select:none;font-size:.75rem"><input type="checkbox" data-plat="${p.id}"${on ? ' checked' : ''} style="margin-inline-end:5px" onchange="this.parentElement.className='chip '+(this.checked?'green':'gray')">${esc(p.name)}</label>`;
+        }).join('');
+      }
+    },
+    _relPlatsEditing: false,
+    togglePlatEdit(id) {
+      this._relPlatsEditing = !this._relPlatsEditing;
+      if (this._relPlatsEditing) {
+        this._renderRelPlats(false);
+        const box = document.getElementById('aRelPlats');
+        if (box && !document.getElementById('aRelPlatSave')) {
+          box.insertAdjacentHTML('afterend', `<div class="row-flex" id="aRelPlatSave" style="gap:8px;margin:-6px 0 14px">
+            <button class="btn btn-primary btn-sm" onclick="SoutAdmin.savePlats(${id})">Save platforms</button>
+            <button class="btn btn-ghost btn-sm" onclick="SoutAdmin.togglePlatEdit(${id})">Cancel</button></div>`);
+        }
+      } else {
+        const s = document.getElementById('aRelPlatSave'); if (s) s.remove();
+        this._renderRelPlats(true);
+      }
+    },
+    async savePlats(id) {
+      const ids = [...document.querySelectorAll('#aRelPlats input:checked')].map(x => x.dataset.plat);
+      try {
+        await API.call('/admin/releases/' + id, { method: 'PUT', body: { platforms: ids } });
+        toast && toast('Platforms saved ✓');
+        const box = document.getElementById('aRelPlats'); if (box) box.dataset.plats = JSON.stringify(ids);
+        this._relPlatsEditing = false; this.togglePlatEdit(id);
+        await loadModeration();
+      } catch (e) { toast && toast(e.message); }
+    },
 
     async setStatus(id, status, note) {
       try {
