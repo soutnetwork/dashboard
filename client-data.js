@@ -440,6 +440,15 @@
         if (v[0]) v[0].textContent = '$' + knum(b.available); if (v[1]) v[1].textContent = '$' + knum(b.pending);
         if (v[2]) v[2].textContent = '$' + knum(b.lifetime); if (v[3]) v[3].textContent = (fin.payouts || []).length;
       }
+      // Delivery Status card mirrors the real per-status counts
+      const svcD = document.getElementById('ovDeliverySvc');
+      if (svcD) {
+        const v = svcD.querySelectorAll('.svc-v');
+        if (v[0]) v[0].textContent = pending;
+        if (v[1]) v[1].textContent = processing;
+        if (v[2]) v[2].textContent = done;
+        if (v[3]) v[3].textContent = s.draft || 0;
+      }
     } catch { }
     // top tracks (admin-entered analytics)
     try {
