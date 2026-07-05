@@ -1,6 +1,6 @@
 // ============================================================
 // Client dashboard — real-data loaders
-// Manage Music (unified tabs) + Rights Manager (Believe-style)
+// Manage Music (unified tabs) + Rights Manager
 // ============================================================
 (function () {
   const { chip, esc, initials } = window.SoutUI;
