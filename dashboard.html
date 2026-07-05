@@ -159,7 +159,9 @@ a.cell-sub,a.cell-main{color:var(--link)}
 .chip.red{background:var(--red-soft);color:var(--red)}
 .chip.blue{background:var(--blue-soft);color:var(--blue)}
 .chip.purple{background:var(--purple-soft);color:var(--purple)}
-.chip.gray{background:var(--surface-3);color:var(--fg-soft)}
+.chip.gray{background:var(--surface-3);color:var(--fg);font-weight:700;border:1px solid var(--line-strong)}
+.dl{display:inline-flex;align-items:center;gap:5px;margin-top:5px;padding:3px 10px;border:1.5px solid var(--fg);border-radius:7px;background:transparent;color:var(--fg)!important;font-weight:700;font-size:.7rem;letter-spacing:.02em;text-decoration:none;cursor:pointer;transition:.12s}
+.dl:hover{background:var(--fg);color:var(--on-accent)!important}
 .dot-status{width:7px;height:7px;border-radius:50%;display:inline-block;flex:none}
 
 /* checkbox */
@@ -216,7 +218,7 @@ select.input{appearance:none;background-image:url("data:image/svg+xml,%3Csvg xml
 .spark > i.hot{background:var(--accent)}
 
 /* section title */
-.sec-title{font-family:var(--display);font-weight:700;font-size:.98rem;margin-bottom:14px;display:flex;align-items:center;gap:8px}
+.sec-title{font-family:var(--display);font-weight:700;font-size:.98rem;margin-bottom:14px;display:flex;align-items:center;gap:8px;border-left:3px solid var(--fg);padding-left:9px}
 .sec-title svg{width:16px;height:16px;opacity:.6}
 .sec-title .count{font-size:.7rem;color:var(--fg-faint);font-weight:600;background:var(--surface-3);padding:2px 9px;border-radius:20px}
 

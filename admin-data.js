@@ -262,7 +262,7 @@
       const trackRows = tracks.map(t => {
         const contribs = (t.contributors || []).map(x => `${esc(x.name)} <span class="cell-sub">(${esc(x.role)})</span>`).join(', ');
         const audio = t.audio_file
-          ? `<audio controls preload="none" style="height:30px;max-width:210px" src="/uploads/${esc(t.audio_file)}"></audio><div><a class="cell-sub" style="color:var(--accent)" href="/uploads/${esc(t.audio_file)}" download>Download WAV</a></div>`
+          ? `<audio controls preload="none" style="height:30px;max-width:210px" src="/uploads/${esc(t.audio_file)}"></audio><div><a class="dl" href="/uploads/${esc(t.audio_file)}" download>⤓ Download WAV</a></div>`
           : `<span class="chip amber">No audio</span>`;
         return `<tr>
           <td class="cell-mono">${t.track_no}</td>
@@ -272,7 +272,7 @@
           <td>${audio}</td></tr>`;
       }).join('');
       const artBlock = artSrc
-        ? `<img src="${artSrc}" onclick="SoutAdmin.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="cell-sub" style="color:var(--accent)" href="${artSrc}" download>Download JPG</a></div>`
+        ? `<img src="${artSrc}" onclick="SoutAdmin.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="dl" href="${artSrc}" download>⤓ Download JPG</a></div>`
         : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div><div class="cell-sub" style="margin-top:6px;color:var(--red)">No artwork</div>`;
       document.getElementById('arBody').innerHTML = `
         <div style="display:flex;gap:18px;align-items:flex-start;margin-bottom:14px">
@@ -644,7 +644,7 @@
         <td><span class="chip ${r.kind === 'upc' ? 'blue' : 'green'}">${r.kind.toUpperCase()}</span></td>
         <td><span class="chip ${r.source === 'external' ? 'amber' : 'gray'}">${esc(r.source)}</span></td>
         <td><div class="cell-main">${esc(r.assigned_to || r.release_title || '—')}</div>${r.client_name ? `<div class="cell-sub">${esc(r.client_name)}</div>` : ''}</td>
-        <td><div class="cell-sub">${esc(r.note || '')}</div>${r.batch_id ? `<a class="cell-sub cell-mono" style="color:var(--accent)" href="/api/admin/codes/export.csv?batch=${esc(r.batch_id)}">${esc(r.batch_id)} ⬇</a>` : ''}</td>
+        <td><div class="cell-sub">${esc(r.note || '')}</div>${r.batch_id ? `<a class="dl" style="margin-top:3px" href="/api/admin/codes/export.csv?batch=${esc(r.batch_id)}">⤓ ${esc(r.batch_id)}</a>` : ''}</td>
         <td class="cell-sub">${esc((r.created_by || '').split('@')[0])}</td>
         <td class="cell-mono">${esc((r.created_at || '').slice(0, 10))}</td></tr>`).join('');
     },

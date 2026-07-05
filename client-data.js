@@ -633,7 +633,7 @@
           <td>${audio}${up}</td></tr>`;
       }).join('');
       const artBlock = artSrc
-        ? `<img src="${artSrc}" onclick="SoutClient.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="cell-sub" style="color:var(--accent)" href="${artSrc}" download>Download JPG</a></div>`
+        ? `<img src="${artSrc}" onclick="SoutClient.zoom('${artSrc}')" style="width:150px;height:150px;border-radius:14px;object-fit:cover;border:1px solid var(--line);cursor:zoom-in" title="Click to enlarge"><div><a class="dl" href="${artSrc}" download>⤓ Download JPG</a></div>`
         : `<div class="art" style="width:150px;height:150px;font-size:2rem;border-radius:14px">${esc(initials(r.title))}</div>`;
       const artUp = editable ? `<label class="btn btn-ghost btn-sm" style="cursor:pointer;margin-top:8px;display:inline-flex">${artSrc ? 'Replace artwork' : 'Upload artwork'}<input type="file" accept=".jpg,.jpeg" style="display:none" onchange="SoutClient.uploadArt(${r.id},this)"></label><div class="cell-sub" style="margin-top:4px">JPG · 3000×3000</div>` : '';
       const note = (r.note && ['rejected', 'correction'].includes(r.status)) ? `<div class="card card-pad" style="border-color:var(--red);color:var(--red);margin-top:12px;font-size:.85rem">${esc(r.note)}</div>` : '';
