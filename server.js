@@ -107,8 +107,24 @@ app.post('/api/logout', (req, res) => {
   res.json({ ok: true });
 });
 
+const DEFAULT_PAGES = ['overview', 'analytics', 'releases', 'artists', 'newrelease', 'rights', 'finance', 'payouts', 'promotion', 'bulk', 'settings'];
+function clientProfile(clientId) {
+  const cli = db.prepare('SELECT * FROM clients WHERE id = ?').get(clientId);
+  if (!cli) return null;
+  let pages = DEFAULT_PAGES;
+  try { const p = JSON.parse(cli.visible_pages || 'null'); if (Array.isArray(p) && p.length) pages = p; } catch { }
+  const labels = db.prepare('SELECT name FROM labels WHERE client_id = ? ORDER BY name').all(clientId).map(x => x.name);
+  return {
+    id: cli.id, name: cli.name, account_type: cli.account_type || 'label',
+    max_labels: cli.max_labels, can_create_labels: !!cli.can_create_labels,
+    revenue_share: cli.revenue_share, visible_pages: pages, labels,
+    payout_method: cli.payout_method || '', payout_details: cli.payout_details || ''
+  };
+}
 app.get('/api/me', auth, (req, res) => {
-  res.json({ user: { name: req.user.name, email: req.user.email, role: req.user.role, client_id: req.user.client_id } });
+  const out = { user: { name: req.user.name, email: req.user.email, role: req.user.role, client_id: req.user.client_id } };
+  if (req.user.client_id) out.client = clientProfile(req.user.client_id);
+  res.json(out);
 });
 
 // change own password
@@ -126,6 +142,17 @@ app.post('/api/change-password', auth, (req, res) => {
 // RELEASES  (client sees only theirs; admin sees all)
 // ============================================================
 app.get('/api/releases', auth, (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q) {
+    const like = '%' + q + '%';
+    const base = req.user.role === 'admin'
+      ? `SELECT r.*, c.name AS client_name FROM releases r JOIN clients c ON c.id = r.client_id WHERE 1=1`
+      : `SELECT r.* FROM releases r WHERE r.client_id = ${Number(req.user.client_id) || 0}`;
+    const rows = db.prepare(`${base} AND (r.title LIKE ? OR r.artist LIKE ? OR r.upc LIKE ? OR r.label LIKE ?
+      OR r.id IN (SELECT release_id FROM tracks WHERE isrc LIKE ? OR title LIKE ?))
+      ORDER BY r.created_at DESC LIMIT 200`).all(like, like, like, like, like, like);
+    return res.json({ releases: rows, q });
+  }
   let rows;
   if (req.user.role === 'admin') {
     rows = db.prepare(`SELECT r.*, c.name AS client_name FROM releases r JOIN clients c ON c.id=r.client_id ORDER BY r.created_at DESC`).all();
@@ -171,8 +198,21 @@ app.post('/api/releases', auth, (req, res) => {
         .run(trackId, c.role || 'Main Artist', c.name || '', c.is_composer ? 1 : 0, c.is_author ? 1 : 0, c.spotify_url || '', c.apple_url || '');
     });
   });
-  // save label for autocomplete
-  if (b.label) { try { db.prepare('INSERT OR IGNORE INTO labels (client_id,name) VALUES (?,?)').run(clientId, b.label); } catch { } }
+  // labels are controlled per client: pick an assigned one, or create only if allowed & under the limit
+  if (b.label) {
+    const owned = db.prepare('SELECT 1 FROM labels WHERE client_id = ? AND name = ?').get(clientId, b.label);
+    if (!owned) {
+      const cli = db.prepare('SELECT * FROM clients WHERE id = ?').get(clientId) || {};
+      const cnt = db.prepare('SELECT COUNT(*) AS n FROM labels WHERE client_id = ?').get(clientId).n;
+      const allowed = req.user.role === 'admin' || cnt === 0 || (cli.can_create_labels && cnt < (cli.max_labels || 1));
+      if (!allowed) {
+        db.prepare('DELETE FROM releases WHERE id = ?').run(relId);
+        db.prepare('DELETE FROM tracks WHERE release_id = ?').run(relId);
+        return res.status(400).json({ error: 'This label is not on your account. Choose one of your assigned labels.' });
+      }
+      try { db.prepare('INSERT OR IGNORE INTO labels (client_id,name) VALUES (?,?)').run(clientId, b.label); } catch { }
+    }
+  }
   audit(req, 'release.create', b.title || ('#' + relId));
   const createdTracks = db.prepare('SELECT id, title, track_no FROM tracks WHERE release_id = ? ORDER BY track_no').all(relId);
   res.json({ ok: true, id: relId, tracks: createdTracks });
@@ -320,26 +360,130 @@ app.get('/api/admin/clients', auth, adminOnly, (req, res) => {
 });
 
 app.post('/api/admin/clients', auth, adminOnly, (req, res) => {
-  const { name, plan } = req.body || {};
-  if (!name) return res.status(400).json({ error: 'Name required' });
-  const info = db.prepare('INSERT INTO clients (name, plan) VALUES (?,?)').run(name, plan || 'Label');
-  audit(req, 'client.create', name);
-  res.json({ ok: true, id: info.lastInsertRowid });
+  const b = req.body || {};
+  if (!b.name) return res.status(400).json({ error: 'Name required' });
+  const type = ['label', 'artist', 'distributor'].includes(b.account_type) ? b.account_type : 'label';
+  const info = db.prepare(`INSERT INTO clients (name, plan, account_type, max_labels, can_create_labels, revenue_share, visible_pages)
+    VALUES (?,?,?,?,?,?,?)`).run(
+    b.name, b.plan || 'Label', type,
+    Math.max(1, Number(b.max_labels) || 1), b.can_create_labels ? 1 : 0,
+    Math.min(100, Math.max(0, Number(b.revenue_share) ?? 80)),
+    Array.isArray(b.visible_pages) && b.visible_pages.length ? JSON.stringify(b.visible_pages) : null);
+  const clientId = info.lastInsertRowid;
+  // assigned labels
+  (Array.isArray(b.labels) ? b.labels : []).filter(x => x && x.trim()).forEach(l => {
+    try { db.prepare('INSERT OR IGNORE INTO labels (client_id, name) VALUES (?,?)').run(clientId, l.trim()); } catch { }
+  });
+  // first user (optional)
+  let userId = null, userError = null;
+  if (b.user && b.user.email && b.user.password) {
+    try {
+      if (b.user.password.length < 8) throw new Error('Password must be 8+ characters');
+      const uInfo = db.prepare(`INSERT INTO users (email, password_hash, name, role, client_id) VALUES (?,?,?,?,?)`)
+        .run(b.user.email.trim().toLowerCase(), bcrypt.hashSync(b.user.password, 12), b.user.name || b.name, 'client', clientId);
+      userId = uInfo.lastInsertRowid;
+    } catch (e) { userError = /UNIQUE/.test(e.message) ? 'Email already exists' : e.message; }
+  }
+  audit(req, 'client.create', b.name);
+  res.json({ ok: true, id: clientId, user_id: userId, user_error: userError });
 });
 
+
+// ---------- labels management ----------
+app.post('/api/admin/clients/:id/labels', auth, adminOnly, (req, res) => {
+  const name = ((req.body || {}).name || '').trim();
+  if (!name) return res.status(400).json({ error: 'Label name required' });
+  db.prepare('INSERT OR IGNORE INTO labels (client_id, name) VALUES (?,?)').run(Number(req.params.id), name);
+  audit(req, 'label.add', name);
+  res.json({ ok: true, labels: db.prepare('SELECT name FROM labels WHERE client_id = ? ORDER BY name').all(req.params.id).map(x => x.name) });
+});
+app.delete('/api/admin/clients/:id/labels', auth, adminOnly, (req, res) => {
+  const name = ((req.body || {}).name || req.query.name || '').trim();
+  db.prepare('DELETE FROM labels WHERE client_id = ? AND name = ?').run(Number(req.params.id), name);
+  audit(req, 'label.remove', name);
+  res.json({ ok: true, labels: db.prepare('SELECT name FROM labels WHERE client_id = ? ORDER BY name').all(req.params.id).map(x => x.name) });
+});
+
+// ---------- statements (earnings) management ----------
+app.get('/api/admin/clients/:id/statements', auth, adminOnly, (req, res) => {
+  const rows = db.prepare('SELECT * FROM statements WHERE client_id = ? ORDER BY period DESC, id DESC').all(req.params.id);
+  res.json({ statements: rows, balances: balancesFor(Number(req.params.id)) });
+});
+app.post('/api/admin/clients/:id/statements', auth, adminOnly, (req, res) => {
+  const b = req.body || {};
+  if (!b.period || !b.platform) return res.status(400).json({ error: 'Period and platform required' });
+  const info = db.prepare(`INSERT INTO statements (client_id, period, platform, streams, revenue, status) VALUES (?,?,?,?,?,?)`)
+    .run(Number(req.params.id), String(b.period).trim(), String(b.platform).trim(),
+      Math.max(0, Number(b.streams) || 0), Math.round((Number(b.revenue) || 0) * 100) / 100,
+      b.status === 'cleared' ? 'cleared' : 'pending');
+  audit(req, 'statement.add', `client#${req.params.id} ${b.period} ${b.platform} $${b.revenue}`);
+  res.json({ ok: true, id: info.lastInsertRowid, balances: balancesFor(Number(req.params.id)) });
+});
+app.post('/api/admin/statements/:sid/status', auth, adminOnly, (req, res) => {
+  const st = (req.body || {}).status === 'cleared' ? 'cleared' : 'pending';
+  const row = db.prepare('SELECT * FROM statements WHERE id = ?').get(req.params.sid);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  db.prepare('UPDATE statements SET status = ? WHERE id = ?').run(st, row.id);
+  res.json({ ok: true, balances: balancesFor(row.client_id) });
+});
+app.delete('/api/admin/statements/:sid', auth, adminOnly, (req, res) => {
+  const row = db.prepare('SELECT * FROM statements WHERE id = ?').get(req.params.sid);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  db.prepare('DELETE FROM statements WHERE id = ?').run(row.id);
+  audit(req, 'statement.delete', `#${row.id}`);
+  res.json({ ok: true, balances: balancesFor(row.client_id) });
+});
+
+// ---------- analytics editor ----------
+app.get('/api/admin/clients/:id/stats', auth, adminOnly, (req, res) => {
+  const row = db.prepare('SELECT * FROM client_stats WHERE client_id = ?').get(req.params.id);
+  let data = null; if (row) { try { data = JSON.parse(row.data); } catch { } }
+  const tracks = db.prepare(`SELECT t.id, t.title, r.artist, r.title AS release_title FROM tracks t
+    JOIN releases r ON r.id = t.release_id WHERE r.client_id = ? ORDER BY r.created_at DESC, t.track_no`).all(req.params.id);
+  res.json({ stats: data, tracks });
+});
+app.put('/api/admin/clients/:id/stats', auth, adminOnly, (req, res) => {
+  const data = (req.body || {}).stats;
+  if (!data || typeof data !== 'object') return res.status(400).json({ error: 'stats object required' });
+  const json = JSON.stringify(data);
+  if (json.length > 200000) return res.status(400).json({ error: 'Too large' });
+  db.prepare(`INSERT INTO client_stats (client_id, data, updated_at) VALUES (?,?,datetime('now'))
+    ON CONFLICT(client_id) DO UPDATE SET data = excluded.data, updated_at = excluded.updated_at`).run(Number(req.params.id), json);
+  audit(req, 'stats.update', 'client#' + req.params.id);
+  res.json({ ok: true });
+});
+
+// ---------- payout requests (admin) ----------
+app.get('/api/admin/payouts', auth, adminOnly, (req, res) => {
+  const rows = db.prepare(`SELECT p.*, c.name AS client_name FROM payout_requests p JOIN clients c ON c.id = p.client_id ORDER BY p.id DESC LIMIT 300`).all();
+  res.json({ payouts: rows, pending: rows.filter(x => x.status === 'pending').length });
+});
+app.post('/api/admin/payouts/:id/status', auth, adminOnly, (req, res) => {
+  const b = req.body || {};
+  const status = ['approved', 'paid', 'rejected', 'pending'].includes(b.status) ? b.status : null;
+  if (!status) return res.status(400).json({ error: 'Bad status' });
+  const row = db.prepare('SELECT * FROM payout_requests WHERE id = ?').get(req.params.id);
+  if (!row) return res.status(404).json({ error: 'Not found' });
+  db.prepare(`UPDATE payout_requests SET status = ?, admin_note = ?, processed_at = datetime('now') WHERE id = ?`)
+    .run(status, b.admin_note || row.admin_note, row.id);
+  audit(req, 'payout.' + status, `client#${row.client_id} $${row.amount}`);
+  res.json({ ok: true, balances: balancesFor(row.client_id) });
+});
 
 // client full details (info + users + stats) for the Manage modal
 app.get('/api/admin/clients/:id', auth, adminOnly, (req, res) => {
   const cli = db.prepare('SELECT * FROM clients WHERE id = ?').get(req.params.id);
   if (!cli) return res.status(404).json({ error: 'Not found' });
   const users = db.prepare(`SELECT id, email, name, role, status, must_change_password, created_at FROM users WHERE client_id = ? ORDER BY created_at`).all(cli.id);
+  const labels = db.prepare('SELECT name FROM labels WHERE client_id = ? ORDER BY name').all(cli.id).map(x => x.name);
+  let visible_pages = null; try { visible_pages = JSON.parse(cli.visible_pages || 'null'); } catch { }
   const stats = {
     releases: db.prepare('SELECT COUNT(*) AS n FROM releases WHERE client_id = ?').get(cli.id).n,
     live: db.prepare(`SELECT COUNT(*) AS n FROM releases WHERE client_id = ? AND status IN ('delivered','live')`).get(cli.id).n,
     pending: db.prepare(`SELECT COUNT(*) AS n FROM releases WHERE client_id = ? AND status IN ('submitted','review')`).get(cli.id).n,
     rights_open: db.prepare(`SELECT COUNT(*) AS n FROM rights_issues WHERE client_id = ? AND status IN ('new','answered')`).get(cli.id).n
   };
-  res.json({ client: cli, users, stats });
+  res.json({ client: { ...cli, visible_pages }, users, stats, labels, balances: balancesFor(cli.id) });
 });
 
 // effective capabilities of a user (role defaults + per-user overrides)
@@ -443,6 +587,93 @@ app.post('/api/releases/:id/artwork', auth, artUpload.single('artwork'), (req, r
 });
 
 // ============================================================
+// FINANCE — real balances from admin-entered statements
+// ============================================================
+function balancesFor(clientId) {
+  const g = sql => db.prepare(sql).get(clientId) || {};
+  const lifetime = g(`SELECT COALESCE(SUM(revenue),0) v FROM statements WHERE client_id = ?`).v || 0;
+  const pending = g(`SELECT COALESCE(SUM(revenue),0) v FROM statements WHERE client_id = ? AND status='pending'`).v || 0;
+  const cleared = g(`SELECT COALESCE(SUM(revenue),0) v FROM statements WHERE client_id = ? AND status='cleared'`).v || 0;
+  const paidOut = g(`SELECT COALESCE(SUM(amount),0) v FROM payout_requests WHERE client_id = ? AND status IN ('approved','paid')`).v || 0;
+  const streams = g(`SELECT COALESCE(SUM(streams),0) v FROM statements WHERE client_id = ?`).v || 0;
+  const lastPayout = db.prepare(`SELECT amount, processed_at, created_at FROM payout_requests WHERE client_id = ? AND status='paid' ORDER BY id DESC LIMIT 1`).get(clientId);
+  return {
+    available: Math.max(0, Math.round((cleared - paidOut) * 100) / 100),
+    pending: Math.round(pending * 100) / 100,
+    lifetime: Math.round(lifetime * 100) / 100,
+    total_streams: streams,
+    avg_per_1k: streams > 0 ? Math.round(lifetime / streams * 1000 * 100) / 100 : 0,
+    last_payout: lastPayout || null
+  };
+}
+app.get('/api/finance', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  if (!cid) return res.status(400).json({ error: 'No client' });
+  const statements = db.prepare(`SELECT * FROM statements WHERE client_id = ? ORDER BY period DESC, id DESC LIMIT 500`).all(cid);
+  const payouts = db.prepare(`SELECT * FROM payout_requests WHERE client_id = ? ORDER BY id DESC LIMIT 200`).all(cid);
+  res.json({ statements, payouts, balances: balancesFor(cid) });
+});
+app.get('/api/finance/export.csv', auth, (req, res) => {
+  const cid = req.user.client_id;
+  if (!cid) return res.status(400).json({ error: 'No client' });
+  const rows = db.prepare(`SELECT * FROM statements WHERE client_id = ? ORDER BY period, id`).all(cid);
+  const lines = ['Period,Platform,Streams,Revenue,Status'];
+  rows.forEach(r => lines.push([r.period, r.platform, r.streams, r.revenue, r.status].map(csvCell).join(',')));
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="statement.csv"');
+  res.send('\uFEFF' + lines.join('\n'));
+});
+// client requests a payout (manual processing by the team)
+app.post('/api/payouts', auth, (req, res) => {
+  const cid = req.user.client_id;
+  if (!cid) return res.status(400).json({ error: 'No client' });
+  const b = req.body || {};
+  const amount = Math.round(Number(b.amount) * 100) / 100;
+  const method = (b.method || '').trim(), details = (b.details || '').trim();
+  if (!amount || amount <= 0) return res.status(400).json({ error: 'Enter a valid amount' });
+  const bal = balancesFor(cid);
+  if (amount > bal.available) return res.status(400).json({ error: `Amount exceeds your available balance ($${bal.available})` });
+  if (!method) return res.status(400).json({ error: 'Add a payout method first' });
+  db.prepare('UPDATE clients SET payout_method = ?, payout_details = ? WHERE id = ?').run(method, details, cid);
+  const info = db.prepare(`INSERT INTO payout_requests (client_id, amount, method, details) VALUES (?,?,?,?)`).run(cid, amount, method, details);
+  audit(req, 'payout.request', '$' + amount);
+  res.json({ ok: true, id: info.lastInsertRowid });
+});
+
+// ============================================================
+// ANALYTICS — admin-entered stats per client
+// ============================================================
+app.get('/api/analytics', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  if (!cid) return res.status(400).json({ error: 'No client' });
+  const row = db.prepare('SELECT * FROM client_stats WHERE client_id = ?').get(cid);
+  let data = null;
+  if (row) { try { data = JSON.parse(row.data); } catch { } }
+  // resolve top tracks to real catalog entries with artwork
+  if (data && Array.isArray(data.top_tracks)) {
+    data.top_tracks = data.top_tracks.map(t => {
+      const trk = db.prepare(`SELECT t.id, t.title, t.isrc, r.artist, r.artwork, r.title AS release_title
+        FROM tracks t JOIN releases r ON r.id = t.release_id WHERE t.id = ? AND r.client_id = ?`).get(t.track_id, cid);
+      return trk ? { ...t, ...trk } : t;
+    }).filter(t => t.title);
+  }
+  res.json({ stats: data, updated_at: row ? row.updated_at : null });
+});
+
+// client-scoped catalog export
+app.get('/api/export.csv', auth, (req, res) => {
+  const cid = req.user.client_id;
+  if (!cid) return res.status(400).json({ error: 'No client' });
+  const rows = db.prepare(`SELECT r.*, t.title AS track_title, t.isrc, t.track_no, t.c_line, t.p_line
+    FROM releases r LEFT JOIN tracks t ON t.release_id = r.id WHERE r.client_id = ? ORDER BY r.id, t.track_no`).all(cid);
+  const lines = ['Release,Artist,Label,Type,Status,UPC,Track No,Track Title,ISRC,C Line,P Line,Digital Date'];
+  rows.forEach(r => lines.push([r.title, r.artist, r.label, r.type, r.status, r.upc, r.track_no, r.track_title, r.isrc, r.c_line, r.p_line, r.digital_date].map(csvCell).join(',')));
+  res.setHeader('Content-Type', 'text/csv; charset=utf-8');
+  res.setHeader('Content-Disposition', 'attachment; filename="my-catalog.csv"');
+  res.send('\uFEFF' + lines.join('\n'));
+});
+
+// ============================================================
 // STAGED UPLOADS — start uploading the moment the client picks a file.
 // Files are validated immediately, stored with an owner-bound name,
 // then attached to the release when it is saved.
@@ -531,8 +762,15 @@ app.put('/api/admin/clients/:id', auth, adminOnly, (req, res) => {
   const c = db.prepare('SELECT * FROM clients WHERE id = ?').get(req.params.id);
   if (!c) return res.status(404).json({ error: 'Not found' });
   const b = req.body || {};
-  db.prepare(`UPDATE clients SET name=?, plan=?, status=?, balance=? WHERE id=?`)
-    .run(b.name ?? c.name, b.plan ?? c.plan, b.status ?? c.status, b.balance ?? c.balance, c.id);
+  const type = ['label', 'artist', 'distributor'].includes(b.account_type) ? b.account_type : (c.account_type || 'label');
+  const vp = Array.isArray(b.visible_pages) ? (b.visible_pages.length ? JSON.stringify(b.visible_pages) : null) : c.visible_pages;
+  db.prepare(`UPDATE clients SET name=?, plan=?, status=?, balance=?, account_type=?, max_labels=?, can_create_labels=?, revenue_share=?, visible_pages=? WHERE id=?`)
+    .run(b.name ?? c.name, b.plan ?? c.plan, b.status ?? c.status, b.balance ?? c.balance,
+      type,
+      b.max_labels !== undefined ? Math.max(1, Number(b.max_labels) || 1) : c.max_labels,
+      b.can_create_labels !== undefined ? (b.can_create_labels ? 1 : 0) : c.can_create_labels,
+      b.revenue_share !== undefined ? Math.min(100, Math.max(0, Number(b.revenue_share))) : c.revenue_share,
+      vp, c.id);
   audit(req, 'client.edit', c.name);
   res.json({ ok: true });
 });
@@ -629,6 +867,14 @@ app.get('/api/tracks', auth, (req, res) => {
       WHERE r.client_id = ? ORDER BY t.id DESC`).all(req.user.client_id);
   }
   res.json({ tracks: rows });
+});
+
+// client's assigned labels (for the release builder)
+app.get('/api/labels', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  const labels = db.prepare('SELECT name FROM labels WHERE client_id = ? ORDER BY name').all(cid).map(x => x.name);
+  const cli = db.prepare('SELECT max_labels, can_create_labels FROM clients WHERE id = ?').get(cid) || {};
+  res.json({ labels, max_labels: cli.max_labels || 1, can_create: !!cli.can_create_labels });
 });
 
 // roster: real artists (from contributors) + labels (from releases)
@@ -1172,6 +1418,46 @@ async function main() {
   // tiny idempotent migrations
   try { db.exec('ALTER TABLE releases ADD COLUMN artwork TEXT'); } catch { }
   try { db.exec('ALTER TABLE users ADD COLUMN must_change_password INTEGER DEFAULT 0'); } catch { }
+  // client business settings (idempotent)
+  const cliCols = db.prepare(`PRAGMA table_info(clients)`).all().map(x => x.name);
+  const addCli = (col, ddl) => { if (!cliCols.includes(col)) db.exec(`ALTER TABLE clients ADD COLUMN ${ddl}`); };
+  addCli('account_type', `account_type TEXT NOT NULL DEFAULT 'label'`);
+  addCli('max_labels', `max_labels INTEGER NOT NULL DEFAULT 1`);
+  addCli('can_create_labels', `can_create_labels INTEGER NOT NULL DEFAULT 0`);
+  addCli('revenue_share', `revenue_share REAL NOT NULL DEFAULT 80`);
+  addCli('visible_pages', `visible_pages TEXT`);
+  addCli('payout_method', `payout_method TEXT`);
+  addCli('payout_details', `payout_details TEXT`);
+  try {
+    db.prepare(`INSERT OR IGNORE INTO labels (client_id, name)
+      SELECT DISTINCT client_id, label FROM releases WHERE label IS NOT NULL AND label != ''`).run();
+  } catch { }
+  db.exec(`CREATE TABLE IF NOT EXISTS statements (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    period TEXT NOT NULL,
+    platform TEXT NOT NULL,
+    streams INTEGER NOT NULL DEFAULT 0,
+    revenue REAL NOT NULL DEFAULT 0,
+    status TEXT NOT NULL DEFAULT 'pending',
+    created_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
+  db.exec(`CREATE TABLE IF NOT EXISTS payout_requests (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    amount REAL NOT NULL,
+    method TEXT,
+    details TEXT,
+    status TEXT NOT NULL DEFAULT 'pending',
+    admin_note TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    processed_at TEXT
+  );`);
+  db.exec(`CREATE TABLE IF NOT EXISTS client_stats (
+    client_id INTEGER PRIMARY KEY,
+    data TEXT,
+    updated_at TEXT NOT NULL DEFAULT (datetime('now'))
+  );`);
   db.exec(`CREATE TABLE IF NOT EXISTS codes_registry (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     code TEXT UNIQUE NOT NULL,

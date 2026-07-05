@@ -346,6 +346,7 @@ svg[stroke="currentColor"]{stroke-width:2}
       <div class="sb-item" data-page="admin_tax"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg><span>Statements & Tax</span></div>
     </div>
     <div class="sb-group"><div class="sb-label">System</div>
+      <div class="sb-item" data-page="admin_payouts"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h3v-4z"/></svg><span>Payouts</span><span class="badge" id="aPayBadge" style="display:none">0</span></div>
       <div class="sb-item" data-page="admin_codes"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 7h1M4 12h1M4 17h1M8 7h12M8 12h12M8 17h12"/></svg><span>Codes (UPC/ISRC)</span></div>
       <div class="sb-item" data-page="admin_audit"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg><span>Audit Logs</span></div>
       <div class="sb-item" data-page="admin_settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.7 1.6 1.6 0 01-3.2 0 1.6 1.6 0 00-2.7-.7l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-.7-2.7 1.6 1.6 0 010-3.2 1.6 1.6 0 00.7-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 002.7-.7 1.6 1.6 0 013.2 0 1.6 1.6 0 002.7.7l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00.7 2.7 1.6 1.6 0 010 3.2 1.6 1.6 0 00-1 .9z"/></svg><span>Settings</span></div>
@@ -461,16 +462,31 @@ svg[stroke="currentColor"]{stroke-width:2}
     </div>
 
 <div class="modal-bg" id="clientModal">
-  <div class="modal" style="max-width:520px">
+  <div class="modal" style="max-width:640px">
     <div class="modal-head"><h3 id="cmTitle2">Add Client</h3><button class="icon-btn" onclick="closeModal('clientModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
     <div class="modal-body">
-      <div class="field"><label>Client / label name *</label><input class="input" id="cfName" placeholder="e.g. Omega Music Group"></div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:14px">
-        <div class="field"><label>Plan</label><select class="ctrl" id="cfPlan" style="width:100%"><option>Label</option><option>Artist</option><option>Partner</option><option>Pro</option></select></div>
-        <div class="field"><label>Status</label><select class="ctrl" id="cfStatus" style="width:100%"><option value="active">Active</option><option value="disabled">Disabled</option></select></div>
+      <div class="sec-title" style="margin-bottom:10px">Account</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px">
+        <div class="field"><label>Client / company name *</label><input class="input" id="cfName" placeholder="e.g. Omega Music Group"></div>
+        <div class="field"><label>Account type</label><select class="ctrl" id="cfType" style="width:100%"><option value="label">Label</option><option value="artist">Artist</option><option value="distributor">Distributor</option></select></div>
+        <div class="field"><label>Revenue share %</label><input class="input" id="cfShare" type="number" min="0" max="100" value="80"></div>
       </div>
+      <div class="sec-title" style="margin:14px 0 10px">Labels</div>
+      <div style="display:grid;grid-template-columns:2fr 1fr 1fr;gap:12px;align-items:end">
+        <div class="field"><label>First label name</label><input class="input" id="cfLabel1" placeholder="e.g. Omega Records"></div>
+        <div class="field"><label>Max labels</label><input class="input" id="cfMaxLabels" type="number" min="1" value="1"></div>
+        <div class="field" style="display:flex;align-items:center;gap:8px;padding-bottom:10px"><input type="checkbox" id="cfCanCreate" style="width:16px;height:16px"><label for="cfCanCreate" style="margin:0;cursor:pointer">Can create labels</label></div>
+      </div>
+      <div class="sec-title" style="margin:14px 0 10px">First user (login)</div>
+      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px">
+        <div class="field"><label>Name</label><input class="input" id="cfUserName" placeholder="Full name"></div>
+        <div class="field"><label>Email</label><input class="input" id="cfUserEmail" placeholder="user@email.com"></div>
+        <div class="field"><label>Password (8+)</label><input class="input" id="cfUserPass" type="text" placeholder="Temp password"></div>
+      </div>
+      <div class="sec-title" style="margin:14px 0 10px">Visible pages</div>
+      <div id="cfPages" style="display:flex;flex-wrap:wrap;gap:8px"></div>
     </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="SoutClients.submitCreate()">Save client</button></div>
+    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('clientModal')">Cancel</button><button class="btn btn-primary" onclick="SoutClients.submitCreate()">Create client</button></div>
   </div>
 </div>
 
@@ -606,6 +622,14 @@ svg[stroke="currentColor"]{stroke-width:2}
       <tr><td class="cell-main">ELshamrany</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
       <tr><td class="cell-main">Injaz Teqani</td><td class="cell-mono">Jun 2026</td><td><span class="chip green">Ready</span></td><td><span class="chip gray">W-8BEN</span></td><td style="text-align:right"><button class="btn btn-ghost btn-sm"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download</button></td></tr>
       </tbody></table></div></div></div>
+<div class="page" data-page="admin_payouts">
+      <div class="page-head"><div><div class="page-title">Payout Requests</div><div class="page-sub">Client withdrawal requests — processed manually</div></div></div>
+      <div class="table-wrap"><div class="table-scroll"><table>
+        <thead><tr><th>Date</th><th>Client</th><th>Method</th><th>Amount</th><th>Status</th><th></th></tr></thead>
+        <tbody id="aPayBody"><tr><td colspan="6"><div class="empty"><h4>Loading…</h4></div></td></tr></tbody>
+      </table></div></div>
+    </div>
+
 <div class="page" data-page="admin_codes">
       <div class="page-head"><div><div class="page-title">Codes Registry — UPC &amp; ISRC</div><div class="page-sub">One ledger for every code — dashboard &amp; external. Same counters, zero collisions.</div></div>
       <div style="display:flex;gap:8px">
@@ -676,7 +700,7 @@ svg[stroke="currentColor"]{stroke-width:2}
 function go(p){document.querySelectorAll('.page').forEach(x=>x.classList.remove('active'));
   var el=document.querySelector('.page[data-page="'+p+'"]'); if(el)el.classList.add('active');
   document.querySelectorAll('.sb-item').forEach(x=>x.classList.toggle('active',x.dataset.page===p));
-  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_applications:['Accounts','Applications'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_codes:['System','Codes Registry'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
+  var L={admin_overview:['Admin','Overview'],admin_moderation:['Operations','Review Queue'],admin_distribution:['Operations','Distribution'],admin_applications:['Accounts','Applications'],admin_users:['Accounts','User Management'],admin_permissions:['Accounts','Permissions'],admin_clients:['Accounts','Client Accounts'],admin_rights:['Rights','Rights Manager'],admin_revenue:['Finance','Revenue Reports'],admin_splits:['Finance','Split Payments'],admin_payouts:['Finance','Payout Approvals'],admin_tax:['Finance','Statements & Tax'],admin_payouts:['Business','Payout Requests'],admin_codes:['System','Codes Registry'],admin_audit:['System','Audit Logs'],admin_settings:['System','Settings']};
   var c=L[p]||['','']; document.getElementById('crumb').innerHTML='<span>'+c[0]+'</span>'+`<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg>`+'<b>'+c[1]+'</b>';
   document.querySelector('.content').scrollTop=0; clearSel(); if(window.innerWidth<=1024)closeSidebar();}
 document.querySelectorAll('.sb-item').forEach(it=>it.addEventListener('click',()=>go(it.dataset.page)));

@@ -61,44 +61,111 @@
     const rows = d.clients || [];
     if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><h4>No clients yet</h4></div></td></tr>`; return; }
     tbody.innerHTML = rows.map(cl => `<tr>
-      <td><div class="row-flex">${art(initials(cl.name))}<div class="cell-main">${esc(cl.name)}</div></div></td>
+      <td><div class="row-flex" style="cursor:pointer" onclick="SoutClients.manage(${cl.id})">${art(initials(cl.name))}<div><div class="cell-main">${esc(cl.name)}</div><div class="cell-sub cell-mono">#${cl.id}</div></div></div></td>
       <td class="cell-mono">${cl.releases} releases</td>
       <td class="cell-mono">${cl.users} user${cl.users == 1 ? '' : 's'}</td>
-      <td><span class="chip blue">${esc(cl.plan)}</span></td>
+      <td><span class="chip gray">${esc(cl.account_type || cl.plan)}</span></td>
       <td><span class="chip ${cl.status === 'active' ? 'green' : 'gray'}">${esc(cl.status)}</span></td>
-      <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="SoutClients.manage(${cl.id})">Manage</button></td></tr>`).join('');
+      <td style="text-align:right"><button class="btn btn-primary btn-sm" onclick="SoutClients.manage(${cl.id})">Manage</button></td></tr>`).join('');
   }
 
+  function money(v) { return '$' + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function knum(v) { v = Number(v) || 0; if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'; if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K'; return String(v); }
+  const CLIENT_PAGES = { overview: 'Overview', analytics: 'Analytics', releases: 'Manage Music', artists: 'Artists & Labels', newrelease: 'New Release', rights: 'Rights Manager', finance: 'Finance', payouts: 'Payouts', promotion: 'Promotion', bulk: 'Bulk Ops', settings: 'Settings' };
   const MC_CAPS = { upload_releases: 'Upload releases', edit_releases: 'Edit releases', deliver_releases: 'Deliver releases', metadata_edits: 'Metadata edits', takedowns: 'Takedowns', financial_access: 'Financial access', rights_access: 'Rights access', analytics_access: 'Analytics access', team_access: 'Team access' };
 
   const SoutClients = {
     _id: null,
     openCreate() {
-      this._id = null;
-      document.getElementById('cmTitle2').textContent = 'Add Client';
-      document.getElementById('cfName').value = '';
-      document.getElementById('cfPlan').value = 'Label';
-      document.getElementById('cfStatus').value = 'active';
+      const v = (id, val) => { const el = document.getElementById(id); if (el) el.value = val; };
+      v('cfName', ''); v('cfType', 'label'); v('cfShare', 80); v('cfLabel1', ''); v('cfMaxLabels', 1);
+      v('cfUserName', ''); v('cfUserEmail', ''); v('cfUserPass', '');
+      document.getElementById('cfCanCreate').checked = false;
+      const pages = document.getElementById('cfPages');
+      pages.innerHTML = Object.keys(CLIENT_PAGES).map(p => `<label class="chip green" style="cursor:pointer;user-select:none"><input type="checkbox" checked value="${p}" style="margin-right:5px" onchange="this.parentElement.className='chip '+(this.checked?'green':'gray')">${CLIENT_PAGES[p]}</label>`).join('');
       openModal('clientModal');
     },
     async submitCreate() {
-      const name = document.getElementById('cfName').value.trim();
-      const plan = document.getElementById('cfPlan').value, status = document.getElementById('cfStatus').value;
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      const name = v('cfName');
       if (!name) { toast && toast('Client name is required'); return; }
+      const visible_pages = [...document.querySelectorAll('#cfPages input:checked')].map(x => x.value);
+      const body = {
+        name, account_type: v('cfType'), revenue_share: Number(v('cfShare')) || 80,
+        max_labels: Number(v('cfMaxLabels')) || 1,
+        can_create_labels: document.getElementById('cfCanCreate').checked,
+        labels: v('cfLabel1') ? [v('cfLabel1')] : [],
+        visible_pages
+      };
+      if (v('cfUserEmail') && v('cfUserPass')) body.user = { name: v('cfUserName'), email: v('cfUserEmail'), password: v('cfUserPass') };
       try {
-        if (this._id) { await API.call('/admin/clients/' + this._id, { method: 'PUT', body: { name, plan, status } }); toast && toast('Client updated'); }
-        else { await API.call('/admin/clients', { method: 'POST', body: { name, plan } }); toast && toast('Client created'); }
-        closeModal('clientModal'); await loadClients();
-        if (this._id) await this.manage(this._id);
+        const r = await API.call('/admin/clients', { method: 'POST', body });
+        if (r.user_error) alert('Client created, but the user was NOT created:\n' + r.user_error);
+        else toast && toast('Client #' + r.id + ' created ✓' + (r.user_id ? ' with login user' : ''));
+        closeModal('clientModal'); await loadClients(); await this.manage(r.id);
       } catch (e) { toast && toast(e.message); }
     },
 
-    // ---------- full manage modal ----------
-    async manage(id) {
+    // ---------- full manage modal (tabs: Info | Users | Labels | Finance | Analytics) ----------
+    _d: null,
+    async manage(id, tab) {
       this._id = id;
-      let d; try { d = await API.call('/admin/clients/' + id); } catch (e) { toast && toast(e.message); return; }
-      const cl = d.client, users = d.users || [], st = d.stats || {};
-      document.getElementById('mcTitle').textContent = cl.name;
+      let d; try { d = await API.call('/admin/clients/' + id); } catch (err) { toast && toast(err.message); return; }
+      this._d = d;
+      const cl = d.client;
+      document.getElementById('mcTitle').textContent = cl.name + '  ·  #' + cl.id;
+      const tabs = ['Info', 'Users', 'Labels', 'Finance', 'Analytics'];
+      const cur = tab || 'Info';
+      document.getElementById('mcBody').innerHTML = `
+        <div class="tabs" style="margin-bottom:14px">${tabs.map(t => `<div class="tab${t === cur ? ' active' : ''}" onclick="SoutClients.manage(${id},'${t}')">${t}</div>`).join('')}</div>
+        <div id="mcTabBody"></div>`;
+      this['tab' + cur]();
+      openModal('manageClientModal');
+    },
+
+    // ----- Info tab -----
+    tabInfo() {
+      const cl = this._d.client, st = this._d.stats || {}, bal = this._d.balances || {};
+      const vp = Array.isArray(cl.visible_pages) && cl.visible_pages.length ? cl.visible_pages : Object.keys(CLIENT_PAGES);
+      document.getElementById('mcTabBody').innerHTML = `
+        <div class="stat-grid" style="margin-bottom:14px">
+          <div class="stat"><div class="lbl">Releases</div><div class="val">${st.releases || 0}</div></div>
+          <div class="stat"><div class="lbl">Live</div><div class="val">${st.live || 0}</div></div>
+          <div class="stat"><div class="lbl">Available balance</div><div class="val">${money(bal.available)}</div></div>
+          <div class="stat"><div class="lbl">Lifetime</div><div class="val">${money(bal.lifetime)}</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:2fr 1fr 1fr 1fr;gap:10px;margin-bottom:12px">
+          <div class="field" style="margin:0"><label>Name</label><input class="input" id="mcName" value="${esc(cl.name)}"></div>
+          <div class="field" style="margin:0"><label>Type</label><select class="ctrl" id="mcType" style="width:100%">${['label', 'artist', 'distributor'].map(t => `<option value="${t}"${cl.account_type === t ? ' selected' : ''}>${t[0].toUpperCase() + t.slice(1)}</option>`).join('')}</select></div>
+          <div class="field" style="margin:0"><label>Revenue share %</label><input class="input" id="mcShare" type="number" min="0" max="100" value="${cl.revenue_share ?? 80}"></div>
+          <div class="field" style="margin:0"><label>Status</label><select class="ctrl" id="mcStatus" style="width:100%"><option value="active"${cl.status === 'active' ? ' selected' : ''}>Active</option><option value="disabled"${cl.status === 'disabled' ? ' selected' : ''}>Disabled</option></select></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 2fr;gap:10px;margin-bottom:12px;align-items:end">
+          <div class="field" style="margin:0"><label>Max labels</label><input class="input" id="mcMaxLabels" type="number" min="1" value="${cl.max_labels || 1}"></div>
+          <div class="field" style="margin:0;display:flex;align-items:center;gap:8px;padding-bottom:10px"><input type="checkbox" id="mcCanCreate" style="width:16px;height:16px"${cl.can_create_labels ? ' checked' : ''}><label for="mcCanCreate" style="margin:0;cursor:pointer">Can create labels</label></div>
+          <div class="field" style="margin:0"><label>Plan</label><select class="ctrl" id="mcPlan" style="width:100%">${['Label', 'Artist', 'Partner', 'Pro'].map(p => `<option${cl.plan === p ? ' selected' : ''}>${p}</option>`).join('')}</select></div>
+        </div>
+        <div class="sec-title" style="margin-bottom:8px">Visible pages (what this client sees)</div>
+        <div id="mcPages" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${Object.keys(CLIENT_PAGES).map(p => `<label class="chip ${vp.includes(p) ? 'green' : 'gray'}" style="cursor:pointer;user-select:none"><input type="checkbox"${vp.includes(p) ? ' checked' : ''} value="${p}" style="margin-right:5px" onchange="this.parentElement.className='chip '+(this.checked?'green':'gray')">${CLIENT_PAGES[p]}</label>`).join('')}</div>
+        <button class="btn btn-primary" onclick="SoutClients.saveInfo()">Save changes — applies to the client immediately</button>`;
+    },
+    async saveInfo() {
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      const body = {
+        name: v('mcName'), plan: v('mcPlan'), status: v('mcStatus'),
+        account_type: v('mcType'), revenue_share: Number(v('mcShare')),
+        max_labels: Number(v('mcMaxLabels')) || 1,
+        can_create_labels: document.getElementById('mcCanCreate').checked,
+        visible_pages: [...document.querySelectorAll('#mcPages input:checked')].map(x => x.value)
+      };
+      if (!body.name) { toast && toast('Name required'); return; }
+      try { await API.call('/admin/clients/' + this._id, { method: 'PUT', body }); toast && toast('Saved ✓ — applied to the client account'); await loadClients(); await this.manage(this._id, 'Info'); }
+      catch (e) { toast && toast(e.message); }
+    },
+
+    // ----- Users tab -----
+    tabUsers() {
+      const users = this._d.users || [];
       const userRows = users.map(u => `
         <tr>
           <td><div class="row-flex">${art(initials(u.name))}<div><div class="cell-main">${esc(u.name)}</div><div class="cell-sub">${esc(u.email)}</div></div></div></td>
@@ -111,20 +178,7 @@
         </tr>
         <tr class="permsRow" data-u="${u.id}" style="display:none"><td colspan="3"><div class="permsBox" style="display:flex;flex-wrap:wrap;gap:8px;padding:6px 4px"></div></td></tr>
         <tr class="pwRow" data-u="${u.id}" style="display:none"><td colspan="3"><div class="row-flex" style="gap:8px;padding:4px"><input class="input" type="text" placeholder="New password (8+ chars)" style="max-width:280px"><button class="btn btn-primary btn-sm" onclick="SoutClients.resetPwSave(${u.id},this)">Save</button></div></td></tr>`).join('');
-      document.getElementById('mcBody').innerHTML = `
-        <div class="stat-grid" style="margin-bottom:16px">
-          <div class="stat"><div class="lbl">Releases</div><div class="val">${st.releases || 0}</div></div>
-          <div class="stat"><div class="lbl">Live</div><div class="val">${st.live || 0}</div></div>
-          <div class="stat"><div class="lbl">Pending review</div><div class="val">${st.pending || 0}</div></div>
-          <div class="stat"><div class="lbl">Open rights issues</div><div class="val">${st.rights_open || 0}</div></div>
-        </div>
-        <div class="sec-title" style="margin-bottom:8px">Client info</div>
-        <div style="display:grid;grid-template-columns:2fr 1fr 1fr auto;gap:10px;align-items:end;margin-bottom:18px">
-          <div class="field" style="margin:0"><label>Name</label><input class="input" id="mcName" value="${esc(cl.name)}"></div>
-          <div class="field" style="margin:0"><label>Plan</label><select class="ctrl" id="mcPlan" style="width:100%"><option${cl.plan === 'Label' ? ' selected' : ''}>Label</option><option${cl.plan === 'Artist' ? ' selected' : ''}>Artist</option><option${cl.plan === 'Partner' ? ' selected' : ''}>Partner</option><option${cl.plan === 'Pro' ? ' selected' : ''}>Pro</option></select></div>
-          <div class="field" style="margin:0"><label>Status</label><select class="ctrl" id="mcStatus" style="width:100%"><option value="active"${cl.status === 'active' ? ' selected' : ''}>Active</option><option value="disabled"${cl.status === 'disabled' ? ' selected' : ''}>Disabled</option></select></div>
-          <button class="btn btn-primary" onclick="SoutClients.saveInfo()">Save</button>
-        </div>
+      document.getElementById('mcTabBody').innerHTML = `
         <div class="row-flex" style="justify-content:space-between;margin-bottom:8px">
           <div class="sec-title" style="margin:0">Users (${users.length})</div>
           <button class="btn btn-ghost btn-sm" onclick="SoutClients.toggleAddUser()">+ Add user</button>
@@ -136,14 +190,114 @@
           <button class="btn btn-primary btn-sm" onclick="SoutClients.addUser()">Create</button>
         </div></div>
         <div class="table-wrap"><div class="table-scroll"><table><tbody>${userRows || '<tr><td><div class="empty"><h4>No users yet — add the first one</h4></div></td></tr>'}</tbody></table></div></div>`;
-      openModal('manageClientModal');
     },
-    async saveInfo() {
-      const body = { name: document.getElementById('mcName').value.trim(), plan: document.getElementById('mcPlan').value, status: document.getElementById('mcStatus').value };
-      if (!body.name) { toast && toast('Name required'); return; }
-      try { await API.call('/admin/clients/' + this._id, { method: 'PUT', body }); toast && toast('Client updated — applied to the client account'); await loadClients(); }
+
+    // ----- Labels tab -----
+    tabLabels() {
+      const cl = this._d.client, labels = this._d.labels || [];
+      document.getElementById('mcTabBody').innerHTML = `
+        <div class="cell-sub" style="margin-bottom:12px">This client can use <b>${labels.length}/${cl.max_labels}</b> label(s) · creating new labels: <b>${cl.can_create_labels ? 'allowed' : 'locked — picks from this list only'}</b> (change in Info tab)</div>
+        <div style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:14px">${labels.map(l => `<span class="chip gray" style="gap:6px">${esc(l)} <span style="cursor:pointer;font-weight:800" title="Remove" onclick="SoutClients.removeLabel('${esc(l).replace(/'/g, "\\'")}')">×</span></span>`).join('') || '<span class="cell-sub">No labels assigned yet</span>'}</div>
+        <div class="row-flex" style="gap:8px"><input class="input" id="mcNewLabel" placeholder="New label name" style="max-width:300px" onkeydown="if(event.key==='Enter')SoutClients.addLabel()"><button class="btn btn-primary btn-sm" onclick="SoutClients.addLabel()">Add label</button></div>`;
+    },
+    async addLabel() {
+      const name = (document.getElementById('mcNewLabel').value || '').trim();
+      if (!name) return;
+      try { await API.call('/admin/clients/' + this._id + '/labels', { method: 'POST', body: { name } }); toast && toast('Label added'); await this.manage(this._id, 'Labels'); }
       catch (e) { toast && toast(e.message); }
     },
+    async removeLabel(name) {
+      try { await API.call('/admin/clients/' + this._id + '/labels?name=' + encodeURIComponent(name), { method: 'DELETE' }); toast && toast('Label removed'); await this.manage(this._id, 'Labels'); }
+      catch (e) { toast && toast(e.message); }
+    },
+
+    // ----- Finance tab (statements) -----
+    async tabFinance() {
+      let d; try { d = await API.call('/admin/clients/' + this._id + '/statements'); } catch (e) { toast && toast(e.message); return; }
+      const b = d.balances || {};
+      const rows = (d.statements || []).map(s => `<tr>
+        <td class="cell-mono">${esc(s.period)}</td><td>${esc(s.platform)}</td>
+        <td class="cell-mono">${knum(s.streams)}</td><td class="cell-mono">${money(s.revenue)}</td>
+        <td><span class="chip ${s.status === 'cleared' ? 'green' : 'amber'}" style="cursor:pointer" title="Click to toggle" onclick="SoutClients.stStatus(${s.id},'${s.status === 'cleared' ? 'pending' : 'cleared'}')">${s.status}</span></td>
+        <td style="text-align:right"><button class="btn btn-ghost btn-sm" onclick="SoutClients.stDelete(${s.id})">Delete</button></td></tr>`).join('');
+      document.getElementById('mcTabBody').innerHTML = `
+        <div class="stat-grid" style="margin-bottom:14px">
+          <div class="stat"><div class="lbl">Available</div><div class="val">${money(b.available)}</div></div>
+          <div class="stat"><div class="lbl">Pending</div><div class="val">${money(b.pending)}</div></div>
+          <div class="stat"><div class="lbl">Lifetime</div><div class="val">${money(b.lifetime)}</div></div>
+          <div class="stat"><div class="lbl">Streams</div><div class="val">${knum(b.total_streams)}</div></div>
+        </div>
+        <div class="sec-title" style="margin-bottom:8px">Add statement line</div>
+        <div style="display:grid;grid-template-columns:1fr 1.2fr 1fr 1fr 1fr auto;gap:8px;margin-bottom:14px">
+          <input class="input" id="stPeriod" placeholder="2026-06">
+          <input class="input" id="stPlatform" placeholder="Platform (Spotify…)" list="stPlatList"><datalist id="stPlatList"><option>Spotify</option><option>YouTube</option><option>Apple Music</option><option>TikTok</option><option>Anghami</option><option>Deezer</option><option>Facebook/Instagram</option><option>Amazon Music</option><option>SoundCloud</option></datalist>
+          <input class="input" id="stStreams" type="number" min="0" placeholder="Streams">
+          <input class="input" id="stRevenue" type="number" min="0" step="0.01" placeholder="Revenue $">
+          <select class="ctrl" id="stStatus" style="width:100%"><option value="pending">Pending</option><option value="cleared">Cleared</option></select>
+          <button class="btn btn-primary btn-sm" onclick="SoutClients.stAdd()">Add</button>
+        </div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>Period</th><th>Platform</th><th>Streams</th><th>Revenue</th><th>Status</th><th></th></tr></thead>
+          <tbody>${rows || '<tr><td colspan="6"><div class="empty"><h4>No statements yet</h4></div></td></tr>'}</tbody>
+        </table></div></div>
+        <div class="cell-sub" style="margin-top:8px">Pending = showing but not withdrawable · Cleared = counts toward the client's available balance. Click a status chip to toggle.</div>`;
+    },
+    async stAdd() {
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      if (!v('stPeriod') || !v('stPlatform')) { toast && toast('Period and platform required'); return; }
+      try {
+        await API.call('/admin/clients/' + this._id + '/statements', { method: 'POST', body: { period: v('stPeriod'), platform: v('stPlatform'), streams: Number(v('stStreams')) || 0, revenue: Number(v('stRevenue')) || 0, status: v('stStatus') } });
+        toast && toast('Statement added — visible to the client now');
+        await this.manage(this._id, 'Finance');
+      } catch (e) { toast && toast(e.message); }
+    },
+    async stStatus(sid, status) {
+      try { await API.call('/admin/statements/' + sid + '/status', { method: 'POST', body: { status } }); await this.manage(this._id, 'Finance'); }
+      catch (e) { toast && toast(e.message); }
+    },
+    async stDelete(sid) {
+      try { await API.call('/admin/statements/' + sid, { method: 'DELETE' }); toast && toast('Deleted'); await this.manage(this._id, 'Finance'); }
+      catch (e) { toast && toast(e.message); }
+    },
+
+    // ----- Analytics tab (stats editor) -----
+    async tabAnalytics() {
+      let d; try { d = await API.call('/admin/clients/' + this._id + '/stats'); } catch (e) { toast && toast(e.message); return; }
+      const st = d.stats || {};
+      this._tracks = d.tracks || [];
+      const trackOpts = sel => `<option value="">— track —</option>` + this._tracks.map(t => `<option value="${t.id}"${sel == t.id ? ' selected' : ''}>${esc(t.title)} (${esc(t.artist || '')})</option>`).join('');
+      const monthRow = (m) => `<div class="row-flex anMonth" style="gap:6px;margin-bottom:6px"><input class="input" style="max-width:110px" placeholder="Jun" value="${esc((m || {}).m || '')}"><input class="input" type="number" min="0" placeholder="Streams" value="${(m || {}).v ?? ''}"><button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">×</button></div>`;
+      const terrRow = (t) => `<div class="row-flex anTerr" style="gap:6px;margin-bottom:6px"><input class="input" placeholder="Egypt" value="${esc((t || {}).name || '')}"><input class="input" type="number" min="0" max="100" style="max-width:90px" placeholder="%" value="${(t || {}).pct ?? ''}"><button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">×</button></div>`;
+      const topRow = (t) => `<div class="row-flex anTopT" style="gap:6px;margin-bottom:6px"><select class="ctrl" style="flex:1">${trackOpts((t || {}).track_id)}</select><input class="input" type="number" min="0" style="max-width:130px" placeholder="Streams" value="${(t || {}).streams ?? ''}"><button class="btn btn-ghost btn-sm" onclick="this.parentElement.remove()">×</button></div>`;
+      document.getElementById('mcTabBody').innerHTML = `
+        <div class="sec-title" style="margin-bottom:8px">Summary</div>
+        <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:8px;margin-bottom:14px">
+          <div class="field" style="margin:0"><label>Total streams</label><input class="input" id="anEdStreams" type="number" min="0" value="${st.total_streams ?? ''}"></div>
+          <div class="field" style="margin:0"><label>Listeners</label><input class="input" id="anEdListeners" type="number" min="0" value="${st.listeners ?? ''}"></div>
+          <div class="field" style="margin:0"><label>Saves</label><input class="input" id="anEdSaves" type="number" min="0" value="${st.saves ?? ''}"></div>
+          <div class="field" style="margin:0"><label>Completion %</label><input class="input" id="anEdCompletion" type="number" min="0" max="100" value="${st.completion ?? ''}"></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px">
+          <div><div class="sec-title" style="margin-bottom:8px">Monthly streams</div><div id="anMonths">${(st.months || []).map(monthRow).join('')}</div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('anMonths').insertAdjacentHTML('beforeend', SoutClients._mRow())">+ Month</button></div>
+          <div><div class="sec-title" style="margin-bottom:8px">Top territories</div><div id="anTerrs">${(st.territories || []).map(terrRow).join('')}</div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('anTerrs').insertAdjacentHTML('beforeend', SoutClients._tRow())">+ Territory</button></div>
+          <div><div class="sec-title" style="margin-bottom:8px">Top tracks</div><div id="anTops">${(st.top_tracks || []).map(topRow).join('')}</div><button class="btn btn-ghost btn-sm" onclick="document.getElementById('anTops').insertAdjacentHTML('beforeend', SoutClients._topRow())">+ Track</button></div>
+        </div>
+        <button class="btn btn-primary" style="margin-top:16px" onclick="SoutClients.saveStats()">Save analytics — shown to the client immediately</button>`;
+      this._mRow = () => monthRow(); this._tRow = () => terrRow(); this._topRow = () => topRow();
+    },
+    async saveStats() {
+      const num = el => Number(el.value) || 0;
+      const stats = {
+        total_streams: num(document.getElementById('anEdStreams')), listeners: num(document.getElementById('anEdListeners')),
+        saves: num(document.getElementById('anEdSaves')), completion: num(document.getElementById('anEdCompletion')),
+        months: [...document.querySelectorAll('#anMonths .anMonth')].map(r => { const i = r.querySelectorAll('input'); return { m: i[0].value.trim(), v: Number(i[1].value) || 0 }; }).filter(x => x.m),
+        territories: [...document.querySelectorAll('#anTerrs .anTerr')].map(r => { const i = r.querySelectorAll('input'); return { name: i[0].value.trim(), pct: Number(i[1].value) || 0 }; }).filter(x => x.name),
+        top_tracks: [...document.querySelectorAll('#anTops .anTopT')].map(r => ({ track_id: Number(r.querySelector('select').value) || 0, streams: Number(r.querySelector('input').value) || 0 })).filter(x => x.track_id)
+      };
+      try { await API.call('/admin/clients/' + this._id + '/stats', { method: 'PUT', body: { stats } }); toast && toast('Analytics saved ✓ — the client sees them now'); }
+      catch (e) { toast && toast(e.message); }
+    },
+
     toggleAddUser() { const el = document.getElementById('mcAddUser'); el.style.display = el.style.display === 'none' ? '' : 'none'; },
     async addUser() {
       const name = document.getElementById('nuName').value.trim(), email = document.getElementById('nuEmail').value.trim(), password = document.getElementById('nuPass').value;
@@ -702,15 +856,51 @@
   };
   window.SoutCodes = SoutCodes;
 
+
+  // ============================================================
+  // PAYOUT REQUESTS (admin)
+  // ============================================================
+  const SoutPayouts = {
+    async load() {
+      let d; try { d = await API.call('/admin/payouts'); } catch (e) { toast && toast(e.message); return; }
+      const badge = document.getElementById('aPayBadge');
+      if (badge) { badge.textContent = d.pending; badge.style.display = d.pending ? '' : 'none'; }
+      const tbody = document.getElementById('aPayBody'); if (!tbody) return;
+      const rows = d.payouts || [];
+      if (!rows.length) { tbody.innerHTML = `<tr><td colspan="6"><div class="empty"><h4>No payout requests</h4></div></td></tr>`; return; }
+      const pchip = s => s === 'paid' ? '<span class="chip green">Paid</span>' : s === 'approved' ? '<span class="chip blue">Approved</span>' : s === 'rejected' ? '<span class="chip red">Rejected</span>' : '<span class="chip amber">Pending</span>';
+      tbody.innerHTML = rows.map(p => `<tr>
+        <td class="cell-mono">${esc((p.created_at || '').slice(0, 10))}</td>
+        <td><div class="cell-main">${esc(p.client_name)}</div><div class="cell-sub cell-mono">#${p.client_id}</div></td>
+        <td><div class="cell-main">${esc(p.method || '')}</div><div class="cell-sub">${esc(p.details || '')}</div></td>
+        <td class="cell-mono" style="font-weight:700">${money(p.amount)}</td>
+        <td>${pchip(p.status)}</td>
+        <td style="text-align:right;white-space:nowrap">${p.status === 'pending' ? `
+          <button class="btn btn-primary btn-sm" onclick="SoutPayouts.act(${p.id},'paid')">Mark Paid</button>
+          <button class="btn btn-ghost btn-sm" onclick="SoutPayouts.reject(${p.id})">Reject</button>` : ''}</td></tr>`).join('');
+    },
+    async act(id, status) {
+      try { await API.call('/admin/payouts/' + id + '/status', { method: 'POST', body: { status } }); toast && toast('Payout ' + status); await this.load(); }
+      catch (e) { toast && toast(e.message); }
+    },
+    reject(id) {
+      ask('Reject payout', [{ id: 'note', label: 'Reason (visible to the client)', type: 'textarea' }], 'Reject', async v => {
+        try { await API.call('/admin/payouts/' + id + '/status', { method: 'POST', body: { status: 'rejected', admin_note: v.note.trim() } }); closeModal('askModal'); toast && toast('Payout rejected'); await this.load(); }
+        catch (e) { toast && toast(e.message); }
+      });
+    }
+  };
+  window.SoutPayouts = SoutPayouts;
+
   // ---------- router hook ----------
   window.SoutPage = {
     onReady() {
-      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load(); SoutApps.load(); SoutDist.load();
+      loadAdminOverview(); loadModeration(); SoutRightsAdmin.load(); SoutApps.load(); SoutDist.load(); SoutPayouts.load();
       if (window.go && !window.__goWrapped) {
         const _go = window.go;
         window.go = function (p) {
           _go(p);
-          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load(), admin_distribution: () => SoutDist.load(), admin_codes: () => SoutCodes.load() }[p] || (() => { }))();
+          ({ admin_overview: loadAdminOverview, admin_moderation: loadModeration, admin_users: loadUsers, admin_clients: loadClients, admin_permissions: loadPermissions, admin_audit: loadAudit, admin_rights: () => SoutRightsAdmin.load(), admin_applications: () => SoutApps.load(), admin_distribution: () => SoutDist.load(), admin_codes: () => SoutCodes.load(), admin_payouts: () => SoutPayouts.load() }[p] || (() => { }))();
           // wire CSV export button on revenue/distribution pages
         };
         window.__goWrapped = true;

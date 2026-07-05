@@ -44,7 +44,19 @@
     if (adminLink && u.role === 'admin') adminLink.style.display = '';
     // set user name/role in topbar if elements exist
     document.querySelectorAll('.tb-user .un').forEach(el => el.textContent = u.name || 'User');
-    document.querySelectorAll('.tb-user .uc').forEach(el => el.textContent = u.role === 'admin' ? 'Administrator' : ('Client #' + (u.client_id || '—')));
+    window.__me = me;
+    document.querySelectorAll('.tb-user .uc').forEach(el => el.textContent = u.role === 'admin' ? 'Administrator' : ('#' + (u.client_id || '—')));
+    const umh = document.getElementById('umHead');
+    if (umh) umh.innerHTML = '<div style="font-weight:700;color:var(--fg)">' + (u.name || '') + '</div><div>' + (u.email || '') + '</div><div style="margin-top:2px">Account ID: #' + (u.client_id || '—') + '</div>';
+    document.addEventListener('click', () => { const m = document.getElementById('userMenu'); if (m) m.style.display = 'none'; });
+    // page visibility controlled per client from the admin
+    if (me.client && Array.isArray(me.client.visible_pages)) {
+      const always = ['overview', 'settings', 'releases', 'newrelease'];
+      document.querySelectorAll('.sb-item[data-page]').forEach(el => {
+        const p = el.getAttribute('data-page');
+        if (!always.includes(p) && !me.client.visible_pages.includes(p)) el.style.display = 'none';
+      });
+    }
     document.querySelectorAll('.tb-avatar').forEach(el => el.textContent = initials(u.name));
     // settings page account fields
     const stN = document.getElementById('stName'), stE = document.getElementById('stEmail');

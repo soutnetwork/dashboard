@@ -361,21 +361,25 @@ svg[stroke="currentColor"]{stroke-width:2}
     <div class="sb-group">
       <div class="sb-label">Tools</div>
       <div class="sb-item" data-page="bulk"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 21v-7M4 10V3M12 21v-9M12 8V3M20 21v-5M20 12V3M1 14h6M9 8h6M17 16h6"/></svg><span>Bulk Operations</span></div>
-      <div class="sb-item" data-page="clients"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 10l9-6 9 6"/><path d="M5 10v8M10 10v8M14 10v8M19 10v8"/><path d="M3 21h18"/></svg><span>Client Accounts</span></div>
-      <div class="sb-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.7 1.6 1.6 0 01-3.2 0 1.6 1.6 0 00-2.7-.7l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-.7-2.7 1.6 1.6 0 010-3.2 1.6 1.6 0 00.7-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 002.7-.7 1.6 1.6 0 013.2 0 1.6 1.6 0 002.7.7l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00.7 2.7 1.6 1.6 0 010 3.2 1.6 1.6 0 00-1 .9z"/></svg><span>Settings</span></div>
+            <div class="sb-item" data-page="settings"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.6 1.6 0 00.3 1.8l.1.1a2 2 0 11-2.8 2.8l-.1-.1a1.6 1.6 0 00-2.7.7 1.6 1.6 0 01-3.2 0 1.6 1.6 0 00-2.7-.7l-.1.1a2 2 0 11-2.8-2.8l.1-.1a1.6 1.6 0 00-.7-2.7 1.6 1.6 0 010-3.2 1.6 1.6 0 00.7-2.7l-.1-.1a2 2 0 112.8-2.8l.1.1a1.6 1.6 0 002.7-.7 1.6 1.6 0 013.2 0 1.6 1.6 0 002.7.7l.1-.1a2 2 0 112.8 2.8l-.1.1a1.6 1.6 0 00.7 2.7 1.6 1.6 0 010 3.2 1.6 1.6 0 00-1 .9z"/></svg><span>Settings</span></div>
     </div>
   </div>
 </aside><div class="main"><header class="topbar">
   <button class="icon-btn menu-btn" onclick="toggleSidebar()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12h18M3 6h18M3 18h18"/></svg></button>
   <div class="tb-crumb" id="crumb"><span>Catalog</span><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 18l6-6-6-6"/></svg><b>Dashboard</b></div>
   <div class="tb-spacer"></div>
-  <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input placeholder="Search releases, tracks, artists, UPC, ISRC..."></div>
+  <div class="tb-search"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="M21 21l-4.3-4.3"/></svg><input id="tbSearch" placeholder="Search your releases — title, artist, UPC, ISRC…" onkeydown="if(event.key==='Enter')SoutClient.search(this.value)"></div>
   <div class="tb-actions">
     <a class="btn btn-ghost btn-sm" href="admin.html" id="adminLink" style="margin-right:8px;display:none"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Admin</a><button class="icon-btn" onclick="toggleTheme()" id="themeBtn" title="Toggle theme"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12.8A9 9 0 1111.2 3 7 7 0 0021 12.8z"/></svg></button>
     <button class="icon-btn" title="Notifications"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8a6 6 0 10-12 0c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.7 21a2 2 0 01-3.4 0"/></svg><span class="dot"></span></button>
-    <button class="icon-btn" data-action="logout" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button><div class="tb-user">
+    <button class="icon-btn" data-action="logout" title="Sign out"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5M21 12H9"/></svg></button><div class="tb-user" style="position:relative;cursor:pointer" onclick="const m=document.getElementById('userMenu');m.style.display=m.style.display==='none'?'':'none';event.stopPropagation()">
       <div class="tb-avatar">SN</div>
-      <div><div class="un">Sout Network</div><div class="uc">Client #1055037</div></div>
+      <div><div class="un">Sout Network</div><div class="uc">#—</div></div>
+      <div id="userMenu" style="display:none;position:absolute;top:52px;right:0;min-width:190px;background:var(--surface);border:1px solid var(--line);border-radius:12px;box-shadow:0 12px 32px rgba(15,18,30,.14);padding:6px;z-index:120">
+        <div class="cell-sub" id="umHead" style="padding:8px 10px;border-bottom:1px solid var(--line);margin-bottom:4px"></div>
+        <div class="sb-item" style="margin:0" onclick="go('settings');document.getElementById('userMenu').style.display='none'"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 00.33 1.82l.06.06a2 2 0 11-2.83 2.83l-.06-.06a1.65 1.65 0 00-1.82-.33 1.65 1.65 0 00-1 1.51V21a2 2 0 11-4 0v-.09a1.65 1.65 0 00-1-1.51 1.65 1.65 0 00-1.82.33l-.06.06a2 2 0 11-2.83-2.83l.06-.06a1.65 1.65 0 00.33-1.82 1.65 1.65 0 00-1.51-1H3a2 2 0 110-4h.09a1.65 1.65 0 001.51-1 1.65 1.65 0 00-.33-1.82l-.06-.06a2 2 0 112.83-2.83l.06.06a1.65 1.65 0 001.82.33h0a1.65 1.65 0 001-1.51V3a2 2 0 114 0v.09a1.65 1.65 0 001 1.51h0a1.65 1.65 0 001.82-.33l.06-.06a2 2 0 112.83 2.83l-.06.06a1.65 1.65 0 00-.33 1.82v0a1.65 1.65 0 001.51 1H21a2 2 0 110 4h-.09a1.65 1.65 0 00-1.51 1z"/></svg><span>Settings</span></div>
+        <div class="sb-item" style="margin:0" onclick="document.getElementById('logoutBtn')?.click()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M9 21H5a2 2 0 01-2-2V5a2 2 0 012-2h4"/><path d="M16 17l5-5-5-5"/><path d="M21 12H9"/></svg><span>Sign out</span></div>
+      </div>
     </div>
   </div>
 </header><div class="content"><div class="page" data-page="overview">
@@ -398,85 +402,54 @@ svg[stroke="currentColor"]{stroke-width:2}
         </div><div class="svc-card" onclick="go('finance')">
           <div class="svc-head"><div class="ico green" style="width:44px;height:44px;border-radius:12px;display:grid;place-items:center"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg></div>
           <div><div class="svc-name">Finance</div><div class="svc-desc">Royalties & payouts</div></div></div>
-          <div class="svc-stats"><div class="svc-stat"><div class="svc-v">18240</div><div class="svc-l">Available</div></div><div class="svc-stat"><div class="svc-v">11882</div><div class="svc-l">Pending</div></div><div class="svc-stat"><div class="svc-v">214500</div><div class="svc-l">Lifetime</div></div><div class="svc-stat"><div class="svc-v">0</div><div class="svc-l">Failed</div></div></div>
+          <div class="svc-stats" id="ovFinSvc"><div class="svc-stat"><div class="svc-v">$0</div><div class="svc-l">Available</div></div><div class="svc-stat"><div class="svc-v">$0</div><div class="svc-l">Pending</div></div><div class="svc-stat"><div class="svc-v">$0</div><div class="svc-l">Lifetime</div></div><div class="svc-stat"><div class="svc-v">0</div><div class="svc-l">Payouts</div></div></div>
         </div></div>
 
       <div style="display:grid;grid-template-columns:1fr 320px;gap:20px;align-items:start;margin-top:26px">
         <div>
           <div class="sec-title">Latest Releases <span class="count">Delivered</span></div>
-          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Label</th><th>Status</th><th>Delivered</th><th>Stores</th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td class="cell-mono">8h ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">40 stores</span></div></td></tr><tr><td><div class="row-flex"><div class="art">YK</div><div><div class="cell-main">Yasbah El Kheir</div><div class="cell-sub">Yassmin</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td class="cell-mono">12h ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">40 stores</span></div></td></tr><tr><td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td class="cell-mono">30h ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">38 stores</span></div></td></tr><tr><td><div class="row-flex"><div class="art">EM</div><div><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td class="cell-mono">2d ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">36 stores</span></div></td></tr><tr><td><div class="row-flex"><div class="art">TM</div><div><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants Egypt</div></div></div></td>
-        <td class="cell-mono">PNDA Media</td><td><span class="chip green">Live</span></td><td class="cell-mono">3d ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">42 stores</span></div></td></tr><tr><td><div class="row-flex"><div class="art">EK</div><div><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></div></div></td>
-        <td class="cell-mono">ELshamrany</td><td><span class="chip green">Delivered</span></td><td class="cell-mono">4d ago</td><td><div class="row-flex" style="gap:5px"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3c2.5 2.6 2.5 15.4 0 18M12 3c-2.5 2.6-2.5 15.4 0 18"/></svg><span class="cell-mono">41 stores</span></div></td></tr></tbody></table></div></div>
-          <div class="sec-title" style="margin-top:22px">Top Tracks <span class="count">Last 28 days</span></div>
-          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Track</th><th>Streams</th><th>Revenue</th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">842,100</td><td class="cell-mono">$3,368.40</td></tr><tr><td><div class="row-flex"><div class="art">EM</div><div><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></div></div></td>
-        <td class="cell-mono">610,500</td><td class="cell-mono">$2,442.00</td></tr><tr><td><div class="row-flex"><div class="art">EK</div><div><div class="cell-main">El Kahf</div><div class="cell-sub">El Monshed Salah</div></div></div></td>
-        <td class="cell-mono">503,200</td><td class="cell-mono">$2,012.80</td></tr><tr><td><div class="row-flex"><div class="art">YG</div><div><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></div></div></td>
-        <td class="cell-mono">388,900</td><td class="cell-mono">$1,555.60</td></tr><tr><td><div class="row-flex"><div class="art">YK</div><div><div class="cell-main">Yasbah El Kheir</div><div class="cell-sub">Yassmin</div></div></div></td>
-        <td class="cell-mono">274,300</td><td class="cell-mono">$1,097.20</td></tr><tr><td><div class="row-flex"><div class="art">TM</div><div><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants</div></div></div></td>
-        <td class="cell-mono">190,400</td><td class="cell-mono">$761.60</td></tr></tbody></table></div></div>
+          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Release</th><th>Label</th><th>Status</th><th>Delivered</th></tr></thead><tbody id="ovDelivered"><tr><td colspan="4"><div class="empty"><h4>No delivered releases yet</h4></div></td></tr></tbody></table></div></div>
+          <div class="sec-title" style="margin-top:22px">Top Tracks</div>
+          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Track</th><th>Streams</th></tr></thead><tbody id="ovTop"><tr><td colspan="2"><div class="empty"><h4>No data yet</h4><div class="cell-sub">Your top tracks will appear here once your music is live.</div></div></td></tr></tbody></table></div></div>
         </div>
         <div>
           <div class="sec-title">Available Balance</div>
           <div class="card card-pad">
             <div style="font-size:.74rem;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.04em">Withdrawable</div>
-            <div style="font-family:var(--display);font-weight:800;font-size:1.7rem;margin:5px 0 3px">$18,240.00</div>
+            <div style="font-family:var(--display);font-weight:800;font-size:1.7rem;margin:5px 0 3px" id="ovAvailable">$0.00</div>
             <div class="cell-sub" style="margin-bottom:14px">Cleared earnings available for payout</div>
             <button class="btn btn-primary btn-sm" style="width:100%;justify-content:center" onclick="go('payouts')">Request Payout</button>
           </div>
           <div class="card card-pad" style="margin-top:14px">
-            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-2)"><span class="cell-sub">Pending clearance</span><span class="cell-mono">$11,882.00</span></div>
-            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-2)"><span class="cell-sub">Last payout</span><span class="cell-mono">$15,420.00</span></div>
-            <div style="display:flex;justify-content:space-between;padding:6px 0"><span class="cell-sub">Next statement</span><span class="cell-mono">Jul 31</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-2)"><span class="cell-sub">Pending clearance</span><span class="cell-mono" id="ovPending">$0.00</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0;border-bottom:1px solid var(--line-2)"><span class="cell-sub">Last payout</span><span class="cell-mono" id="ovLastPayout">—</span></div>
+            <div style="display:flex;justify-content:space-between;padding:6px 0"><span class="cell-sub">Lifetime earnings</span><span class="cell-mono" id="ovLifetime">$0.00</span></div>
           </div>
         </div>
       </div>
     </div>
 <div class="page" data-page="analytics">
-      <div class="page-head"><div><div class="page-title">Analytics</div><div class="page-sub">Streams, audience and trends across platforms</div></div>
-      <div style="display:flex;gap:10px"><div class="seg"><button class="on">28d</button><button>90d</button><button>12m</button></div><button class="btn btn-ghost" onclick="toast('Exporting report...')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Export</button></div></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="lbl">Total Streams</div><div class="val">12.4M</div><div class="chg up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> +8.2%</div></div>
-        <div class="stat"><div class="lbl">Listeners</div><div class="val">3.1M</div><div class="chg up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> +5.4%</div></div>
-        <div class="stat"><div class="lbl">Saves</div><div class="val">284K</div><div class="chg up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> +11%</div></div>
-        <div class="stat"><div class="lbl">Avg. Completion</div><div class="val">78%</div><div class="chg down"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> -1.2%</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:20px;align-items:start">
-        <div class="card card-pad"><div class="sec-title">Streams over time</div>
-          <div class="spark" style="height:160px;gap:8px"><i style="height:40%" class=""></i><i style="height:55%" class=""></i><i style="height:48%" class=""></i><i style="height:62%" class=""></i><i style="height:70%" class=""></i><i style="height:58%" class=""></i><i style="height:80%" class="hot"></i><i style="height:72%" class=""></i><i style="height:85%" class="hot"></i><i style="height:90%" class="hot"></i><i style="height:78%" class="hot"></i><i style="height:95%" class="hot"></i></div>
-          <div style="display:flex;justify-content:space-between;margin-top:10px;font-family:var(--mono);font-size:.7rem;color:var(--fg-faint)"><span>Jan</span><span>Mar</span><span>May</span><span>Jul</span><span>Sep</span><span>Nov</span></div>
+      <div class="page-head"><div><div class="page-title">Analytics</div><div class="page-sub">Streams, audience and trends across platforms</div></div></div>
+      <div id="anEmpty" class="card card-pad" style="display:none"><div class="empty"><h4>No analytics yet</h4><div class="cell-sub">Your streams and audience reports will appear here after your first reporting period.</div></div></div>
+      <div id="anBody" style="display:none">
+        <div class="stat-grid">
+          <div class="stat"><div class="lbl">Total Streams</div><div class="val" id="anStreams">—</div></div>
+          <div class="stat"><div class="lbl">Listeners</div><div class="val" id="anListeners">—</div></div>
+          <div class="stat"><div class="lbl">Saves</div><div class="val" id="anSaves">—</div></div>
+          <div class="stat"><div class="lbl">Avg. Completion</div><div class="val" id="anCompletion">—</div></div>
         </div>
-        <div class="card card-pad"><div class="sec-title">Top Territories</div>
-          <div class="legend">
-            <div class="li"><span class="sw" style="background:#1DB954"></span>Egypt<span class="v">42%</span></div>
-            <div class="li"><span class="sw" style="background:#FF0000"></span>Saudi Arabia<span class="v">23%</span></div>
-            <div class="li"><span class="sw" style="background:#FA243C"></span>UAE<span class="v">14%</span></div>
-            <div class="li"><span class="sw" style="background:#25F4EE"></span>Morocco<span class="v">9%</span></div>
-            <div class="li"><span class="sw" style="background:#9aa3b4"></span>Others<span class="v">12%</span></div>
+        <div style="display:grid;grid-template-columns:1.6fr 1fr;gap:18px;margin-top:4px">
+          <div class="card card-pad"><div class="sec-title">Streams over time</div>
+            <div id="anChart" style="display:flex;align-items:flex-end;gap:6px;height:190px;padding-top:8px"></div>
+            <div id="anChartLbls" style="display:flex;gap:6px;margin-top:6px"></div>
           </div>
+          <div class="card card-pad"><div class="sec-title">Top Territories</div><div id="anTerr"></div></div>
         </div>
-      </div>
-      <div style="margin-top:24px"><div class="sec-title">Top Tracks</div>
-        <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th style="width:50px">#</th><th>Track</th><th>Streams</th><th>Trend</th></tr></thead><tbody><tr><td style="color:var(--fg-faint);font-family:var(--mono)">01</td>
-        <td><div class="cell-main">Tashat Molokhya</div><div class="cell-sub">Hadrmout Restaurants Egypt</div></td>
-        <td class="cell-mono">356K</td>
-        <td><div class="bar" style="width:90px"><i style="width:54%"></i></div></td></tr><tr><td style="color:var(--fg-faint);font-family:var(--mono)">02</td>
-        <td><div class="cell-main">Kan Wedy Naltaqy</div><div class="cell-sub">Yara Gamal</div></td>
-        <td class="cell-mono">863K</td>
-        <td><div class="bar" style="width:90px"><i style="width:55%"></i></div></td></tr><tr><td style="color:var(--fg-faint);font-family:var(--mono)">03</td>
-        <td><div class="cell-main">Shok El Ghadr</div><div class="cell-sub">Yara Gamal</div></td>
-        <td class="cell-mono">594K</td>
-        <td><div class="bar" style="width:90px"><i style="width:46%"></i></div></td></tr><tr><td style="color:var(--fg-faint);font-family:var(--mono)">04</td>
-        <td><div class="cell-main">El Mafrod</div><div class="cell-sub">Planko, Echo EG</div></td>
-        <td class="cell-mono">818K</td>
-        <td><div class="bar" style="width:90px"><i style="width:86%"></i></div></td></tr><tr><td style="color:var(--fg-faint);font-family:var(--mono)">05</td>
-        <td><div class="cell-main">Rahmak Ya Rab</div><div class="cell-sub">Ahmed ELmndrawy</div></td>
-        <td class="cell-mono">822K</td>
-        <td><div class="bar" style="width:90px"><i style="width:83%"></i></div></td></tr></tbody></table></div></div>
+        <div class="sec-title" style="margin-top:22px">Top Tracks</div>
+        <div class="table-wrap"><div class="table-scroll"><table>
+          <thead><tr><th>#</th><th>Track</th><th>Streams</th></tr></thead>
+          <tbody id="anTop"></tbody>
+        </table></div></div>
       </div>
     </div>
 <div class="page" data-page="releases">
@@ -709,113 +682,63 @@ svg[stroke="currentColor"]{stroke-width:2}
   <img id="lightboxImg" alt="" style="max-width:92vw;max-height:92vh;border-radius:12px;box-shadow:0 12px 48px rgba(0,0,0,.5)">
 </div>
 <div class="page" data-page="finance">
-      <div class="page-head"><div><div class="page-title">Finance & Royalties</div><div class="page-sub">Earnings, statements and revenue breakdown</div></div>
-      <div style="display:flex;gap:10px"><button class="btn btn-ghost" onclick="toast('Generating statement...')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg> Statement</button><button class="btn btn-primary" onclick="go('payouts')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h3v-4z"/></svg> Request Payout</button></div></div>
+      <div class="page-head"><div><div class="page-title">Finance &amp; Royalties</div><div class="page-sub">Earnings, statements and revenue breakdown</div></div>
+        <a class="btn btn-ghost" href="/api/finance/export.csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Statement (CSV)</a></div>
       <div class="stat-grid">
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div><div class="lbl">Available Balance</div><div class="val">$18,240</div><div class="chg up"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg> +12.5%</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg></div><div class="lbl">Pending</div><div class="val">$11,882</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="6" width="20" height="12" rx="2"/><circle cx="12" cy="12" r="2.5"/><path d="M6 12h.01M18 12h.01"/></svg></div><div class="lbl">Lifetime Earnings</div><div class="val">$214,500</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14v-2a9 9 0 0118 0v2"/><path d="M21 16a2 2 0 01-2 2h-1v-6h1a2 2 0 012 2zM3 16a2 2 0 002 2h1v-6H5a2 2 0 00-2 2z"/></svg></div><div class="lbl">Avg per 1K streams</div><div class="val">$4.10</div></div>
+        <div class="stat"><div class="lbl">Available Balance</div><div class="val" id="fnAvailable">$0.00</div></div>
+        <div class="stat"><div class="lbl">Pending clearance</div><div class="val" id="fnPending">$0.00</div></div>
+        <div class="stat"><div class="lbl">Lifetime Earnings</div><div class="val" id="fnLifetime">$0.00</div></div>
+        <div class="stat"><div class="lbl">Avg per 1K streams</div><div class="val" id="fnAvg">—</div></div>
       </div>
-      <div style="display:grid;grid-template-columns:1.5fr 1fr;gap:20px;align-items:start">
+      <div style="display:grid;grid-template-columns:1.7fr 1fr;gap:18px">
         <div><div class="sec-title">Revenue by Period</div>
-          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Period</th><th>Platform</th><th>Streams</th><th>Revenue</th><th>Status</th></tr></thead><tbody><tr><td class="cell-mono">Jun 2026</td><td><div class="cell-main">Spotify</div></td>
-        <td class="cell-mono">1,240,500</td><td class="cell-main">$4,962.00</td><td><span class="chip amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pending</span></td></tr><tr><td class="cell-mono">Jun 2026</td><td><div class="cell-main">YouTube</div></td>
-        <td class="cell-mono">3,850,200</td><td class="cell-main">$3,080.16</td><td><span class="chip amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pending</span></td></tr><tr><td class="cell-mono">Jun 2026</td><td><div class="cell-main">Apple Music</div></td>
-        <td class="cell-mono">640,100</td><td class="cell-main">$3,840.60</td><td><span class="chip amber"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/></svg>Pending</span></td></tr><tr><td class="cell-mono">May 2026</td><td><div class="cell-main">Spotify</div></td>
-        <td class="cell-mono">1,180,300</td><td class="cell-main">$4,721.20</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr><tr><td class="cell-mono">May 2026</td><td><div class="cell-main">TikTok</div></td>
-        <td class="cell-mono">5,200,000</td><td class="cell-main">$1,560.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr><tr><td class="cell-mono">May 2026</td><td><div class="cell-main">Anghami</div></td>
-        <td class="cell-mono">420,800</td><td class="cell-main">$1,683.20</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr><tr><td class="cell-mono">May 2026</td><td><div class="cell-main">Deezer</div></td>
-        <td class="cell-mono">310,500</td><td class="cell-main">$1,242.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr></tbody></table></div></div>
+          <div class="table-wrap"><div class="table-scroll"><table>
+            <thead><tr><th>Period</th><th>Platform</th><th>Streams</th><th>Revenue</th><th>Status</th></tr></thead>
+            <tbody id="fnBody"><tr><td colspan="5"><div class="empty"><h4>No statements yet</h4><div class="cell-sub">Your earnings appear here after each reporting period.</div></div></td></tr></tbody>
+          </table></div></div>
         </div>
-        <div><div class="sec-title">Revenue by Platform</div>
-          <div class="card card-pad">
-            <div style="display:flex;justify-content:center;margin-bottom:18px"><div class="donut" style="background:conic-gradient(#1DB954 0% 40%,#FF0000 40% 65%,#FA243C 65% 80%,#25F4EE 80% 92%,#9aa3b4 92% 100%)"><div class="hole"><div><div class="v">$18.2K</div><div class="l">Total</div></div></div></div></div>
-            <div class="legend">
-              <div class="li"><span class="sw" style="background:#2b2b2b"></span>Spotify<span class="v">40%</span></div>
-              <div class="li"><span class="sw" style="background:#555"></span>YouTube<span class="v">25%</span></div>
-              <div class="li"><span class="sw" style="background:#7d7d7d"></span>Apple Music<span class="v">15%</span></div>
-              <div class="li"><span class="sw" style="background:#a3a3a3"></span>TikTok<span class="v">12%</span></div>
-              <div class="li"><span class="sw" style="background:#c9c9c9"></span>Others<span class="v">8%</span></div>
-            </div>
-          </div>
-        </div>
+        <div><div class="sec-title">Revenue by Platform</div><div class="card card-pad" id="fnPlat"><div class="empty"><h4>—</h4></div></div></div>
       </div>
     </div>
 <div class="page" data-page="payouts">
       <div class="page-head"><div><div class="page-title">Payouts</div><div class="page-sub">Withdraw earnings and view payout history</div></div></div>
-      <div style="display:grid;grid-template-columns:1fr 1.4fr;gap:20px;align-items:start">
+      <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:18px">
         <div class="card card-pad">
-          <div class="cell-sub">Available to withdraw</div><div class="page-title" style="font-size:1.6rem;margin:6px 0 18px">$18,240.00</div>
-          <div class="field" style="margin-bottom:14px"><label>Payout method</label><select class="input"><option>Bank Transfer · ****4521</option><option>PayPal · finance@soutnetwork.com</option><option>Wise · ****8830</option></select></div>
-          <div class="field" style="margin-bottom:18px"><label>Amount (USD)</label><input class="input" value="18,240.00"></div>
-          <button class="btn btn-primary" style="width:100%;justify-content:center" onclick="toast('Payout request submitted')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 12V7H5a2 2 0 010-4h14v4"/><path d="M3 5v14a2 2 0 002 2h16v-5"/><path d="M18 12a2 2 0 000 4h3v-4z"/></svg> Request Payout</button>
+          <div class="cell-sub" style="text-transform:uppercase;letter-spacing:.04em;font-size:.72rem">Available to withdraw</div>
+          <div style="font-size:1.9rem;font-weight:800;font-family:var(--display);margin:6px 0 14px" id="poAvailable">$0.00</div>
+          <div class="field"><label>Payout method</label><select class="input" id="poMethod"><option>Bank Transfer</option><option>PayPal</option><option>Wise</option><option>Vodafone Cash</option><option>InstaPay</option></select></div>
+          <div class="field"><label>Method details (account / IBAN / email / number)</label><input class="input" id="poDetails" placeholder="e.g. IBAN EG00 0000 0000 0000"></div>
+          <div class="field"><label>Amount (USD)</label><input class="input" id="poAmount" type="number" min="1" step="0.01" placeholder="0.00"></div>
+          <button class="btn btn-primary" style="width:100%;margin-top:6px" id="poBtn" onclick="SoutClient.requestPayout()">Request Payout</button>
+          <div class="cell-sub" style="margin-top:10px">Requests are reviewed and processed manually by the Sout Network team.</div>
         </div>
         <div><div class="sec-title">Payout History</div>
-          <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead><tbody>
-          <tr><td class="cell-mono">2026-05-31</td><td>Bank Transfer</td><td class="cell-main">$15,420.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr>
-          <tr><td class="cell-mono">2026-04-30</td><td>Bank Transfer</td><td class="cell-main">$13,890.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr>
-          <tr><td class="cell-mono">2026-03-31</td><td>PayPal</td><td class="cell-main">$12,100.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr>
-          <tr><td class="cell-mono">2026-02-28</td><td>Bank Transfer</td><td class="cell-main">$9,640.00</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg>Paid</span></td></tr>
-          </tbody></table></div></div>
+          <div class="table-wrap"><div class="table-scroll"><table>
+            <thead><tr><th>Date</th><th>Method</th><th>Amount</th><th>Status</th></tr></thead>
+            <tbody id="poBody"><tr><td colspan="4"><div class="empty"><h4>No payouts yet</h4></div></td></tr></tbody>
+          </table></div></div>
         </div>
       </div>
     </div>
 <div class="page" data-page="promotion">
-      <div class="page-head"><div><div class="page-title">Promotion</div><div class="page-sub">Pitch to editorial playlists and run campaigns</div></div>
-      <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> New Campaign</button></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8-6.1-3.2-6.1 3.2 1.2-6.8-5-4.9 6.9-1z"/></svg></div><div class="lbl">Playlist Adds</div><div class="val">128</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 11v2a1 1 0 001 1h3l5 4V6L7 10H4a1 1 0 00-1 1z"/><path d="M16 8a5 5 0 010 8"/></svg></div><div class="lbl">Active Campaigns</div><div class="val">4</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7z"/><circle cx="12" cy="12" r="3"/></svg></div><div class="lbl">Campaign Reach</div><div class="val">2.4M</div></div>
-        <div class="stat"><div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 14v-2a9 9 0 0118 0v2"/><path d="M21 16a2 2 0 01-2 2h-1v-6h1a2 2 0 012 2zM3 16a2 2 0 002 2h1v-6H5a2 2 0 00-2 2z"/></svg></div><div class="lbl">Conversion</div><div class="val">6.8%</div></div>
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr;gap:16px">
-        <div class="card card-pad"><div class="sec-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3 6.3 6.9 1-5 4.9 1.2 6.8-6.1-3.2-6.1 3.2 1.2-6.8-5-4.9 6.9-1z"/></svg> Editorial Pitch</div><div class="cell-sub" style="margin-bottom:14px">Submit upcoming releases to platform editorial teams (Spotify, Apple, Anghami, Deezer).</div><button class="btn btn-ghost btn-sm" onclick="toast('Pitch form opened')">Start Pitch</button></div>
-        <div class="card card-pad"><div class="sec-title"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10 13a5 5 0 007 0l3-3a5 5 0 00-7-7l-1 1"/><path d="M14 11a5 5 0 00-7 0l-3 3a5 5 0 007 7l1-1"/></svg> Smart Links</div><div class="cell-sub" style="margin-bottom:14px">Create one landing page that links to every store for a release.</div><button class="btn btn-ghost btn-sm" onclick="toast('Smart link created')">Create Link</button></div>
-      </div>
+      <div class="page-head"><div><div class="page-title">Promotion</div><div class="page-sub">Playlist pitching &amp; campaigns</div></div></div>
+      <div class="card card-pad"><div class="empty"><h4>No campaigns yet</h4><div class="cell-sub">Promotion campaigns for your releases will appear here. Contact your account manager to start one.</div></div></div>
     </div>
 <div class="page" data-page="bulk">
-      <div class="page-head"><div><div class="page-title">Bulk Operations</div><div class="page-sub">Power tools for managing thousands of releases at once</div></div></div>
-      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:16px"><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Upload — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Upload</div><div class="cell-sub" style="margin-top:5px">Import multiple releases at once via spreadsheet or ZIP.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Metadata Edit — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Metadata Edit</div><div class="cell-sub" style="margin-top:5px">Update genre, artist, label or copyright across many tracks.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Delivery — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Delivery</div><div class="cell-sub" style="margin-top:5px">Deliver or re-deliver selected releases to chosen stores.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Takedown — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M5.6 5.6l12.8 12.8"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Takedown</div><div class="cell-sub" style="margin-top:5px">Remove releases from one or more platforms.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Pricing — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20.6 13.4L13.4 20.6a2 2 0 01-2.8 0l-7.2-7.2a2 2 0 01-.6-1.4V4a1 1 0 011-1h7.9a2 2 0 011.4.6l7.5 7.5a2 2 0 010 2.3z"/><circle cx="7.5" cy="7.5" r="1.3"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Pricing</div><div class="cell-sub" style="margin-top:5px">Set price tiers for multiple releases.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Claim Policy — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 000 7h5a3.5 3.5 0 010 7H6"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Claim Policy</div><div class="cell-sub" style="margin-top:5px">Apply monetize/block/takedown to many UGC claims.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Reschedule — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="18" rx="2"/><path d="M16 2v4M8 2v4M3 10h18"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Reschedule</div><div class="cell-sub" style="margin-top:5px">Change release dates for a batch.</div></div><div class="card card-pad" style="cursor:pointer" onclick="toast('Bulk Export — select items to continue')">
-        <div class="ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6"/></svg></div>
-        <div class="cell-main" style="font-size:.95rem">Bulk Export</div><div class="cell-sub" style="margin-top:5px">Export catalog, rights or finance data as CSV/Excel.</div></div></div>
-      <div style="margin-top:24px"><div class="sec-title">Recent Bulk Jobs</div>
-        <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Job</th><th>Items</th><th>Progress</th><th>Started</th></tr></thead><tbody>
-        <tr><td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="1" y="6" width="13" height="10" rx="1"/><path d="M14 9h4l3 3v4h-7z"/><circle cx="5.5" cy="18" r="1.6"/><circle cx="17.5" cy="18" r="1.6"/></svg><span class="cell-main">Bulk Delivery → Spotify</span></div></td><td>248 releases</td><td><div class="bar" style="width:140px"><i style="width:72%"></i></div></td><td class="cell-mono">12m ago</td></tr>
-        <tr><td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M11 4H4a2 2 0 00-2 2v14a2 2 0 002 2h14a2 2 0 002-2v-7"/><path d="M18.5 2.5a2.1 2.1 0 013 3L12 15l-4 1 1-4z"/></svg><span class="cell-main">Metadata Edit — Genre</span></div></td><td>512 tracks</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Complete</span></td><td class="cell-mono">1h ago</td></tr>
-        <tr><td><div class="row-flex"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg><span class="cell-main">Bulk Upload — ELshamrany</span></div></td><td>96 releases</td><td><span class="chip green"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3"><path d="M20 6L9 17l-5-5"/></svg> Complete</span></td><td class="cell-mono">3h ago</td></tr>
-        </tbody></table></div></div>
+      <div class="page-head"><div><div class="page-title">Bulk Operations</div><div class="page-sub">Catalog-wide tools</div></div></div>
+      <div style="display:grid;grid-template-columns:repeat(auto-fill,minmax(340px,1fr));gap:16px">
+        <div class="card card-pad">
+          <div class="sec-title">Export my catalog</div>
+          <div class="cell-sub" style="margin-bottom:14px">Download your full catalog — every release and track with UPC/ISRC — as a CSV file.</div>
+          <a class="btn btn-primary" href="/api/export.csv"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg> Download CSV</a>
+        </div>
+        <div class="card card-pad">
+          <div class="sec-title">Submit all complete drafts</div>
+          <div class="cell-sub" style="margin-bottom:14px">Send every draft that has complete data &amp; files to review in one click. Incomplete drafts are skipped with reasons.</div>
+          <button class="btn btn-primary" id="bulkSubmitBtn" onclick="SoutClient.bulkSubmit()">Submit drafts</button>
+          <div id="bulkResult" style="margin-top:12px"></div>
+        </div>
       </div>
-    </div>
-<div class="page" data-page="clients">
-      <div class="page-head"><div><div class="page-title">Client Accounts</div><div class="page-sub">Sub-labels and partner companies you distribute for</div></div>
-      <button class="btn btn-primary"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add Client</button></div>
-      <div class="stat-grid">
-        <div class="stat"><div class="lbl">Total Clients</div><div class="val">42</div></div>
-        <div class="stat"><div class="lbl">Active</div><div class="val">38</div></div>
-        <div class="stat"><div class="lbl">Pending</div><div class="val">4</div></div>
-        <div class="stat"><div class="lbl">Combined Catalog</div><div class="val">10,284</div></div>
-      </div>
-      <div class="table-wrap"><div class="table-scroll"><table><thead><tr><th>Client</th><th>Catalog</th><th>Status</th><th></th></tr></thead><tbody><tr><td><div class="row-flex"><div class="art">EL</div><div class="cell-main">ELshamrany</div></div></td><td class="cell-mono">679 releases</td>
-        <td><span class="chip green">Active</span></td><td><button class="btn btn-ghost btn-sm">Manage</button></td></tr><tr><td><div class="row-flex"><div class="art">IT</div><div class="cell-main">Injaz Teqani</div></div></td><td class="cell-mono">312 releases</td>
-        <td><span class="chip green">Active</span></td><td><button class="btn btn-ghost btn-sm">Manage</button></td></tr><tr><td><div class="row-flex"><div class="art">PM</div><div class="cell-main">PNDA Media</div></div></td><td class="cell-mono">148 releases</td>
-        <td><span class="chip green">Active</span></td><td><button class="btn btn-ghost btn-sm">Manage</button></td></tr><tr><td><div class="row-flex"><div class="art">EE</div><div class="cell-main">Echo EG</div></div></td><td class="cell-mono">54 releases</td>
-        <td><span class="chip amber">Pending</span></td><td><button class="btn btn-ghost btn-sm">Manage</button></td></tr></tbody></table></div></div>
     </div>
 <div class="page" data-page="settings">
       <div class="page-head"><div><div class="page-title">Settings</div><div class="page-sub">Your account &amp; security</div></div></div>

@@ -4,6 +4,8 @@
 // ============================================================
 (function () {
   const { chip, esc, initials } = window.SoutUI;
+  function money(v) { return '$' + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
+  function knum(v) { v = Number(v) || 0; if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'; if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K'; return String(v); }
   const API = window.SoutAPI;
   let CACHE = { releases: [], issues: [], claims: [], rightsApiMissing: false };
 
@@ -134,8 +136,8 @@
 
   const PLAT_ICONS = {
     youtube: '<svg viewBox="0 0 24 24" fill="currentColor" style="color:#f00"><path d="M23 12s0-3.9-.5-5.6c-.3-1-1.1-1.8-2.1-2C18.6 4 12 4 12 4s-6.6 0-8.4.4c-1 .2-1.8 1-2.1 2C1 8.1 1 12 1 12s0 3.9.5 5.6c.3 1 1.1 1.8 2.1 2 1.8.4 8.4.4 8.4.4s6.6 0 8.4-.4c1-.2 1.8-1 2.1-2 .5-1.7.5-5.6.5-5.6zM9.8 15.5v-7l6.2 3.5-6.2 3.5z"/></svg>',
-    facebook: '<svg viewBox="0 0 24 24" fill="currentColor" style="color:var(--fg-soft)"><path d="M24 12a12 12 0 10-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0024 12z"/></svg>',
-    tiktok: '<svg viewBox="0 0 24 24" fill="currentColor"><path d="M12.5 2h3.1c.2 1.8 1.3 3.4 2.9 4.2.9.5 1.9.7 2.9.7v3.2c-1.8 0-3.6-.6-5-1.6v7.3A6.4 6.4 0 019.9 22 6.4 6.4 0 013.5 15.6c0-3.5 2.9-6.4 6.4-6.4.4 0 .7 0 1.1.1v3.3c-.3-.1-.7-.2-1.1-.2a3.2 3.2 0 100 6.4c1.8 0 3.2-1.5 3.2-3.2V2z"/></svg>',
+    facebook: '<svg viewBox="0 0 24 24" fill="#1877f2"><path d="M24 12a12 12 0 10-13.9 11.9v-8.4h-3V12h3V9.4c0-3 1.8-4.7 4.5-4.7 1.3 0 2.7.2 2.7.2v3h-1.5c-1.5 0-2 .9-2 1.9V12h3.3l-.5 3.5h-2.8v8.4A12 12 0 0024 12z"/></svg>',
+    tiktok: '<svg viewBox="0 0 24 24"><path fill="#25F4EE" transform="translate(-0.7,-0.7)" d="M12.5 2h3.1c.2 1.8 1.3 3.4 2.9 4.2.9.5 1.9.7 2.9.7v3.2c-1.8 0-3.6-.6-5-1.6v7.3A6.4 6.4 0 019.9 22 6.4 6.4 0 013.5 15.6c0-3.5 2.9-6.4 6.4-6.4.4 0 .7 0 1.1.1v3.3c-.3-.1-.7-.2-1.1-.2a3.2 3.2 0 100 6.4c1.8 0 3.2-1.5 3.2-3.2V2z"/><path fill="#FE2C55" transform="translate(0.7,0.7)" d="M12.5 2h3.1c.2 1.8 1.3 3.4 2.9 4.2.9.5 1.9.7 2.9.7v3.2c-1.8 0-3.6-.6-5-1.6v7.3A6.4 6.4 0 019.9 22 6.4 6.4 0 013.5 15.6c0-3.5 2.9-6.4 6.4-6.4.4 0 .7 0 1.1.1v3.3c-.3-.1-.7-.2-1.1-.2a3.2 3.2 0 100 6.4c1.8 0 3.2-1.5 3.2-3.2V2z"/><path fill="var(--fg)" d="M12.5 2h3.1c.2 1.8 1.3 3.4 2.9 4.2.9.5 1.9.7 2.9.7v3.2c-1.8 0-3.6-.6-5-1.6v7.3A6.4 6.4 0 019.9 22 6.4 6.4 0 013.5 15.6c0-3.5 2.9-6.4 6.4-6.4.4 0 .7 0 1.1.1v3.3c-.3-.1-.7-.2-1.1-.2a3.2 3.2 0 100 6.4c1.8 0 3.2-1.5 3.2-3.2V2z"/></svg>',
     other: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M3.6 9h16.8M3.6 15h16.8M12 3a15 15 0 010 18M12 3a15 15 0 000 18"/></svg>'
   };
   function storeIcon(p) { return `<div class="art" style="width:32px;height:32px;background:var(--surface-3)">${PLAT_ICONS[p] || PLAT_ICONS.other}</div>`; }
@@ -417,15 +419,111 @@
       const set2 = (i, lab, val) => { if (l[i]) l[i].textContent = lab; if (v[i]) v[i].textContent = val; };
       set2(0, 'Pending', pending); set2(1, 'Approved', processing); set2(2, 'Delivered', done); set2(3, 'Drafts', s.draft || 0);
     }
-    const tables = page.querySelectorAll('.table-wrap tbody');
-    if (tables[0]) {
-      tables[0].innerHTML = delivered.length ? delivered.map(r => {
+    const dv = document.getElementById('ovDelivered');
+    if (dv) {
+      dv.innerHTML = delivered.length ? delivered.map(r => {
         const when = r.delivered_at ? esc(r.delivered_at.slice(0, 10)) : '';
-        return `<tr><td><div class="row-flex">${thumb(r.title)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div></div></div></td>
-          <td class="cell-mono">${esc(r.label)}</td><td>${chip(r.status)}</td><td class="cell-mono">${when}</td><td class="cell-mono">${esc(r.stores || '')} </td></tr>`;
-      }).join('') : `<tr><td colspan="5"><div class="empty"><h4>No delivered releases yet</h4></div></td></tr>`;
+        return `<tr><td><div class="row-flex" style="cursor:pointer" onclick="SoutClient.viewRelease(${r.id})">${thumb(r.title, r.artwork)}<div><div class="cell-main">${esc(r.title)}</div><div class="cell-sub">${esc(r.artist)}</div></div></div></td>
+          <td class="cell-mono">${esc(r.label)}</td><td>${chip(r.status)}</td><td class="cell-mono">${when}</td></tr>`;
+      }).join('') : `<tr><td colspan="4"><div class="empty"><h4>No delivered releases yet</h4></div></td></tr>`;
     }
+    // real balances + finance service card
+    try {
+      const fin = await API.call('/finance');
+      const b = fin.balances || {};
+      const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+      set('ovAvailable', money(b.available)); set('ovPending', money(b.pending)); set('ovLifetime', money(b.lifetime));
+      set('ovLastPayout', b.last_payout ? money(b.last_payout.amount) : '—');
+      const svc2 = document.getElementById('ovFinSvc');
+      if (svc2) {
+        const v = svc2.querySelectorAll('.svc-v');
+        if (v[0]) v[0].textContent = '$' + knum(b.available); if (v[1]) v[1].textContent = '$' + knum(b.pending);
+        if (v[2]) v[2].textContent = '$' + knum(b.lifetime); if (v[3]) v[3].textContent = (fin.payouts || []).length;
+      }
+    } catch { }
+    // top tracks (admin-entered analytics)
+    try {
+      const an = await API.call('/analytics');
+      const top = (an.stats && an.stats.top_tracks) || [];
+      const tt = document.getElementById('ovTop');
+      if (tt && top.length) {
+        tt.innerHTML = top.map(t => `<tr><td><div class="row-flex">${thumb(t.title, t.artwork)}<div><div class="cell-main">${esc(t.title)}</div><div class="cell-sub">${esc(t.artist || '')}</div></div></div></td><td class="cell-mono">${knum(t.streams)}</td></tr>`).join('');
+      }
+    } catch { }
   }
+
+  // ============================================================
+  // Analytics / Finance / Payouts (all real, admin-fed)
+  // ============================================================
+  async function loadAnalyticsPage() {
+    let d; try { d = await API.call('/analytics'); } catch { return; }
+    const st = d.stats;
+    const empty = document.getElementById('anEmpty'), body = document.getElementById('anBody');
+    if (!empty || !body) return;
+    if (!st) { empty.style.display = ''; body.style.display = 'none'; return; }
+    empty.style.display = 'none'; body.style.display = '';
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('anStreams', knum(st.total_streams)); set('anListeners', knum(st.listeners));
+    set('anSaves', knum(st.saves)); set('anCompletion', (st.completion || 0) + '%');
+    const months = st.months || [];
+    const max = Math.max(1, ...months.map(m => Number(m.v) || 0));
+    const chart = document.getElementById('anChart'), lbls = document.getElementById('anChartLbls');
+    if (chart) chart.innerHTML = months.map((m, i) => `<div title="${esc(m.m)}: ${knum(m.v)}" style="flex:1;border-radius:6px 6px 0 0;background:${i === months.length - 1 ? 'var(--fg)' : 'var(--surface-3)'};height:${Math.max(4, Math.round((Number(m.v) || 0) / max * 100))}%"></div>`).join('');
+    if (lbls) lbls.innerHTML = months.map(m => `<div class="cell-sub" style="flex:1;text-align:center;font-size:.65rem">${esc(m.m)}</div>`).join('');
+    const terr = document.getElementById('anTerr');
+    if (terr) terr.innerHTML = (st.territories || []).map(t => `
+      <div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="cell-main" style="font-size:.85rem">${esc(t.name)}</span><span class="cell-mono">${t.pct}%</span></div>
+      <div style="height:6px;background:var(--surface-3);border-radius:4px"><div style="height:6px;width:${Math.min(100, t.pct)}%;background:var(--fg);border-radius:4px"></div></div></div>`).join('') || '<div class="empty"><h4>—</h4></div>';
+    const top = document.getElementById('anTop');
+    if (top) top.innerHTML = (st.top_tracks || []).map((t, i) => `<tr><td class="cell-mono">${String(i + 1).padStart(2, '0')}</td>
+      <td><div class="row-flex">${thumb(t.title, t.artwork)}<div><div class="cell-main">${esc(t.title)}</div><div class="cell-sub">${esc(t.artist || '')}</div></div></div></td>
+      <td class="cell-mono">${knum(t.streams)}</td></tr>`).join('') || `<tr><td colspan="3"><div class="empty"><h4>No tracks yet</h4></div></td></tr>`;
+  }
+
+  async function loadFinancePage() {
+    let d; try { d = await API.call('/finance'); } catch { return; }
+    const b = d.balances || {};
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('fnAvailable', money(b.available)); set('fnPending', money(b.pending));
+    set('fnLifetime', money(b.lifetime)); set('fnAvg', b.avg_per_1k ? money(b.avg_per_1k) : '—');
+    const rows = d.statements || [];
+    const tbody = document.getElementById('fnBody');
+    if (tbody) tbody.innerHTML = rows.length ? rows.map(s => `<tr>
+      <td class="cell-mono">${esc(s.period)}</td><td><div class="cell-main">${esc(s.platform)}</div></td>
+      <td class="cell-mono">${knum(s.streams)}</td><td class="cell-mono">${money(s.revenue)}</td>
+      <td><span class="chip ${s.status === 'cleared' ? 'green' : 'amber'}">${s.status === 'cleared' ? 'Cleared' : 'Pending'}</span></td></tr>`).join('')
+      : `<tr><td colspan="5"><div class="empty"><h4>No statements yet</h4><div class="cell-sub">Your earnings appear here after each reporting period.</div></div></td></tr>`;
+    // platform breakdown bars
+    const plat = {};
+    rows.forEach(s => plat[s.platform] = (plat[s.platform] || 0) + Number(s.revenue || 0));
+    const total = Object.values(plat).reduce((a, v) => a + v, 0);
+    const box = document.getElementById('fnPlat');
+    if (box) box.innerHTML = total ? Object.entries(plat).sort((a, b2) => b2[1] - a[1]).map(([name, v]) => `
+      <div style="margin-bottom:10px"><div style="display:flex;justify-content:space-between;margin-bottom:4px"><span class="cell-main" style="font-size:.85rem">${esc(name)}</span><span class="cell-mono">${money(v)} · ${Math.round(v / total * 100)}%</span></div>
+      <div style="height:6px;background:var(--surface-3);border-radius:4px"><div style="height:6px;width:${Math.round(v / total * 100)}%;background:var(--fg);border-radius:4px"></div></div></div>`).join('')
+      : '<div class="empty"><h4>No revenue yet</h4></div>';
+  }
+
+  async function loadPayoutsPage() {
+    let d; try { d = await API.call('/finance'); } catch { return; }
+    const b = d.balances || {};
+    const set = (id, v) => { const el = document.getElementById(id); if (el) el.textContent = v; };
+    set('poAvailable', money(b.available));
+    const me = window.__me || {};
+    if (me.client) {
+      const m = document.getElementById('poMethod'), dt = document.getElementById('poDetails');
+      if (m && me.client.payout_method) m.value = me.client.payout_method;
+      if (dt && !dt.value) dt.value = me.client.payout_details || '';
+    }
+    const tbody = document.getElementById('poBody');
+    const rows = d.payouts || [];
+    const pchip = s => s === 'paid' ? '<span class="chip green">Paid</span>' : s === 'approved' ? '<span class="chip blue">Approved</span>' : s === 'rejected' ? '<span class="chip red">Rejected</span>' : '<span class="chip amber">Pending</span>';
+    if (tbody) tbody.innerHTML = rows.length ? rows.map(p => `<tr>
+      <td class="cell-mono">${esc((p.created_at || '').slice(0, 10))}</td><td><div class="cell-main">${esc(p.method || '')}</div><div class="cell-sub">${esc(p.details || '')}</div>${p.admin_note ? `<div class="cell-sub" style="color:var(--red)">${esc(p.admin_note)}</div>` : ''}</td>
+      <td class="cell-mono">${money(p.amount)}</td><td>${pchip(p.status)}</td></tr>`).join('')
+      : `<tr><td colspan="4"><div class="empty"><h4>No payouts yet</h4></div></td></tr>`;
+  }
+
 
   // ============================================================
   // Artists & Labels (real roster from catalog data)
@@ -468,6 +566,26 @@
       } catch (e) { toast && toast(e.message); }
     }
   };
+
+  // ============================================================
+  // Label control: locked clients pick from assigned labels only
+  // ============================================================
+  async function lockLabelField() {
+    let d; try { d = await API.call('/labels'); } catch { return; }
+    const inp = document.getElementById('nrLabel'); if (!inp) return;
+    const labels = d.labels || [];
+    if (!d.can_create && labels.length) {
+      const sel = document.createElement('select');
+      sel.className = 'input'; sel.id = 'nrLabel';
+      sel.innerHTML = '<option value="">Select your label…</option>' + labels.map(l => `<option>${esc(l)}</option>`).join('');
+      if (labels.length === 1) sel.value = labels[0];
+      inp.replaceWith(sel);
+    } else if (labels.length) {
+      const dl = document.getElementById('labelList');
+      if (dl) dl.innerHTML = labels.map(l => `<option value="${esc(l)}">`).join('');
+      inp.placeholder = `Your labels (${labels.length}/${d.max_labels})` + (d.can_create && labels.length < d.max_labels ? ' — or type a new one' : '');
+    }
+  }
 
   // ============================================================
   // Actions
@@ -662,6 +780,51 @@
       openModal('relModal');
     },
     zoom(src) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; lb.style.display = 'grid'; },
+
+    // ---------- catalog search: title / artist / UPC / ISRC ----------
+    async search(q) {
+      q = (q || '').trim();
+      if (!q) { CACHE.q = null; await loadReleases(); if (window.go) go('releases'); return; }
+      try {
+        const d = await API.call('/releases?q=' + encodeURIComponent(q));
+        CACHE.releases = d.releases || [];
+        CACHE.q = q;
+        if (window.go) go('releases');
+        if (window.catTab) { const first = document.querySelector('.page[data-page="releases"] .tab'); if (first) catTab(first, 'all'); }
+        toast && toast((CACHE.releases.length || 'No') + ' result(s) for "' + q + '" — clear the search box and press Enter to reset');
+      } catch (e) { toast && toast(e.message); }
+    },
+
+    // ---------- payouts ----------
+    async requestPayout() {
+      const v = id => ((document.getElementById(id) || {}).value || '').trim();
+      const amount = Number(v('poAmount'));
+      if (!amount || amount <= 0) { toast && toast('Enter a valid amount'); return; }
+      const btn = document.getElementById('poBtn'); if (btn) btn.disabled = true;
+      try {
+        await API.call('/payouts', { method: 'POST', body: { amount, method: v('poMethod'), details: v('poDetails') } });
+        toast && toast('Payout request sent ✓ — the team will process it');
+        const a = document.getElementById('poAmount'); if (a) a.value = '';
+        await loadPayoutsPage(); await loadFinancePage(); await loadOverview();
+      } catch (e) { alert(e.message); }
+      if (btn) btn.disabled = false;
+    },
+
+    // ---------- bulk: submit every complete draft ----------
+    async bulkSubmit() {
+      const drafts = (CACHE.releases || []).filter(r => r.status === 'draft');
+      const out = document.getElementById('bulkResult');
+      if (!drafts.length) { if (out) out.innerHTML = '<div class="cell-sub">No drafts to submit.</div>'; return; }
+      const btn = document.getElementById('bulkSubmitBtn'); if (btn) { btn.disabled = true; btn.textContent = 'Submitting…'; }
+      const lines = [];
+      for (const r of drafts) {
+        try { await API.call('/releases/' + r.id + '/submit', { method: 'POST' }); lines.push(`<div class="row-flex" style="gap:6px;margin-bottom:4px"><span class="chip green">Submitted</span><span class="cell-main" style="font-size:.85rem">${esc(r.title)}</span></div>`); }
+        catch (e) { lines.push(`<div style="margin-bottom:6px"><div class="row-flex" style="gap:6px"><span class="chip amber">Skipped</span><span class="cell-main" style="font-size:.85rem">${esc(r.title)}</span></div><div class="cell-sub" style="white-space:pre-line;margin-right:4px">${esc(e.message)}</div></div>`); }
+      }
+      if (out) out.innerHTML = lines.join('');
+      if (btn) { btn.disabled = false; btn.textContent = 'Submit drafts'; }
+      await loadReleases();
+    },
     async uploadArt(relId, input) {
       const f = input.files[0]; if (!f) return;
       const lbl = input.parentElement; const orig = lbl.firstChild.textContent;
@@ -720,6 +883,10 @@
     onReady() {
       loadReleases().catch(() => { });
       loadOverview().catch(() => { });
+      loadAnalyticsPage().catch(() => { });
+      loadFinancePage().catch(() => { });
+      loadPayoutsPage().catch(() => { });
+      lockLabelField().catch(() => { });
       SoutRights.load().catch(() => { });
       loadRoster().catch(() => { });
       if (window.go && !window.__goWrapped) {
@@ -730,6 +897,9 @@
           else if (p === 'overview') loadOverview();
           else if (p === 'rights') SoutRights.load();
           else if (p === 'artists') loadRoster();
+          else if (p === 'analytics') loadAnalyticsPage();
+          else if (p === 'finance') loadFinancePage();
+          else if (p === 'payouts') loadPayoutsPage();
         };
         window.__goWrapped = true;
       }
