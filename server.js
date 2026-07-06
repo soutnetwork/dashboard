@@ -42,11 +42,21 @@ app.use((req, res, next) => {
   next();
 });
 // admin.html is served ONLY to logged-in admins (server-side protection)
+function isAdminReq(req) {
+  try { const u = jwt.verify((req.cookies || {}).token || '', JWT_SECRET); return u && u.role === 'admin'; }
+  catch { return false; }
+}
+// catch every path variant that could resolve to admin.html
+app.use((req, res, next) => {
+  const p = decodeURIComponent((req.path || '').toLowerCase());
+  if (p.replace(/\/+/g, '/').indexOf('admin.html') !== -1) {
+    if (isAdminReq(req)) return next();
+    return res.redirect('/login.html');
+  }
+  next();
+});
 app.get('/admin.html', (req, res, next) => {
-  try {
-    const u = jwt.verify(req.cookies.token, JWT_SECRET);
-    if (u.role === 'admin') return next();
-  } catch { }
+  if (isAdminReq(req)) return next();
   res.redirect('/login.html');
 });
 app.use(express.static(__dirname, { dotfiles: 'deny', index: 'login.html' }));
@@ -790,7 +800,8 @@ app.get('/api/artists/search', auth, async (req, res) => {
     const j = await r.json();
     out.apple = (j.results || []).map(a => ({
       platform: 'apple', id: String(a.artistId), name: a.artistName,
-      url: a.artistLinkUrl || ('https://music.apple.com/artist/' + a.artistId), genre: a.primaryGenreName || ''
+      url: a.artistLinkUrl || ('https://music.apple.com/artist/' + a.artistId),
+      genre: a.primaryGenreName || '', sub: 'Apple ID: ' + a.artistId
     }));
   } catch (e) { console.error('apple search:', e.message); }
   const tok = await spotifyToken();
@@ -800,7 +811,9 @@ app.get('/api/artists/search', auth, async (req, res) => {
       const j = await r.json();
       out.spotify = ((j.artists && j.artists.items) || []).map(a => ({
         platform: 'spotify', id: a.id, name: a.name, url: (a.external_urls || {}).spotify || '',
-        image: (a.images && a.images.length ? a.images[a.images.length - 1].url : ''), followers: (a.followers || {}).total || 0
+        image: (a.images && a.images.length ? a.images[a.images.length - 1].url : ''),
+        followers: (a.followers || {}).total || 0,
+        sub: ((a.followers || {}).total || 0).toLocaleString() + ' followers' + (a.genres && a.genres.length ? ' · ' + a.genres[0] : '')
       }));
     } catch (e) { console.error('spotify search:', e.message); }
   }

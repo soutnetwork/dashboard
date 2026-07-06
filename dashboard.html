@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><title>Sout Network — Distribution Dashboard</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><title>Sout Network — Distribution Dashboard</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0a08'/><polygon points='59.7,12.2 42.9,13.4 42.1,14.6 41.3,15.7 40.4,16.9 39.6,18.1 38.9,19.2 38.1,20.4 37.2,21.6 36.4,22.8 35.6,23.9 35.5,25.1 35.7,26.3 35.8,27.4 36.0,28.6 36.2,29.8 36.3,31.0 36.5,32.1 36.7,33.3 37.5,34.5 40.1,35.6 42.7,36.8 45.2,38.0 46.0,38.0 44.7,36.8 43.6,35.6 43.8,34.5 46.2,33.3 47.5,32.1 47.3,31.0 47.1,29.8 47.0,28.6 46.8,27.4 46.6,26.3 46.6,25.1 47.9,23.9 49.3,22.8 50.7,21.6 52.1,20.4 53.4,19.2 54.8,18.1 56.2,16.9 57.4,15.7 58.8,14.6 60.1,13.4 61.3,12.2' fill='%23f3efe5'/><polygon points='53.4,61.4 54.6,62.6 55.9,63.8 57.0,64.9 54.7,66.1 52.4,67.3 52.5,68.5 52.7,69.6 52.9,70.8 53.0,72.0 53.2,73.1 53.4,74.3 52.5,75.5 51.2,76.7 49.8,77.8 48.4,79.0 47.0,80.2 45.6,81.3 44.3,82.5 43.0,83.7 41.7,84.9 40.3,86.0 39.1,87.2 50.1,87.2 57.3,86.0 58.2,84.9 59.0,83.7 59.8,82.5 60.5,81.3 61.4,80.2 62.2,79.0 63.0,77.8 63.8,76.7 64.5,75.5 64.3,74.3 64.2,73.1 64.0,72.0 63.8,70.8 63.7,69.6 63.5,68.5 63.3,67.3 63.1,66.1 61.3,64.9 58.7,63.8 56.2,62.6 53.5,61.4' fill='%23f3efe5'/></svg>">
 <style>
 :root{
@@ -20,7 +20,7 @@
   --sidebar-bg:#ffffff; --sidebar-fg:#464f5e; --sidebar-fg-faint:#9aa1ae; --sidebar-line:#eef0f3; --sidebar-active:#eceef1; --sidebar-brand:#1e2330;
   --radius:12px; --radius-sm:9px; --radius-lg:16px;
   --shadow:0 1px 2px rgba(20,28,48,.04); --shadow-md:0 2px 8px rgba(20,28,48,.06),0 1px 2px rgba(20,28,48,.04); --shadow-lg:0 12px 32px -8px rgba(20,28,48,.16);
-  --display:'Inter',-apple-system,'Segoe UI',sans-serif; --body:'Inter',-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --display:'Plus Jakarta Sans',-apple-system,'Segoe UI',sans-serif; --body:'Manrope',-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
   --row-h:44px;
 }
 html[data-theme="dark"]{
@@ -347,6 +347,61 @@ svg[stroke="currentColor"]{stroke-width:2}
 .art-result{display:flex;align-items:center;gap:10px;padding:8px 10px;border-radius:9px;cursor:pointer}
 .art-result:hover{background:var(--surface-2)}
 .art-badge{font-size:.66rem;padding:2px 7px;border-radius:20px;font-weight:700}
+
+.nr-summary-row{display:flex;justify-content:space-between;align-items:center;padding:12px 2px;border-bottom:1px solid var(--line-2);cursor:pointer;transition:.12s}
+.nr-summary-row:hover{background:var(--surface-2);padding-inline:8px;border-radius:8px}
+.nr-track{display:flex;align-items:center;gap:12px;padding:10px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:8px;cursor:pointer;transition:.12s}
+.nr-track:hover{border-color:var(--fg-soft);background:var(--surface-2)}
+.nr-track.active{border-color:var(--fg);background:var(--surface-2)}
+.nr-track .tno{width:24px;text-align:center;font-size:.72rem;font-weight:700;color:var(--fg-soft);flex:none}
+.nr-track .up-mini{width:90px;height:5px;border-radius:3px;background:var(--surface-3);overflow:hidden;flex:none}
+.nr-track .up-mini > i{display:block;height:100%;background:var(--fg);width:0%;transition:width .2s}
+.role-pill{display:inline-flex;align-items:center;gap:5px;padding:5px 12px;border:1.5px solid var(--line-strong);border-radius:20px;font-size:.78rem;font-weight:600;cursor:pointer;user-select:none;background:var(--surface)}
+.role-pill.on{background:var(--fg);color:var(--on-accent);border-color:var(--fg)}
+.art-result{display:flex;align-items:center;gap:10px;padding:9px 10px;border-radius:9px;cursor:pointer}
+.art-result:hover{background:var(--surface-2)}
+.art-badge{font-size:.64rem;padding:2px 7px;border-radius:20px;font-weight:700;flex:none}
+.nr-drop.drag{border-color:var(--fg);background:var(--surface-3)}
+
+/* ===== Professional motion & interaction polish ===== */
+*{-webkit-tap-highlight-color:transparent}
+.sb-item{transition:background .18s cubic-bezier(.4,0,.2,1),color .18s cubic-bezier(.4,0,.2,1),transform .12s ease}
+.sb-item:hover{background:var(--sidebar-hover)}
+.sb-item:active{transform:scale(.98)}
+.sb-item.active{background:var(--sidebar-active);color:var(--sidebar-active-fg);font-weight:600}
+.btn{transition:background .16s cubic-bezier(.4,0,.2,1),border-color .16s,transform .1s ease,box-shadow .16s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-primary:hover{box-shadow:0 4px 14px -4px var(--fg)}
+.icon-btn{transition:background .16s,color .16s,transform .1s ease}
+.icon-btn:hover{background:var(--surface-3)}
+.icon-btn:active{transform:scale(.92)}
+.card{transition:border-color .18s ease,box-shadow .18s ease,transform .16s ease}
+.stat{transition:border-color .18s ease,transform .16s ease}
+.stat:hover{transform:translateY(-2px);border-color:var(--fg-soft)}
+tbody tr{transition:background .14s ease}
+.tab{transition:color .16s ease,border-color .16s ease}
+.tab:active{transform:scale(.97)}
+.page{animation:pageIn .28s cubic-bezier(.4,0,.2,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.input,.ctrl{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.input:focus,.ctrl:focus{box-shadow:0 0 0 3px var(--accent-soft)}
+.modal{animation:modalIn .24s cubic-bezier(.34,1.3,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.modal-bg{transition:opacity .2s ease}
+.nr-track{transition:border-color .16s ease,background .16s ease,transform .1s ease}
+.nr-track:active{transform:scale(.995)}
+.chip{transition:background .16s ease,color .16s ease}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
+
+.nr-type-card{border:1.5px solid var(--line);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:.16s;color:var(--fg-soft)}
+.nr-type-card:hover{border-color:var(--fg-soft);color:var(--fg)}
+.nr-type-card.active{border-color:var(--fg);background:var(--surface-2);color:var(--fg);box-shadow:0 0 0 1px var(--fg) inset}
+.nr-hero-drop{border:2px dashed var(--line-strong);border-radius:18px;padding:48px 24px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface-2)}
+.nr-hero-drop:hover,.nr-hero-drop.drag{border-color:var(--fg);background:var(--surface-3);transform:translateY(-1px)}
+.nr-hero-icon{width:66px;height:66px;border-radius:18px;background:var(--surface);border:1px solid var(--line);display:grid;place-items:center;margin:0 auto 16px;color:var(--fg)}
+.nr-hero-title{font-family:var(--display);font-weight:700;font-size:1.15rem;margin-bottom:6px}
+.nr-spec{display:flex;align-items:center;gap:8px;padding:10px;border:1px solid var(--line);border-radius:10px;background:var(--surface)}
 </style>
 
 <style>
@@ -506,86 +561,105 @@ svg[stroke="currentColor"]{stroke-width:2}
       </div>
     </div>
 <div class="page" data-page="newrelease">
-      <div class="page-head"><div><div class="page-title">New Release</div><div class="page-sub">Upload your files, then fill in the details — Believe-style workflow</div></div>
+      <div class="page-head"><div><div class="page-title">New Release</div><div class="page-sub">One release: Audio Release, EP or Single</div></div>
       <div style="display:flex;gap:8px"><button class="btn btn-ghost nr-act" id="nrSaveBtn" onclick="SoutClient.saveRelease('draft',this)">Save Draft</button><button class="btn btn-ghost" onclick="go('releases')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg> Cancel</button><button class="btn btn-primary nr-act" id="nrSubmitBtn" onclick="SoutClient.saveRelease('submitted',this)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 2L11 13M22 2l-7 20-4-9-9-4z"/></svg> Submit for Review</button></div></div>
 
       <datalist id="labelList"></datalist>
-      <datalist id="instrList"><option value="Voice"><option value="Oud"><option value="Qanun"><option value="Ney"><option value="Violin"><option value="Piano"><option value="Guitar"><option value="Bass"><option value="Drums"><option value="Percussion"><option value="Synthesizer"><option value="Accordion"><option value="Tabla"><option value="Riq"></datalist>
 
-      <!-- ============ STEP 1: UPLOAD FIRST ============ -->
-      <div id="nrUploadStage" class="card card-pad" style="margin-bottom:18px">
-        <div class="sec-title" style="border-left-color:var(--fg)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:18px;height:18px;color:var(--fg-soft)"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg> Upload assets first</div>
-        <div class="cell-sub" style="margin:-6px 0 16px">Drop your files — they upload in the background while you fill in the details. No waiting.</div>
-        <div style="display:grid;grid-template-columns:220px 1fr;gap:16px">
-          <!-- artwork -->
+      <!-- ============ WELCOME / UPLOAD-FIRST (shown until first upload) ============ -->
+      <!-- STEP A: name & type first -->
+      <div id="nrStepName" style="max-width:560px;margin:40px auto 0">
+        <div style="text-align:center;margin-bottom:28px">
+          <div style="width:56px;height:56px;border-radius:16px;background:var(--fg);display:grid;place-items:center;margin:0 auto 16px">
+            <svg viewBox="0 0 24 24" fill="none" stroke="var(--on-accent)" stroke-width="2" style="width:26px;height:26px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
+          </div>
+          <h2 style="font-family:var(--display);font-weight:800;font-size:1.4rem;margin:0 0 6px">Let's name your release</h2>
+          <div class="cell-sub">Start with the essentials — you'll add tracks &amp; details next.</div>
+        </div>
+        <div class="card card-pad">
+          <div class="field full"><label>Release title <span class="req">*</span></label><input class="input" id="nrPreTitle" placeholder="e.g. My New Album" style="font-size:1rem;height:46px" onkeydown="if(event.key==='Enter')SoutClient.startRelease()"></div>
+          <label style="display:block;margin:14px 0 8px">Release type</label>
+          <div id="nrPreType" style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:10px">
+            <div class="nr-type-card active" data-type="Single" onclick="SoutClient.pickType(this,'Single')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="3"/></svg><div class="cell-main" style="margin-top:8px">Single</div><div class="cell-sub" style="font-size:.72rem">1 track</div></div>
+            <div class="nr-type-card" data-type="EP" onclick="SoutClient.pickType(this,'EP')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><rect x="3" y="3" width="18" height="18" rx="2"/><path d="M9 9h6v6H9z"/></svg><div class="cell-main" style="margin-top:8px">EP</div><div class="cell-sub" style="font-size:.72rem">2–6 tracks</div></div>
+            <div class="nr-type-card" data-type="Album" onclick="SoutClient.pickType(this,'Album')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:20px;height:20px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div class="cell-main" style="margin-top:8px">Album</div><div class="cell-sub" style="font-size:.72rem">7+ tracks</div></div>
+          </div>
+          <button class="btn btn-primary" style="width:100%;margin-top:22px;height:44px" onclick="SoutClient.startRelease()">Continue to upload →</button>
+        </div>
+      </div>
+
+      <!-- STEP B: upload (distinct Sout design, not Believe) -->
+      <div id="nrWelcome" style="display:none;max-width:640px;margin:24px auto 0">
+        <button class="btn btn-ghost btn-sm" style="margin-bottom:14px" onclick="SoutClient.backToName()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back</button>
+        <input type="file" id="nrArtFile" accept=".jpg,.jpeg,image/jpeg" style="display:none" onchange="artPicked(this)">
+        <input type="file" id="nrAudioFiles" accept=".wav,audio/wav,audio/x-wav" multiple style="display:none" onchange="nrAudioPicked(this)">
+        <div id="nrDropZone" class="nr-hero-drop" onclick="document.getElementById('nrAudioFiles').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="nrDropAny(event)">
+          <div class="nr-hero-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width:34px;height:34px"><path d="M12 3v13m0-13l-4 4m4-4l4 4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></div>
+          <div class="nr-hero-title" id="nrHeroTitle">Drop your tracks here</div>
+          <div class="cell-sub">WAV audio &amp; JPG cover · or <span style="color:var(--fg);font-weight:600;text-decoration:underline">browse your device</span></div>
+        </div>
+        <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px">
+          <div class="nr-spec"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="width:15px;height:15px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><div><b style="font-size:.76rem">Audio</b><div class="cell-sub" style="font-size:.7rem">16/24-bit WAV</div></div></div>
+          <div class="nr-spec"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div><b style="font-size:.76rem">Cover</b><div class="cell-sub" style="font-size:.7rem">3000×3000 JPG</div></div></div>
+          <div class="nr-spec"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:15px;height:15px"><path d="M20 6L9 17l-5-5"/></svg><div><b style="font-size:.76rem">Quality</b><div class="cell-sub" style="font-size:.7rem">Same format</div></div></div>
+        </div>
+        <div style="text-align:center;margin-top:16px"><button class="btn btn-ghost btn-sm" onclick="SoutClient.addEmptyTrack()">or add a track manually</button></div>
+      </div>
+
+      <!-- ============ RELEASE WORKSPACE (two columns, shown after first upload) ============ -->
+      <div id="nrWorkspace" style="display:none">
+        <!-- HEADER -->
+        <div class="card" style="padding:0;overflow:hidden;margin-bottom:16px">
+          <div style="display:flex;gap:16px;padding:18px;align-items:center;background:linear-gradient(90deg,var(--surface-3),var(--surface-2))">
+            <img id="nrHdrArt" onclick="if(this.src)SoutClient.zoom(this.src)" style="width:84px;height:84px;border-radius:10px;object-fit:cover;border:1px solid var(--line);background:var(--surface);flex:none;cursor:pointer" title="Click to change / enlarge">
+            <div style="flex:1;min-width:0">
+              <div class="cell-main" id="nrHdrTitle" style="font-family:var(--display);font-weight:800;font-size:1.25rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">Untitled release</div>
+              <div class="cell-sub" id="nrHdrArtist" style="margin-top:2px">Artist: —</div>
+              <div class="cell-sub" style="margin-top:8px;line-height:1.7">
+                <span id="nrHdrLabel"></span><span id="nrHdrGenre"></span><span id="nrHdrType"></span>
+              </div>
+            </div>
+            <label class="btn btn-ghost btn-sm" style="cursor:pointer;flex:none">Change cover<input type="file" accept=".jpg,.jpeg" style="display:none" onchange="artPicked(this)"></label>
+          </div>
+        </div>
+
+        <div style="display:grid;grid-template-columns:1fr 1.25fr;gap:16px;align-items:start">
+          <!-- LEFT: release info + tracks -->
           <div>
-            <input type="file" id="nrArtFile" accept=".jpg,.jpeg,image/jpeg" style="display:none" onchange="artPicked(this)">
-            <div id="nrArtDrop" class="upload nr-drop" style="flex-direction:column;height:220px;text-align:center;margin:0;justify-content:center" onclick="document.getElementById('nrArtFile').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="nrDropArt(event)">
-              <img id="nrArtPreview" style="display:none;width:100%;height:100%;border-radius:10px;object-fit:cover;position:absolute;inset:0">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:30px;height:30px;color:#6b7280"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg>
-              <div class="cell-main" style="margin-top:8px">Cover artwork</div>
-              <div class="cell-sub" id="nrArtName">JPG · 3000×3000</div>
-              <div id="nrArtBar" style="display:none;position:absolute;bottom:0;left:0;height:4px;background:var(--fg);width:0%;border-radius:0 0 10px 10px;transition:width .2s"></div>
+            <div class="card card-pad">
+              <div class="sec-title" style="border-left-color:#7c3aed;margin-bottom:14px"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="width:16px;height:16px"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> Release information <button class="btn btn-ghost btn-sm" style="margin-inline-start:auto" onclick="SoutClient.openReleaseInfo()">Edit</button></div>
+              <div class="fgrid">
+                <div class="field full"><label>Release title <span class="req">*</span></label><input class="input" id="nrTitle" placeholder="Untitled release" oninput="SoutClient.syncHeader()"></div>
+                <div class="field"><label>Label <span class="req">*</span></label><input class="input" id="nrLabel" list="labelList" placeholder="Label" oninput="SoutClient.syncHeader()"></div>
+                <div class="field"><label>Type</label><select class="input" id="nrType" onchange="SoutClient.syncHeader()"><option>Single</option><option>EP</option><option>Album</option></select></div>
+                <div class="field full"><label>Genre <span class="req">*</span></label><select class="input" id="nrGenre" onchange="SoutClient.syncHeader()"><option value="">Genre…</option><option>Nasheed</option><option>Arabic - Islamic Anasheed</option><option>Arabic - Egyptian Musicals</option><option>Pop</option><option>Mahragan</option><option>Hip Hop</option><option>Arabic</option><option>Khaleeji</option><option>Tarab</option><option>Shaabi</option><option>Rock</option><option>EDM</option><option>Jazz</option><option>Classical</option><option>R&B</option><option>Reggaeton</option><option>Latin</option><option>Folk</option></select></div>
+              </div>
+            </div>
+
+            <div class="card card-pad" style="margin-top:14px">
+              <div class="sec-title" style="border-left-color:#6b7280;margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="width:16px;height:16px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Track(s) <span class="count" id="trackCount">0</span></div>
+              <div id="assetList"></div>
+              <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="SoutClient.addEmptyTrack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add a track</button>
+            </div>
+
+            <!-- dates + distribution summary -->
+            <div class="card card-pad" style="margin-top:14px">
+              <div class="nr-summary-row" onclick="SoutClient.openDates()"><div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="width:16px;height:16px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><span class="cell-main">Release dates</span></div><span class="cell-sub" id="nrDatesSummary">Set digital date…</span></div>
+              <div class="nr-summary-row" onclick="SoutClient.openPlatforms()"><div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg><span class="cell-main">Distributed stores</span></div><span class="cell-sub" id="nrPlatSummary">All major platforms</span></div>
+              <div class="nr-summary-row" onclick="SoutClient.openTerritories()" style="border-bottom:none"><div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:16px;height:16px"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg><span class="cell-main">Distributed territories</span></div><span class="cell-sub" id="nrTerrSummary">Worldwide</span></div>
             </div>
           </div>
-          <!-- audio -->
-          <div>
-            <input type="file" id="nrAudioFiles" accept=".wav,audio/wav,audio/x-wav" multiple style="display:none" onchange="nrAudioPicked(this)">
-            <div id="nrAudioDrop" class="upload nr-drop" style="flex-direction:column;height:220px;text-align:center;margin:0;justify-content:center" onclick="document.getElementById('nrAudioFiles').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="nrDropAudio(event)">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:30px;height:30px;color:#6b7280"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-              <div class="cell-main" style="margin-top:8px">Audio tracks</div>
-              <div class="cell-sub">WAV · drop one or many — each becomes a track</div>
-            </div>
+
+          <!-- RIGHT: context panel -->
+          <div class="card card-pad" id="nrPanel" style="min-height:400px">
+            <div id="nrPanelWelcome" class="empty" style="padding:60px 20px"><svg viewBox="0 0 24 24" fill="none" stroke="var(--fg-faint)" stroke-width="1.5" style="width:40px;height:40px;margin:0 auto 12px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg><h4>Select a track to edit its details</h4><div class="cell-sub">Click any track on the left to edit its metadata, contributors and instruments here.</div></div>
+            <div id="nrPanelContent" style="display:none"></div>
           </div>
         </div>
       </div>
 
-      <!-- ============ STEP 2: RELEASE HEADER (Believe-style) ============ -->
-      <div class="card" style="padding:0;overflow:hidden;margin-bottom:18px">
-        <div style="display:flex;gap:18px;padding:20px;align-items:center;background:var(--surface-2)">
-          <img id="nrHdrArt" onclick="if(this.src)SoutClient.zoom(this.src)" style="width:96px;height:96px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:var(--surface-3);flex:none;cursor:zoom-in" onerror="this.style.background='var(--surface-3)'">
-          <div style="flex:1;min-width:0">
-            <div class="cell-sub" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Release title</div>
-            <input class="nr-hdr-title" id="nrTitle" placeholder="Untitled release" style="width:100%;border:1px solid var(--line);background:var(--surface);border-radius:9px;font-family:var(--display);font-weight:800;font-size:1.35rem;color:var(--fg);padding:8px 12px;outline:none">
-            <div class="row-flex" style="gap:10px;margin-top:12px;flex-wrap:wrap">
-              <div class="nr-hdr-field" title="Label"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="width:15px;height:15px"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><input class="input" id="nrLabel" list="labelList" placeholder="Label" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem;min-width:120px"></div>
-              <div class="nr-hdr-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:#6b7280"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
-                <select class="input" id="nrType" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem"><option>Single</option><option>EP</option><option>Album</option></select></div>
-              <div class="nr-hdr-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:#6b7280"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>
-                <select class="input" id="nrGenre" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem">
-                  <option value="">Genre…</option><option>Nasheed</option><option>Pop</option><option>Mahragan</option><option>Hip Hop</option><option>Arabic</option><option>Khaleeji</option><option>Tarab</option><option>Shaabi</option><option>Islamic</option><option>Rock</option><option>EDM</option><option>Jazz</option><option>Classical</option><option>R&B</option><option>Reggaeton</option><option>Latin</option><option>Folk</option></select></div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <!-- ============ STEP 8+9+10: SUMMARY FIELDS (dates / platforms / territories) ============ -->
-      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:12px;margin-bottom:18px">
-        <div class="card card-pad nr-summary" onclick="SoutClient.openDates()">
-          <div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="width:18px;height:18px"><rect x="3" y="4" width="18" height="18" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg><div class="cell-main">Release dates</div></div>
-          <div class="cell-sub" id="nrDatesSummary" style="margin-top:6px">Set digital date…</div>
-        </div>
-        <div class="card card-pad nr-summary" onclick="SoutClient.openPlatforms()">
-          <div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><line x1="2" y1="12" x2="22" y2="12"/><path d="M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg><div class="cell-main">Platforms</div></div>
-          <div class="cell-sub" id="nrPlatSummary" style="margin-top:6px">All major platforms</div>
-        </div>
-        <div class="card card-pad nr-summary" onclick="SoutClient.openTerritories()">
-          <div class="row-flex" style="gap:8px"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:18px;height:18px"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15 15 0 010 20 15 15 0 010-20z"/></svg><div class="cell-main">Territories</div></div>
-          <div class="cell-sub" id="nrTerrSummary" style="margin-top:6px">Worldwide</div>
-        </div>
-      </div>
       <input type="hidden" id="nrDigital"><input type="hidden" id="nrOriginal"><input type="hidden" id="nrPreorder"><input type="hidden" id="nrExclusive">
       <input type="hidden" id="nrTerr" value="Worldwide"><input type="hidden" id="nrStores" value="">
-      <div id="nrPlatforms" style="display:none"></div>
-      <span id="nrPlatCount" style="display:none"></span>
-
-      <!-- ============ STEP 3: ASSETS ============ -->
-      <div class="row-flex" style="justify-content:space-between;margin:4px 0 10px">
-        <div class="sec-title" style="margin:0;border-left-color:#6b7280"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="width:18px;height:18px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Assets <span class="count" id="trackCount">0</span></div>
-        <button class="btn btn-ghost btn-sm" onclick="SoutClient.addEmptyTrack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add track manually</button>
-      </div>
-      <div id="assetList"></div>
-      <div id="assetEmpty" class="card card-pad"><div class="empty"><h4>No tracks yet</h4><div class="cell-sub">Upload WAV files above — each file becomes a track using its filename as the title.</div></div></div>
     </div>
 
 <div class="page" data-page="rights">
@@ -655,54 +729,6 @@ svg[stroke="currentColor"]{stroke-width:2}
 
 
 <!-- ============ STEP 4+5+6+7: TRACK DETAILS + CONTRIBUTORS ============ -->
-<div class="modal-bg" id="trackModal">
-  <div class="modal" style="max-width:820px">
-    <div class="modal-head"><h3 id="tmTitle">Track details</h3><button class="icon-btn" onclick="SoutClient.closeTrack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="modal-body">
-      <div class="sec-title" style="border-left-color:#d97706"><svg viewBox="0 0 24 24" fill="none" stroke="#d97706" stroke-width="2" style="width:16px;height:16px"><path d="M4 19.5A2.5 2.5 0 016.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 014 19.5v-15A2.5 2.5 0 016.5 2z"/></svg> Track information</div>
-      <div class="fgrid">
-        <div class="field full"><label>Track title <span class="req">*</span></label><input class="input" id="tmTrackTitle" placeholder="Track title"></div>
-        <div class="field"><label>C Line <span class="req">*</span></label><input class="input" id="tmCLine" placeholder="2026 Sout Network"></div>
-        <div class="field"><label>P Line <span class="req">*</span></label><input class="input" id="tmPLine" placeholder="2026 Sout Network"></div>
-        <div class="field"><label>Version</label><select class="input" id="tmVersion"><option>Original</option><option>Remix</option><option>Remastered</option><option>Acoustic</option><option>Live</option><option>Instrumental</option><option>Radio Edit</option><option>Extended</option></select></div>
-        <div class="field"><label>ISRC <span class="cell-sub" style="font-weight:400">(auto on approval)</span></label><input class="input" id="tmIsrc" placeholder="Leave empty"></div>
-        <div class="field"><label>Production year</label><input class="input" id="tmProdYear" value="2026"></div>
-        <div class="field"><label>Price tier</label><select class="input" id="tmPrice"><option>Front (Default)</option><option>Mid</option><option>Back</option><option>Budget</option></select></div>
-        <div class="field"><label>Lyrics language</label><select class="input" id="tmLyricsLang"><option>Arabic</option><option>English</option><option>French</option><option>Instrumental</option></select></div>
-        <div class="field"><label>Content type</label><select class="input" id="tmContent"><option>Not Explicit</option><option>Explicit</option><option>Clean</option></select></div>
-        <div class="field"><label>Start time (preview)</label><input class="input" id="tmStart" placeholder="e.g. 0:45"></div>
-      </div>
-
-      <div class="sec-title" style="margin-top:18px;border-left-color:#7c3aed"><svg viewBox="0 0 24 24" fill="none" stroke="#7c3aed" stroke-width="2" style="width:16px;height:16px"><path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75"/></svg> Contributors</div>
-      <div id="tmContribs"></div>
-      <button class="btn btn-ghost btn-sm" style="margin-top:8px" onclick="SoutClient.addContributor()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add contributor</button>
-
-      <div class="sec-title" style="margin-top:18px;border-left-color:#16a34a"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:16px;height:16px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Instruments</div>
-      <div class="field full" style="margin:0"><input class="input" id="tmInstruments" list="instrList" placeholder="Type an instrument and press Enter (e.g. Oud, Voice)" onkeydown="if(event.key==='Enter'){event.preventDefault();SoutClient.addInstrument(this.value);this.value=''}"></div>
-      <div id="tmInstrTags" style="display:flex;flex-wrap:wrap;gap:6px;margin-top:8px"></div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="SoutClient.closeTrack()">Cancel</button><button class="btn btn-primary" onclick="SoutClient.saveTrack()">Save track</button></div>
-  </div>
-</div>
-
-<!-- contributor editor (nested) -->
-<div class="modal-bg" id="contribModal" style="z-index:220">
-  <div class="modal" style="max-width:620px">
-    <div class="modal-head"><h3>Contributor</h3><button class="icon-btn" onclick="closeModal('contribModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>
-    <div class="modal-body">
-      <div class="field full"><label>Artist / contributor name</label>
-        <input class="input" id="coName" placeholder="Start typing — Spotify & Apple results appear" autocomplete="off" oninput="SoutClient.searchArtist(this.value)">
-        <div id="coResults" style="margin-top:6px;border:1px solid var(--line);border-radius:10px;max-height:230px;overflow:auto;display:none"></div>
-      </div>
-      <div id="coLinked" style="display:none;margin-bottom:12px"></div>
-      <label style="margin-bottom:8px;display:block">Roles <span class="cell-sub" style="font-weight:400">(one person can hold several)</span></label>
-      <div id="coRoles" style="display:flex;flex-wrap:wrap;gap:8px"></div>
-    </div>
-    <div class="modal-foot"><button class="btn btn-ghost" onclick="closeModal('contribModal')">Cancel</button><button class="btn btn-primary" onclick="SoutClient.saveContributor()">Save contributor</button></div>
-  </div>
-</div>
-
-<!-- ============ STEP 8: DATES ============ -->
 <div class="modal-bg" id="datesModal">
   <div class="modal" style="max-width:520px">
     <div class="modal-head"><h3>Release dates</h3><button class="icon-btn" onclick="closeModal('datesModal')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>

@@ -1,7 +1,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet"><title>Sout Network — Admin Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin><link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=Manrope:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet"><title>Sout Network — Admin Console</title>
 <link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230b0a08'/><polygon points='59.7,12.2 42.9,13.4 42.1,14.6 41.3,15.7 40.4,16.9 39.6,18.1 38.9,19.2 38.1,20.4 37.2,21.6 36.4,22.8 35.6,23.9 35.5,25.1 35.7,26.3 35.8,27.4 36.0,28.6 36.2,29.8 36.3,31.0 36.5,32.1 36.7,33.3 37.5,34.5 40.1,35.6 42.7,36.8 45.2,38.0 46.0,38.0 44.7,36.8 43.6,35.6 43.8,34.5 46.2,33.3 47.5,32.1 47.3,31.0 47.1,29.8 47.0,28.6 46.8,27.4 46.6,26.3 46.6,25.1 47.9,23.9 49.3,22.8 50.7,21.6 52.1,20.4 53.4,19.2 54.8,18.1 56.2,16.9 57.4,15.7 58.8,14.6 60.1,13.4 61.3,12.2' fill='%23f3efe5'/><polygon points='53.4,61.4 54.6,62.6 55.9,63.8 57.0,64.9 54.7,66.1 52.4,67.3 52.5,68.5 52.7,69.6 52.9,70.8 53.0,72.0 53.2,73.1 53.4,74.3 52.5,75.5 51.2,76.7 49.8,77.8 48.4,79.0 47.0,80.2 45.6,81.3 44.3,82.5 43.0,83.7 41.7,84.9 40.3,86.0 39.1,87.2 50.1,87.2 57.3,86.0 58.2,84.9 59.0,83.7 59.8,82.5 60.5,81.3 61.4,80.2 62.2,79.0 63.0,77.8 63.8,76.7 64.5,75.5 64.3,74.3 64.2,73.1 64.0,72.0 63.8,70.8 63.7,69.6 63.5,68.5 63.3,67.3 63.1,66.1 61.3,64.9 58.7,63.8 56.2,62.6 53.5,61.4' fill='%23f3efe5'/></svg>">
 <style>
 :root{
@@ -18,7 +18,7 @@
   --sidebar-bg:#ffffff; --sidebar-fg:#464f5e; --sidebar-fg-faint:#9aa1ae; --sidebar-line:#eef0f3; --sidebar-active:#eceef1; --sidebar-brand:#1e2330;
   --radius:12px; --radius-sm:9px; --radius-lg:16px;
   --shadow:0 1px 2px rgba(20,28,48,.04); --shadow-md:0 2px 8px rgba(20,28,48,.06),0 1px 2px rgba(20,28,48,.04); --shadow-lg:0 12px 32px -8px rgba(20,28,48,.16);
-  --display:'Inter',-apple-system,'Segoe UI',sans-serif; --body:'Inter',-apple-system,'Segoe UI',sans-serif; --mono:'IBM Plex Mono',ui-monospace,monospace;
+  --display:'Plus Jakarta Sans',-apple-system,'Segoe UI',sans-serif; --body:'Manrope',-apple-system,'Segoe UI',sans-serif; --mono:'JetBrains Mono',ui-monospace,monospace;
   --row-h:44px;
 }
 html[data-theme="dark"]{
@@ -314,6 +314,37 @@ svg[stroke="currentColor"]{stroke-width:2}
   [style*="grid-template-columns:220px 1fr"]{grid-template-columns:1fr !important}
 }
 
+
+/* ===== Professional motion & interaction polish ===== */
+*{-webkit-tap-highlight-color:transparent}
+.sb-item{transition:background .18s cubic-bezier(.4,0,.2,1),color .18s cubic-bezier(.4,0,.2,1),transform .12s ease}
+.sb-item:hover{background:var(--sidebar-hover)}
+.sb-item:active{transform:scale(.98)}
+.sb-item.active{background:var(--sidebar-active);color:var(--sidebar-active-fg);font-weight:600}
+.btn{transition:background .16s cubic-bezier(.4,0,.2,1),border-color .16s,transform .1s ease,box-shadow .16s}
+.btn:hover{transform:translateY(-1px)}
+.btn:active{transform:translateY(0) scale(.98)}
+.btn-primary:hover{box-shadow:0 4px 14px -4px var(--fg)}
+.icon-btn{transition:background .16s,color .16s,transform .1s ease}
+.icon-btn:hover{background:var(--surface-3)}
+.icon-btn:active{transform:scale(.92)}
+.card{transition:border-color .18s ease,box-shadow .18s ease,transform .16s ease}
+.stat{transition:border-color .18s ease,transform .16s ease}
+.stat:hover{transform:translateY(-2px);border-color:var(--fg-soft)}
+tbody tr{transition:background .14s ease}
+.tab{transition:color .16s ease,border-color .16s ease}
+.tab:active{transform:scale(.97)}
+.page{animation:pageIn .28s cubic-bezier(.4,0,.2,1)}
+@keyframes pageIn{from{opacity:0;transform:translateY(6px)}to{opacity:1;transform:none}}
+.input,.ctrl{transition:border-color .16s ease,box-shadow .16s ease,background .16s ease}
+.input:focus,.ctrl:focus{box-shadow:0 0 0 3px var(--accent-soft)}
+.modal{animation:modalIn .24s cubic-bezier(.34,1.3,.64,1)}
+@keyframes modalIn{from{opacity:0;transform:translateY(12px) scale(.98)}to{opacity:1;transform:none}}
+.modal-bg{transition:opacity .2s ease}
+.nr-track{transition:border-color .16s ease,background .16s ease,transform .1s ease}
+.nr-track:active{transform:scale(.995)}
+.chip{transition:background .16s ease,color .16s ease}
+@media (prefers-reduced-motion:reduce){*{animation:none!important;transition:none!important}}
 </style>
 
 <style>
