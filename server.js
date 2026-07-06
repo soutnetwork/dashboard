@@ -167,7 +167,12 @@ app.get('/api/releases/:id', auth, (req, res) => {
   if (!r) return res.status(404).json({ error: 'Not found' });
   if (req.user.role !== 'admin' && r.client_id !== req.user.client_id) return res.status(403).json({ error: 'Forbidden' });
   const tracks = db.prepare('SELECT * FROM tracks WHERE release_id = ? ORDER BY track_no').all(r.id);
-  for (const t of tracks) t.contributors = db.prepare('SELECT * FROM contributors WHERE track_id = ?').all(t.id);
+  for (const t of tracks) t.contributors = db.prepare('SELECT * FROM contributors WHERE track_id = ?').all(t.id).map(co => {
+    let roles = null; try { roles = JSON.parse(co.roles || 'null'); } catch { }
+    if (!Array.isArray(roles) || !roles.length) roles = [co.role || 'Main Artist'];
+    let instruments = []; try { instruments = JSON.parse(co.instruments || '[]'); } catch { }
+    return { ...co, roles, instruments: Array.isArray(instruments) ? instruments : [] };
+  });
   res.json({ release: r, tracks });
 });
 
@@ -197,8 +202,26 @@ app.post('/api/releases', auth, (req, res) => {
       t.version || 'Original', t.lyrics_lang || '', t.content_type || 'Not Explicit', t.production_year || '', i + 1, stagedAudio);
     const trackId = tInfo.lastInsertRowid;
     (t.contributors || []).forEach(c => {
-      db.prepare(`INSERT INTO contributors (track_id,role,name,is_composer,is_author,spotify_url,apple_url) VALUES (?,?,?,?,?,?,?)`)
-        .run(trackId, c.role || 'Main Artist', c.name || '', c.is_composer ? 1 : 0, c.is_author ? 1 : 0, c.spotify_url || '', c.apple_url || '');
+      const roles = Array.isArray(c.roles) && c.roles.length ? c.roles : [c.role || 'Main Artist'];
+      const primaryRole = roles[0];
+      db.prepare(`INSERT INTO contributors (track_id,role,roles,name,is_composer,is_author,spotify_url,apple_url,artist_id,instruments) VALUES (?,?,?,?,?,?,?,?,?,?)`)
+        .run(trackId, primaryRole, JSON.stringify(roles), c.name || '',
+          roles.includes('Composer') ? 1 : 0, roles.includes('Author') || roles.includes('Lyricist') ? 1 : 0,
+          c.spotify_url || '', c.apple_url || '', c.artist_id || null, Array.isArray(c.instruments) ? JSON.stringify(c.instruments) : (c.instruments || null));
+      // auto-store / update the artist in the internal database
+      if ((c.name || '').trim() && clientId) {
+        try {
+          db.prepare(`INSERT INTO artists (client_id,name,spotify_id,spotify_url,apple_id,apple_url,image)
+            VALUES (?,?,?,?,?,?,?)
+            ON CONFLICT(client_id,name) DO UPDATE SET
+              spotify_id=COALESCE(NULLIF(excluded.spotify_id,''),artists.spotify_id),
+              spotify_url=COALESCE(NULLIF(excluded.spotify_url,''),artists.spotify_url),
+              apple_id=COALESCE(NULLIF(excluded.apple_id,''),artists.apple_id),
+              apple_url=COALESCE(NULLIF(excluded.apple_url,''),artists.apple_url),
+              image=COALESCE(NULLIF(excluded.image,''),artists.image)`)
+            .run(clientId, c.name.trim(), c.spotify_id || '', c.spotify_url || '', c.apple_id || '', c.apple_url || '', c.image || '');
+        } catch { }
+      }
     });
   });
   // labels are controlled per client: pick an assigned one, or create only if allowed & under the limit
@@ -728,6 +751,62 @@ app.post('/api/stage/audio', auth, upload.single('audio'), (req, res) => {
 });
 
 // ============================================================
+// ============================================================
+// ARTIST DATABASE + Spotify/Apple search
+// ============================================================
+app.get('/api/artists', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  const q = (req.query.q || '').trim();
+  const rows = q
+    ? db.prepare('SELECT * FROM artists WHERE client_id = ? AND name LIKE ? ORDER BY name LIMIT 20').all(cid, '%' + q + '%')
+    : db.prepare('SELECT * FROM artists WHERE client_id = ? ORDER BY name LIMIT 50').all(cid);
+  res.json({ artists: rows });
+});
+
+let _spTok = { token: null, exp: 0 };
+async function spotifyToken() {
+  if (_spTok.token && Date.now() < _spTok.exp) return _spTok.token;
+  let cfg = {};
+  try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'spotify.json'), 'utf8')); } catch { }
+  if (!cfg.client_id || !cfg.client_secret) return null;
+  try {
+    const r = await fetch('https://accounts.spotify.com/api/token', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/x-www-form-urlencoded', 'Authorization': 'Basic ' + Buffer.from(cfg.client_id + ':' + cfg.client_secret).toString('base64') },
+      body: 'grant_type=client_credentials'
+    });
+    const j = await r.json();
+    if (j.access_token) { _spTok = { token: j.access_token, exp: Date.now() + (j.expires_in - 60) * 1000 }; return j.access_token; }
+  } catch (e) { console.error('spotify token:', e.message); }
+  return null;
+}
+
+app.get('/api/artists/search', auth, async (req, res) => {
+  const q = (req.query.q || '').trim();
+  if (q.length < 2) return res.json({ results: [] });
+  const out = { spotify: [], apple: [] };
+  try {
+    const r = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=musicArtist&limit=6');
+    const j = await r.json();
+    out.apple = (j.results || []).map(a => ({
+      platform: 'apple', id: String(a.artistId), name: a.artistName,
+      url: a.artistLinkUrl || ('https://music.apple.com/artist/' + a.artistId), genre: a.primaryGenreName || ''
+    }));
+  } catch (e) { console.error('apple search:', e.message); }
+  const tok = await spotifyToken();
+  if (tok) {
+    try {
+      const r = await fetch('https://api.spotify.com/v1/search?type=artist&limit=6&q=' + encodeURIComponent(q), { headers: { Authorization: 'Bearer ' + tok } });
+      const j = await r.json();
+      out.spotify = ((j.artists && j.artists.items) || []).map(a => ({
+        platform: 'spotify', id: a.id, name: a.name, url: (a.external_urls || {}).spotify || '',
+        image: (a.images && a.images.length ? a.images[a.images.length - 1].url : ''), followers: (a.followers || {}).total || 0
+      }));
+    } catch (e) { console.error('spotify search:', e.message); }
+  }
+  res.json({ results: [...out.spotify, ...out.apple], spotify_enabled: !!tok });
+});
+
 // LABELS autocomplete
 // ============================================================
 app.get('/api/labels', auth, (req, res) => {
@@ -1442,6 +1521,21 @@ async function main() {
     db.prepare(`INSERT OR IGNORE INTO labels (client_id, name)
       SELECT DISTINCT client_id, label FROM releases WHERE label IS NOT NULL AND label != ''`).run();
   } catch { }
+  db.exec(`CREATE TABLE IF NOT EXISTS artists (
+    id INTEGER PRIMARY KEY AUTOINCREMENT,
+    client_id INTEGER NOT NULL,
+    name TEXT NOT NULL,
+    spotify_id TEXT, spotify_url TEXT,
+    apple_id TEXT, apple_url TEXT,
+    image TEXT,
+    created_at TEXT NOT NULL DEFAULT (datetime('now')),
+    UNIQUE(client_id, name)
+  );`);
+  // contributors: support multiple roles (JSON array) + link to artist record
+  const conCols = db.prepare(`PRAGMA table_info(contributors)`).all().map(x => x.name);
+  if (!conCols.includes('roles')) db.exec(`ALTER TABLE contributors ADD COLUMN roles TEXT`);
+  if (!conCols.includes('artist_id')) db.exec(`ALTER TABLE contributors ADD COLUMN artist_id INTEGER`);
+  if (!conCols.includes('instruments')) db.exec(`ALTER TABLE contributors ADD COLUMN instruments TEXT`);
   db.exec(`CREATE TABLE IF NOT EXISTS statements (
     id INTEGER PRIMARY KEY AUTOINCREMENT,
     client_id INTEGER NOT NULL,
