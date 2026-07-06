@@ -332,7 +332,8 @@ svg[stroke="currentColor"]{stroke-width:2}
 /* ===== New Release (Believe-style) ===== */
 .nr-drop{position:relative;border:1.5px dashed var(--line-strong);transition:.15s}
 .nr-drop.drag{border-color:var(--fg);background:var(--surface-3)}
-.nr-hdr-field{display:flex;align-items:center;gap:5px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:3px 8px}
+.nr-hdr-field{display:flex;align-items:center;gap:6px;background:var(--surface);border:1px solid var(--line);border-radius:8px;padding:5px 10px}
+.nr-hdr-field label{margin:0;font-size:.65rem;color:var(--fg-faint);text-transform:uppercase;letter-spacing:.04em}
 .nr-hdr-field select,.nr-hdr-field input{outline:none;color:var(--fg);cursor:pointer}
 .nr-summary{cursor:pointer;transition:.15s}
 .nr-summary:hover{border-color:var(--fg);transform:translateY(-1px)}
@@ -544,10 +545,10 @@ svg[stroke="currentColor"]{stroke-width:2}
         <div style="display:flex;gap:18px;padding:20px;align-items:center;background:var(--surface-2)">
           <img id="nrHdrArt" onclick="if(this.src)SoutClient.zoom(this.src)" style="width:96px;height:96px;border-radius:12px;object-fit:cover;border:1px solid var(--line);background:var(--surface-3);flex:none;cursor:zoom-in" onerror="this.style.background='var(--surface-3)'">
           <div style="flex:1;min-width:0">
-            <input class="nr-hdr-title" id="nrTitle" placeholder="Release title" oninput="document.getElementById('nrHdrTitleEcho') && (document.getElementById('nrHdrTitleEcho').textContent=this.value)" style="width:100%;border:none;background:transparent;font-family:var(--display);font-weight:800;font-size:1.5rem;color:var(--fg);padding:0;outline:none">
-            <div class="row-flex" style="gap:10px;margin-top:10px;flex-wrap:wrap">
-              <div class="nr-hdr-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:#6b7280"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg>
-                <input class="input" id="nrLabel" list="labelList" placeholder="Label" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem"></div>
+            <div class="cell-sub" style="font-size:.7rem;text-transform:uppercase;letter-spacing:.05em;margin-bottom:4px">Release title</div>
+            <input class="nr-hdr-title" id="nrTitle" placeholder="Untitled release" style="width:100%;border:1px solid var(--line);background:var(--surface);border-radius:9px;font-family:var(--display);font-weight:800;font-size:1.35rem;color:var(--fg);padding:8px 12px;outline:none">
+            <div class="row-flex" style="gap:10px;margin-top:12px;flex-wrap:wrap">
+              <div class="nr-hdr-field" title="Label"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="width:15px;height:15px"><path d="M20.59 13.41l-7.17 7.17a2 2 0 01-2.83 0L2 12V2h10l8.59 8.59a2 2 0 010 2.82z"/><line x1="7" y1="7" x2="7.01" y2="7"/></svg><input class="input" id="nrLabel" list="labelList" placeholder="Label" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem;min-width:120px"></div>
               <div class="nr-hdr-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:#6b7280"><rect x="3" y="3" width="18" height="18" rx="2"/></svg>
                 <select class="input" id="nrType" style="border:none;background:transparent;padding:2px 4px;height:auto;font-size:.85rem"><option>Single</option><option>EP</option><option>Album</option></select></div>
               <div class="nr-hdr-field"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px;color:#6b7280"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg>

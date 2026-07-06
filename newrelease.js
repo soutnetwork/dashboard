@@ -7,8 +7,8 @@
   function ready(fn) { if (document.readyState !== 'loading') fn(); else document.addEventListener('DOMContentLoaded', fn); }
 
   ready(function () {
-    var API = window.API;
-    var toast = window.toast || function () {};
+    var API = window.SoutAPI || window.API;
+    var toast = function (m) { (window.toast || function(){})(m); };
     var esc = (window.SoutUI && window.SoutUI.esc) || function (s) { return (s == null ? '' : String(s)).replace(/[&<>"']/g, function (m) { return ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' })[m]; }); };
     if (!API) { console.error('NewRelease: API missing'); return; }
     var SC = window.SoutClient = window.SoutClient || {};
@@ -50,8 +50,6 @@
         var xhr = new XMLHttpRequest();
         xhr.open('POST', '/api' + path);
         xhr.withCredentials = true;
-        var tok = (window.API && window.API.token) || '';
-        if (tok) xhr.setRequestHeader('Authorization', 'Bearer ' + tok);
         xhr.upload.onprogress = function (e) { if (e.lengthComputable && onp) onp(Math.round(e.loaded / e.total * 100)); };
         xhr.onload = function () {
           var j = {}; try { j = JSON.parse(xhr.responseText); } catch (e) {}
