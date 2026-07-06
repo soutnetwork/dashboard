@@ -592,7 +592,7 @@ tbody tr{transition:background .14s ease}
       <div id="nrWelcome" style="display:none;max-width:640px;margin:24px auto 0">
         <button class="btn btn-ghost btn-sm" style="margin-bottom:14px" onclick="SoutClient.backToName()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg> Back</button>
         <input type="file" id="nrArtFile" accept=".jpg,.jpeg,image/jpeg" style="display:none" onchange="artPicked(this)">
-        <input type="file" id="nrAudioFiles" accept=".wav,audio/wav,audio/x-wav" multiple style="display:none" onchange="nrAudioPicked(this)">
+        <input type="file" id="nrAudioFiles" accept=".wav,audio/wav,audio/x-wav,.jpg,.jpeg,image/jpeg" multiple style="display:none" onchange="nrAudioPicked(this)">
         <div id="nrDropZone" class="nr-hero-drop" onclick="document.getElementById('nrAudioFiles').click()" ondragover="event.preventDefault();this.classList.add('drag')" ondragleave="this.classList.remove('drag')" ondrop="nrDropAny(event)">
           <div class="nr-hero-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" style="width:34px;height:34px"><path d="M12 3v13m0-13l-4 4m4-4l4 4"/><path d="M4 17v2a2 2 0 002 2h12a2 2 0 002-2v-2"/></svg></div>
           <div class="nr-hero-title" id="nrHeroTitle">Drop your tracks here</div>

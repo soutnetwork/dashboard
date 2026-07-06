@@ -48,22 +48,24 @@
       if (!/\.jpe?g$/i.test(f.name)) { toast('Artwork must be JPG'); return; }
       NR.queueArt = f; renderQueue();
     }
-    window.nrAudioPicked = function (input) { queueAudio(input.files); input.value = ''; };
+    window.nrAudioPicked = function (input) { queueFiles(input.files); input.value = ''; };
     window.nrDropAny = function (e) {
       e.preventDefault(); var d = e.currentTarget; d.classList.remove('drag');
-      var files = e.dataTransfer.files, audio = [], art = null;
-      Array.prototype.forEach.call(files, function (f) { if (/\.jpe?g$/i.test(f.name)) art = f; else if (/\.wav$/i.test(f.name)) audio.push(f); });
-      if (art) queueArt(art);
-      if (audio.length) queueAudio(audio);
+      queueFiles(e.dataTransfer.files);
     };
     window.nrDropAudio = window.nrDropAny; window.nrDropArt = window.nrDropAny;
-    function queueAudio(files) {
+    // accept a mixed drop/selection: JPG → cover, WAV → tracks
+    function queueFiles(files) {
+      var added = 0, skipped = [];
       Array.prototype.forEach.call(files, function (f) {
-        if (!/\.wav$/i.test(f.name)) { toast(f.name + ' skipped — WAV only'); return; }
-        NR.queueAudio.push(f);
+        if (/\.jpe?g$/i.test(f.name)) { NR.queueArt = f; added++; }
+        else if (/\.wav$/i.test(f.name)) { NR.queueAudio.push(f); added++; }
+        else skipped.push(f.name);
       });
+      if (skipped.length) toast(skipped[0] + ' skipped — only WAV audio or JPG cover');
       renderQueue();
     }
+    function queueAudio(files) { queueFiles(files); }
     SC.removeQueued = function (kind, idx) {
       if (kind === 'art') NR.queueArt = null;
       else NR.queueAudio.splice(idx, 1);
