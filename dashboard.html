@@ -603,6 +603,8 @@ tbody tr{transition:background .14s ease}
           <div class="nr-spec"><svg viewBox="0 0 24 24" fill="none" stroke="#2563eb" stroke-width="2" style="width:15px;height:15px"><rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/></svg><div><b style="font-size:.76rem">Cover</b><div class="cell-sub" style="font-size:.7rem">3000×3000 JPG</div></div></div>
           <div class="nr-spec"><svg viewBox="0 0 24 24" fill="none" stroke="#16a34a" stroke-width="2" style="width:15px;height:15px"><path d="M20 6L9 17l-5-5"/></svg><div><b style="font-size:.76rem">Quality</b><div class="cell-sub" style="font-size:.7rem">Same format</div></div></div>
         </div>
+        <div id="nrQueue" style="display:none;margin-top:16px"></div>
+        <button class="btn btn-primary" id="nrUploadBtn" style="display:none;width:100%;margin-top:12px;height:46px;font-size:.95rem" onclick="SoutClient.doUpload()">Upload →</button>
         <div style="text-align:center;margin-top:16px"><button class="btn btn-ghost btn-sm" onclick="SoutClient.addEmptyTrack()">or add a track manually</button></div>
       </div>
 
@@ -639,7 +641,7 @@ tbody tr{transition:background .14s ease}
             <div class="card card-pad" style="margin-top:14px">
               <div class="sec-title" style="border-left-color:#6b7280;margin-bottom:12px"><svg viewBox="0 0 24 24" fill="none" stroke="#6b7280" stroke-width="2" style="width:16px;height:16px"><path d="M9 18V5l12-2v13"/><circle cx="6" cy="18" r="3"/><circle cx="18" cy="16" r="3"/></svg> Track(s) <span class="count" id="trackCount">0</span></div>
               <div id="assetList"></div>
-              <button class="btn btn-ghost btn-sm" style="margin-top:6px" onclick="SoutClient.addEmptyTrack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add a track</button>
+              <div class="row-flex" style="gap:8px;margin-top:6px"><button class="btn btn-ghost btn-sm" onclick="SoutClient.addEmptyTrack()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 5v14M5 12h14"/></svg> Add a track</button><label class="btn btn-ghost btn-sm" style="cursor:pointer"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4"/><path d="M17 8l-5-5-5 5"/><path d="M12 3v12"/></svg> Upload more WAV<input type="file" accept=".wav" multiple style="display:none" onchange="SoutClient.addMoreAudio(this)"></label></div>
             </div>
 
             <!-- dates + distribution summary -->
