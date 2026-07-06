@@ -773,6 +773,77 @@ app.get('/api/artists', auth, (req, res) => {
   res.json({ artists: rows });
 });
 
+// get a single saved artist by id
+app.get('/api/artists/:id', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  const a = db.prepare('SELECT * FROM artists WHERE id = ? AND client_id = ?').get(Number(req.params.id), cid);
+  if (!a) return res.status(404).json({ error: 'Artist not found' });
+  res.json({ artist: a });
+});
+
+// extract a platform ID from a pasted URL or raw id
+function parseSpotify(input) {
+  input = (input || '').trim(); if (!input) return { id: '', url: '' };
+  let m = input.match(/artist\/([A-Za-z0-9]{22})/) || input.match(/^([A-Za-z0-9]{22})$/) || input.match(/spotify:artist:([A-Za-z0-9]{22})/);
+  const id = m ? m[1] : '';
+  return { id, url: id ? 'https://open.spotify.com/artist/' + id : '' };
+}
+function parseApple(input) {
+  input = (input || '').trim(); if (!input) return { id: '', url: '' };
+  let m = input.match(/artist\/(?:[^/]+\/)?(\d{3,})/) || input.match(/id(\d{3,})/) || input.match(/^(\d{3,})$/);
+  const id = m ? m[1] : '';
+  return { id, url: id ? 'https://music.apple.com/artist/' + id : '' };
+}
+
+// create or update an artist (manual add / create-in-Sout)
+app.post('/api/artists', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.body.client_id || 0) : req.user.client_id;
+  const b = req.body || {};
+  const name = (b.name || '').trim();
+  if (!name) return res.status(400).json({ error: 'Name is required' });
+
+  const sp = parseSpotify(b.spotify_input || b.spotify_url || b.spotify_id || '');
+  const ap = parseApple(b.apple_input || b.apple_url || b.apple_id || '');
+  // status: 'linked' if we have an id, 'create' if user asked to create a new profile, else 'none'
+  const spStatus = sp.id ? 'linked' : (b.spotify_create ? 'create' : 'none');
+  const apStatus = ap.id ? 'linked' : (b.apple_create ? 'create' : 'none');
+
+  try {
+    db.prepare(`INSERT INTO artists (client_id,name,spotify_id,spotify_url,apple_id,apple_url,image,spotify_status,apple_status,bio)
+      VALUES (?,?,?,?,?,?,?,?,?,?)
+      ON CONFLICT(client_id,name) DO UPDATE SET
+        spotify_id=excluded.spotify_id, spotify_url=excluded.spotify_url,
+        apple_id=excluded.apple_id, apple_url=excluded.apple_url,
+        image=COALESCE(NULLIF(excluded.image,''),artists.image),
+        spotify_status=excluded.spotify_status, apple_status=excluded.apple_status,
+        bio=COALESCE(NULLIF(excluded.bio,''),artists.bio)`)
+      .run(cid, name, sp.id, sp.url, ap.id, ap.url, b.image || '', spStatus, apStatus, b.bio || '');
+    const a = db.prepare('SELECT * FROM artists WHERE client_id = ? AND name = ?').get(cid, name);
+    res.json({ ok: true, artist: a });
+  } catch (e) { res.status(500).json({ error: e.message }); }
+});
+
+// update an existing artist by id
+app.put('/api/artists/:id', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.body.client_id || 0) : req.user.client_id;
+  const a = db.prepare('SELECT * FROM artists WHERE id = ? AND client_id = ?').get(Number(req.params.id), cid);
+  if (!a) return res.status(404).json({ error: 'Artist not found' });
+  const b = req.body || {};
+  const sp = parseSpotify(b.spotify_input !== undefined ? b.spotify_input : (a.spotify_url || ''));
+  const ap = parseApple(b.apple_input !== undefined ? b.apple_input : (a.apple_url || ''));
+  const spStatus = sp.id ? 'linked' : (b.spotify_create ? 'create' : (a.spotify_status || 'none'));
+  const apStatus = ap.id ? 'linked' : (b.apple_create ? 'create' : (a.apple_status || 'none'));
+  db.prepare(`UPDATE artists SET name=?, spotify_id=?, spotify_url=?, apple_id=?, apple_url=?, image=?, spotify_status=?, apple_status=?, bio=? WHERE id=?`)
+    .run((b.name || a.name).trim(), sp.id, sp.url, ap.id, ap.url, b.image !== undefined ? b.image : a.image, spStatus, apStatus, b.bio !== undefined ? b.bio : a.bio, a.id);
+  res.json({ ok: true, artist: db.prepare('SELECT * FROM artists WHERE id = ?').get(a.id) });
+});
+
+app.delete('/api/artists/:id', auth, (req, res) => {
+  const cid = req.user.role === 'admin' ? Number(req.query.client_id || 0) : req.user.client_id;
+  db.prepare('DELETE FROM artists WHERE id = ? AND client_id = ?').run(Number(req.params.id), cid);
+  res.json({ ok: true });
+});
+
 let _spTok = { token: null, exp: 0 };
 async function spotifyToken() {
   if (_spTok.token && Date.now() < _spTok.exp) return _spTok.token;
@@ -1572,9 +1643,16 @@ async function main() {
     spotify_id TEXT, spotify_url TEXT,
     apple_id TEXT, apple_url TEXT,
     image TEXT,
+    spotify_status TEXT DEFAULT 'none',
+    apple_status TEXT DEFAULT 'none',
+    bio TEXT,
     created_at TEXT NOT NULL DEFAULT (datetime('now')),
     UNIQUE(client_id, name)
   );`);
+  const artCols = db.prepare(`PRAGMA table_info(artists)`).all().map(x => x.name);
+  if (!artCols.includes('spotify_status')) db.exec(`ALTER TABLE artists ADD COLUMN spotify_status TEXT DEFAULT 'none'`);
+  if (!artCols.includes('apple_status')) db.exec(`ALTER TABLE artists ADD COLUMN apple_status TEXT DEFAULT 'none'`);
+  if (!artCols.includes('bio')) db.exec(`ALTER TABLE artists ADD COLUMN bio TEXT`);
   // contributors: support multiple roles (JSON array) + link to artist record
   const conCols = db.prepare(`PRAGMA table_info(contributors)`).all().map(x => x.name);
   if (!conCols.includes('roles')) db.exec(`ALTER TABLE contributors ADD COLUMN roles TEXT`);

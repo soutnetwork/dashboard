@@ -196,17 +196,70 @@
     SC.editContributor = function (i) { var t = active(); editingContrib = i; openContrib(t.contributors[i]); };
     SC.removeContributor = function (i) { var t = active(); t.contributors.splice(i, 1); renderContribs(); SC.syncHeader(); };
     function openContrib(c) {
-      NR._draft = { name: c.name || '', roles: (c.roles || []).slice(), spotify_url: c.spotify_url || '', spotify_id: c.spotify_id || '', apple_url: c.apple_url || '', apple_id: c.apple_id || '', image: c.image || '' };
+      NR._draft = { name: c.name || '', roles: (c.roles || []).slice(), spotify_url: c.spotify_url || '', spotify_id: c.spotify_id || '', apple_url: c.apple_url || '', apple_id: c.apple_id || '', image: c.image || '', spotify_status: c.spotify_status || 'none', apple_status: c.apple_status || 'none' };
       var box = document.getElementById('nrPanelContent');
-      box.innerHTML = '<div class="row-flex" style="justify-content:space-between;margin-bottom:6px"><div class="sec-title" style="margin:0;border-left-color:#16a34a">What are the roles for this contributor?</div><button class="btn btn-ghost btn-sm" onclick="SoutClient.backToTrack()">Back</button></div><div class="cell-sub" style="margin-bottom:14px">Search Spotify &amp; Apple Music, or type a new name.</div><div class="field full"><label>Artist / contributor name</label><input class="input" id="coName" placeholder="Start typing — real Spotify &amp; Apple results appear" autocomplete="off" value="' + esc(c.name || '') + '" oninput="SoutClient.searchArtist(this.value)"><div id="coResults" style="margin-top:6px;border:1px solid var(--line);border-radius:10px;max-height:260px;overflow:auto;display:none"></div></div><div id="coLinked" style="margin:6px 0 14px;display:none"></div><label style="display:block;margin-bottom:8px">Roles <span class="cell-sub" style="font-weight:400">(one person can hold several)</span></label><div id="coRoles" style="display:flex;flex-wrap:wrap;gap:8px"></div><div class="row-flex" style="justify-content:flex-end;gap:8px;margin-top:20px"><button class="btn btn-ghost btn-sm" onclick="SoutClient.backToTrack()">Cancel</button><button class="btn btn-primary btn-sm" onclick="SoutClient.saveContributor()">Save contributor</button></div>';
-      renderRolePills(); renderLinked();
+      box.innerHTML =
+        '<div class="row-flex" style="justify-content:space-between;margin-bottom:6px"><div class="sec-title" style="margin:0;border-left-color:#16a34a">Contributor / artist</div><button class="btn btn-ghost btn-sm" onclick="SoutClient.backToTrack()">Back</button></div>' +
+        '<div class="field full"><label>Artist / contributor name</label>' +
+          '<input class="input" id="coName" placeholder="Type a name — saved artists &amp; Apple/Spotify appear" autocomplete="off" value="' + esc(c.name || '') + '" oninput="SoutClient.searchArtist(this.value)">' +
+          '<div id="coResults" style="margin-top:6px;border:1px solid var(--line);border-radius:10px;max-height:240px;overflow:auto;display:none"></div>' +
+        '</div>' +
+        '<div id="coLinked" style="margin:6px 0 12px;display:none"></div>' +
+        // manual platform accounts
+        '<div class="sec-title" style="margin:14px 0 10px;border-left-color:#2563eb">Streaming profiles</div>' +
+        '<div class="cell-sub" style="margin-bottom:10px">Paste an existing profile link/ID, or mark it to be created inside Sout.</div>' +
+        // Spotify row
+        '<div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px">' +
+          '<div class="row-flex" style="gap:8px;margin-bottom:8px"><span class="art-badge" style="background:#e9f7ef;color:#16a34a">Spotify</span><span class="cell-sub" id="coSpStatus"></span></div>' +
+          '<input class="input" id="coSpotify" placeholder="Paste Spotify artist link or ID" value="' + esc(c.spotify_url || '') + '" oninput="SoutClient.onPlatInput()">' +
+          '<label class="row-flex" style="gap:6px;margin-top:8px;cursor:pointer;font-size:.82rem"><input type="checkbox" id="coSpCreate"' + (c.spotify_status === 'create' ? ' checked' : '') + ' onchange="SoutClient.onPlatInput()"> No profile yet — create a new Spotify for Artists profile</label>' +
+        '</div>' +
+        // Apple row
+        '<div style="border:1px solid var(--line);border-radius:10px;padding:11px;margin-bottom:8px">' +
+          '<div class="row-flex" style="gap:8px;margin-bottom:8px"><span class="art-badge" style="background:#fdecec;color:#dc2626">Apple Music</span><span class="cell-sub" id="coApStatus"></span></div>' +
+          '<input class="input" id="coApple" placeholder="Paste Apple Music artist link or ID" value="' + esc(c.apple_url || '') + '" oninput="SoutClient.onPlatInput()">' +
+          '<label class="row-flex" style="gap:6px;margin-top:8px;cursor:pointer;font-size:.82rem"><input type="checkbox" id="coApCreate"' + (c.apple_status === 'create' ? ' checked' : '') + ' onchange="SoutClient.onPlatInput()"> No profile yet — create a new Apple Music for Artists profile</label>' +
+        '</div>' +
+        '<label style="display:block;margin:16px 0 8px">Roles <span class="cell-sub" style="font-weight:400">(one person can hold several)</span></label>' +
+        '<div id="coRoles" style="display:flex;flex-wrap:wrap;gap:8px"></div>' +
+        '<div class="row-flex" style="justify-content:space-between;gap:8px;margin-top:20px"><span class="cell-sub" style="font-size:.75rem">✓ Saved to your Sout artist database automatically</span><div class="row-flex" style="gap:8px"><button class="btn btn-ghost btn-sm" onclick="SoutClient.backToTrack()">Cancel</button><button class="btn btn-primary btn-sm" onclick="SoutClient.saveContributor()">Save contributor</button></div></div>';
+      renderRolePills(); renderLinked(); SC.onPlatInput();
     }
     SC.backToTrack = function () { var t = active(); if (t) renderTrackPanel(t); };
     function renderRolePills() { var box = document.getElementById('coRoles'); if (!box) return; box.innerHTML = ROLES.map(function (r) { var on = NR._draft.roles.indexOf(r) >= 0; return '<span class="role-pill' + (on ? ' on' : '') + '" onclick="SoutClient.toggleRole(\'' + r + '\')">' + r + '</span>'; }).join(''); }
     SC.toggleRole = function (r) { var a = NR._draft.roles, i = a.indexOf(r); if (i >= 0) a.splice(i, 1); else a.push(r); renderRolePills(); };
-    function renderLinked() { var box = document.getElementById('coLinked'), d = NR._draft; if (!box) return; if (d.spotify_url || d.apple_url) { box.style.display = ''; box.innerHTML = '<div class="card" style="padding:10px;display:flex;gap:10px;align-items:center;border-color:var(--fg-soft)">' + (d.image ? '<img src="' + esc(d.image) + '" style="width:36px;height:36px;border-radius:50%;object-fit:cover">' : '<div class="art" style="width:36px;height:36px;border-radius:50%">' + esc((d.name || '?').slice(0, 2).toUpperCase()) + '</div>') + '<div style="flex:1"><div class="cell-main">' + esc(d.name) + '</div><div class="cell-sub">' + (d.spotify_url ? '🟢 Spotify linked ' : '') + (d.apple_url ? '🔴 Apple linked' : '') + '</div></div><button class="icon-btn btn-sm" onclick="SoutClient.unlinkArtist()"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>'; } else { box.style.display = 'none'; box.innerHTML = ''; } }
+    // parse & reflect status as the user types a link/id
+    function extractSpotify(v) { v = (v || '').trim(); var m = v.match(/artist\/([A-Za-z0-9]{22})/) || v.match(/^([A-Za-z0-9]{22})$/) || v.match(/spotify:artist:([A-Za-z0-9]{22})/); return m ? m[1] : ''; }
+    function extractApple(v) { v = (v || '').trim(); var m = v.match(/artist\/(?:[^/]+\/)?(\d{3,})/) || v.match(/id(\d{3,})/) || v.match(/^(\d{3,})$/); return m ? m[1] : ''; }
+    SC.onPlatInput = function () {
+      var spEl = document.getElementById('coSpotify'), apEl = document.getElementById('coApple');
+      var spCreate = (document.getElementById('coSpCreate') || {}).checked, apCreate = (document.getElementById('coApCreate') || {}).checked;
+      var spId = extractSpotify(spEl ? spEl.value : ''), apId = extractApple(apEl ? apEl.value : '');
+      var d = NR._draft;
+      d.spotify_id = spId; d.spotify_url = spId ? 'https://open.spotify.com/artist/' + spId : '';
+      d.apple_id = apId; d.apple_url = apId ? 'https://music.apple.com/artist/' + apId : '';
+      d.spotify_status = spId ? 'linked' : (spCreate ? 'create' : 'none');
+      d.apple_status = apId ? 'linked' : (apCreate ? 'create' : 'none');
+      var sst = document.getElementById('coSpStatus'), ast = document.getElementById('coApStatus');
+      if (sst) sst.innerHTML = spId ? '<span style="color:#16a34a">✓ Linked (ID: ' + esc(spId) + ')</span>' : (spCreate ? '<span style="color:#c2410c">Will create new profile</span>' : 'Not linked');
+      if (ast) ast.innerHTML = apId ? '<span style="color:#16a34a">✓ Linked (ID: ' + esc(apId) + ')</span>' : (apCreate ? '<span style="color:#c2410c">Will create new profile</span>' : 'Not linked');
+    };
+    function renderLinked() { var box = document.getElementById('coLinked'), d = NR._draft; if (!box) return; if (d.image) { box.style.display = ''; box.innerHTML = '<div class="card" style="padding:10px;display:flex;gap:10px;align-items:center;border-color:var(--fg-soft)"><img src="' + esc(d.image) + '" style="width:40px;height:40px;border-radius:50%;object-fit:cover"><div style="flex:1"><div class="cell-main">' + esc(d.name || '') + '</div><div class="cell-sub">Profile image from streaming platform</div></div></div>'; } else { box.style.display = 'none'; } }
     SC.unlinkArtist = function () { NR._draft.spotify_url = NR._draft.spotify_id = NR._draft.apple_url = NR._draft.apple_id = NR._draft.image = ''; renderLinked(); };
-    SC.saveContributor = function () { var name = (document.getElementById('coName').value || '').trim(); if (!name) { toast('Enter a name'); return; } if (!NR._draft.roles.length) { toast('Pick at least one role'); return; } NR._draft.name = name; var t = active(); if (editingContrib >= 0) t.contributors[editingContrib] = NR._draft; else t.contributors.push(NR._draft); renderTrackPanel(t); SC.syncHeader(); };
+    SC.saveContributor = function () {
+      var name = (document.getElementById('coName').value || '').trim();
+      if (!name) { toast('Enter a name'); return; }
+      if (!NR._draft.roles.length) { toast('Pick at least one role'); return; }
+      SC.onPlatInput(); NR._draft.name = name;
+      var t = active();
+      if (editingContrib >= 0) t.contributors[editingContrib] = NR._draft; else t.contributors.push(NR._draft);
+      // persist to the Sout artist database immediately
+      API.call('/artists', { method: 'POST', body: {
+        name: name, spotify_input: NR._draft.spotify_url, apple_input: NR._draft.apple_url,
+        spotify_create: NR._draft.spotify_status === 'create', apple_create: NR._draft.apple_status === 'create', image: NR._draft.image || ''
+      } }).catch(function () {});
+      renderTrackPanel(t); SC.syncHeader(); toast('Contributor saved to your artist database ✓');
+    };
     var searchTimer = null;
     SC.searchArtist = function (q) {
       NR._draft.name = q; var box = document.getElementById('coResults'); q = (q || '').trim();
@@ -228,7 +281,7 @@
       }, 300);
     };
     function row(payload, badge, img, sub) { var color = badge === 'Spotify' ? 'background:#e9f7ef;color:#16a34a' : badge === 'Apple' ? 'background:#fdecec;color:#dc2626' : 'background:var(--surface-3);color:var(--fg-soft)'; var pj = JSON.stringify(payload).replace(/"/g, '&quot;'); return '<div class="art-result" onclick="SoutClient.pickArtist(JSON.parse(this.dataset.p))" data-p="' + pj + '">' + (img ? '<img src="' + esc(img) + '" style="width:34px;height:34px;border-radius:50%;object-fit:cover;flex:none">' : '<div class="art" style="width:34px;height:34px;border-radius:50%;flex:none">' + esc((payload.name || '?').slice(0, 2).toUpperCase()) + '</div>') + '<div style="flex:1;min-width:0"><div class="cell-main">' + esc(payload.name) + '</div><div class="cell-sub" style="white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(sub || 'Link this profile') + '</div></div><span class="art-badge" style="' + color + '">' + badge + '</span></div>'; }
-    SC.pickArtist = function (a) { var d = NR._draft; d.name = a.name; document.getElementById('coName').value = a.name; if (a.spotify_url) { d.spotify_url = a.spotify_url; d.spotify_id = a.spotify_id || ''; } if (a.apple_url) { d.apple_url = a.apple_url; d.apple_id = a.apple_id || ''; } if (a.image) d.image = a.image; document.getElementById('coResults').style.display = 'none'; renderLinked(); };
+    SC.pickArtist = function (a) { var d = NR._draft; d.name = a.name; document.getElementById('coName').value = a.name; if (a.spotify_url) { d.spotify_url = a.spotify_url; d.spotify_id = a.spotify_id || ''; var sp = document.getElementById('coSpotify'); if (sp) sp.value = a.spotify_url; } if (a.apple_url) { d.apple_url = a.apple_url; d.apple_id = a.apple_id || ''; var ap = document.getElementById('coApple'); if (ap) ap.value = a.apple_url; } if (a.image) d.image = a.image; document.getElementById('coResults').style.display = 'none'; SC.onPlatInput(); renderLinked(); };
     SC.openReleaseInfo = function () { var el = document.getElementById('nrTitle'); if (el) { el.focus(); el.scrollIntoView({ behavior: 'smooth', block: 'center' }); } };
 
     SC.openDates = function () { document.getElementById('dtDigital').value = NR.dates.digital; document.getElementById('dtOriginal').value = NR.dates.original; document.getElementById('dtPreorder').value = NR.dates.preorder; document.getElementById('dtExclusive').value = NR.dates.exclusive; openModal('datesModal'); };
