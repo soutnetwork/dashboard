@@ -777,8 +777,8 @@ let _spTok = { token: null, exp: 0 };
 async function spotifyToken() {
   if (_spTok.token && Date.now() < _spTok.exp) return _spTok.token;
   let cfg = {};
-  try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'spotify.json'), 'utf8')); } catch { }
-  if (!cfg.client_id || !cfg.client_secret) return null;
+  try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'spotify.json'), 'utf8')); } catch (e) { _spTok.lastError = 'no config file: ' + e.message; return null; }
+  if (!cfg.client_id || !cfg.client_secret) { _spTok.lastError = 'client_id or client_secret missing in spotify.json'; return null; }
   try {
     const r = await fetch('https://accounts.spotify.com/api/token', {
       method: 'POST',
@@ -787,21 +787,49 @@ async function spotifyToken() {
     });
     const j = await r.json();
     if (j.access_token) { _spTok = { token: j.access_token, exp: Date.now() + (j.expires_in - 60) * 1000 }; return j.access_token; }
-  } catch (e) { console.error('spotify token:', e.message); }
+    _spTok.lastError = 'Spotify replied: ' + (j.error_description || j.error || JSON.stringify(j));
+    console.error('spotify token error:', _spTok.lastError);
+  } catch (e) { _spTok.lastError = e.message; console.error('spotify token:', e.message); }
   return null;
 }
+
+// admin debug: check Spotify connection status
+app.get('/api/admin/spotify-status', auth, adminOnly, async (req, res) => {
+  let hasFile = false, cfg = {};
+  try { cfg = JSON.parse(fs.readFileSync(path.join(__dirname, 'data', 'spotify.json'), 'utf8')); hasFile = true; } catch {}
+  _spTok = { token: null, exp: 0 }; // force refresh
+  const tok = await spotifyToken();
+  res.json({
+    config_file_exists: hasFile,
+    client_id_present: !!cfg.client_id,
+    client_secret_present: !!cfg.client_secret,
+    client_id_preview: cfg.client_id ? cfg.client_id.slice(0, 6) + '…' : null,
+    token_obtained: !!tok,
+    error: tok ? null : (_spTok.lastError || 'unknown')
+  });
+});
 
 app.get('/api/artists/search', auth, async (req, res) => {
   const q = (req.query.q || '').trim();
   if (q.length < 2) return res.json({ results: [] });
   const out = { spotify: [], apple: [] };
+  let spotifyError = null;
   try {
     const r = await fetch('https://itunes.apple.com/search?term=' + encodeURIComponent(q) + '&entity=musicArtist&limit=6');
     const j = await r.json();
     out.apple = (j.results || []).map(a => ({
       platform: 'apple', id: String(a.artistId), name: a.artistName,
       url: a.artistLinkUrl || ('https://music.apple.com/artist/' + a.artistId),
-      genre: a.primaryGenreName || '', sub: 'Apple ID: ' + a.artistId
+      genre: a.primaryGenreName || '', sub: 'Apple ID: ' + a.artistId, image: ''
+    }));
+    // Apple artist search returns NO image — fetch each artist's latest album artwork
+    await Promise.all(out.apple.slice(0, 6).map(async (a) => {
+      try {
+        const lr = await fetch('https://itunes.apple.com/lookup?id=' + a.id + '&entity=album&limit=1');
+        const lj = await lr.json();
+        const alb = (lj.results || []).find(x => x.wrapperType === 'collection' || x.artworkUrl100);
+        if (alb && alb.artworkUrl100) a.image = alb.artworkUrl100.replace('100x100', '200x200');
+      } catch (e) {}
     }));
   } catch (e) { console.error('apple search:', e.message); }
   const tok = await spotifyToken();
@@ -809,15 +837,18 @@ app.get('/api/artists/search', auth, async (req, res) => {
     try {
       const r = await fetch('https://api.spotify.com/v1/search?type=artist&limit=6&q=' + encodeURIComponent(q), { headers: { Authorization: 'Bearer ' + tok } });
       const j = await r.json();
+      if (j.error) spotifyError = j.error.message || JSON.stringify(j.error);
       out.spotify = ((j.artists && j.artists.items) || []).map(a => ({
         platform: 'spotify', id: a.id, name: a.name, url: (a.external_urls || {}).spotify || '',
         image: (a.images && a.images.length ? a.images[a.images.length - 1].url : ''),
         followers: (a.followers || {}).total || 0,
         sub: ((a.followers || {}).total || 0).toLocaleString() + ' followers' + (a.genres && a.genres.length ? ' · ' + a.genres[0] : '')
       }));
-    } catch (e) { console.error('spotify search:', e.message); }
+    } catch (e) { console.error('spotify search:', e.message); spotifyError = e.message; }
+  } else {
+    spotifyError = 'no_token';
   }
-  res.json({ results: [...out.spotify, ...out.apple], spotify_enabled: !!tok });
+  res.json({ results: [...out.spotify, ...out.apple], spotify_enabled: !!tok, spotify_error: spotifyError });
 });
 
 // LABELS autocomplete

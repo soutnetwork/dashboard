@@ -40,31 +40,78 @@
     var STAGING = [];
     function showWorkspace() { var st = document.getElementById('nrStepName'); if (st) st.style.display = 'none'; var w = document.getElementById('nrWelcome'); if (w) w.style.display = 'none'; var ws = document.getElementById('nrWorkspace'); if (ws) ws.style.display = ''; }
 
-    window.artPicked = function (input) { handleArt(input.files[0]); };
-    function handleArt(f) {
+    // ---- selection queue: files wait here until the user presses Upload ----
+    NR.queueArt = null; NR.queueAudio = [];
+    window.artPicked = function (input) { queueArt(input.files[0]); input.value = ''; };
+    function queueArt(f) {
       if (!f) return;
       if (!/\.jpe?g$/i.test(f.name)) { toast('Artwork must be JPG'); return; }
+      NR.queueArt = f; renderQueue();
+    }
+    window.nrAudioPicked = function (input) { queueAudio(input.files); input.value = ''; };
+    window.nrDropAny = function (e) {
+      e.preventDefault(); var d = e.currentTarget; d.classList.remove('drag');
+      var files = e.dataTransfer.files, audio = [], art = null;
+      Array.prototype.forEach.call(files, function (f) { if (/\.jpe?g$/i.test(f.name)) art = f; else if (/\.wav$/i.test(f.name)) audio.push(f); });
+      if (art) queueArt(art);
+      if (audio.length) queueAudio(audio);
+    };
+    window.nrDropAudio = window.nrDropAny; window.nrDropArt = window.nrDropAny;
+    function queueAudio(files) {
+      Array.prototype.forEach.call(files, function (f) {
+        if (!/\.wav$/i.test(f.name)) { toast(f.name + ' skipped — WAV only'); return; }
+        NR.queueAudio.push(f);
+      });
+      renderQueue();
+    }
+    SC.removeQueued = function (kind, idx) {
+      if (kind === 'art') NR.queueArt = null;
+      else NR.queueAudio.splice(idx, 1);
+      renderQueue();
+    };
+    function renderQueue() {
+      var box = document.getElementById('nrQueue'), btn = document.getElementById('nrUploadBtn');
+      var count = (NR.queueArt ? 1 : 0) + NR.queueAudio.length;
+      if (!box) return;
+      if (!count) { box.style.display = 'none'; if (btn) btn.style.display = 'none'; return; }
+      box.style.display = ''; if (btn) { btn.style.display = ''; btn.textContent = 'Upload ' + count + ' file' + (count > 1 ? 's' : '') + ' →'; }
+      var rows = '';
+      if (NR.queueArt) rows += queuedRow('art', 0, NR.queueArt.name, 'Cover', '#2563eb');
+      NR.queueAudio.forEach(function (f, i) { rows += queuedRow('audio', i, f.name, 'WAV', '#7c3aed'); });
+      box.innerHTML = rows;
+    }
+    function queuedRow(kind, idx, name, tag, color) {
+      return '<div style="display:flex;align-items:center;gap:10px;padding:9px 12px;border:1px solid var(--line);border-radius:10px;background:var(--surface);margin-bottom:6px">' +
+        '<span class="art-badge" style="background:' + color + '22;color:' + color + '">' + tag + '</span>' +
+        '<div class="cell-main" style="flex:1;min-width:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">' + esc(name) + '</div>' +
+        '<button class="icon-btn btn-sm" onclick="SoutClient.removeQueued(\'' + kind + '\',' + idx + ')"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg></button></div>';
+    }
+    // ---- the actual upload: only runs when the user presses Upload ----
+    SC.doUpload = function () {
+      var count = (NR.queueArt ? 1 : 0) + NR.queueAudio.length;
+      if (!count) { toast('Select files first'); return; }
       showWorkspace();
+      if (NR.queueArt) { startArtUpload(NR.queueArt); NR.queueArt = null; }
+      NR.queueAudio.forEach(function (f) { startAudioUpload(f); });
+      NR.queueAudio = [];
+      renderQueue();
+    };
+    function startArtUpload(f) {
       var url = URL.createObjectURL(f); NR.artUrl = url;
       var hdr = document.getElementById('nrHdrArt'); if (hdr) hdr.src = url;
       NR.artStaged = null;
       var p = upload('/stage/artwork', 'artwork', f, null).then(function (r) { NR.artStaged = r.file; NR.hasArtwork = true; toast('Cover uploaded ✓'); }).catch(function (err) { NR.artUrl = ''; if (hdr) hdr.removeAttribute('src'); alert('Artwork not accepted:\n' + err.message); });
       STAGING.push(p);
     }
-
-    window.nrAudioPicked = function (input) { handleAudioList(input.files); input.value = ''; };
-    window.nrDropAny = function (e) { e.preventDefault(); var d = e.currentTarget; d.classList.remove('drag'); var files = e.dataTransfer.files, audio = [], art = null; Array.prototype.forEach.call(files, function (f) { if (/\.jpe?g$/i.test(f.name)) art = f; else if (/\.wav$/i.test(f.name)) audio.push(f); }); if (art) handleArt(art); if (audio.length) handleAudioList(audio); };
-    window.nrDropAudio = window.nrDropAny; window.nrDropArt = window.nrDropAny;
-    function handleAudioList(files) {
-      showWorkspace();
-      Array.prototype.forEach.call(files, function (f) {
-        if (!/\.wav$/i.test(f.name)) { toast(f.name + ' skipped — WAV only'); return; }
-        var t = { key: 'k' + (++NR.seq), title: f.name.replace(/\.wav$/i, ''), filename: f.name, staged: null, audio_file: null, pct: 0, uploading: true, c_line: '', p_line: '', version: 'Original', isrc: '', prod_year: '2026', price: 'Front (Default)', lyrics_lang: 'Arabic', content_type: 'Not Explicit', start: '', contributors: [], instruments: [] };
-        NR.tracks.push(t); renderTracks(); autoNameFromSingle();
-        var p = upload('/stage/audio', 'audio', f, function (pct) { t.pct = pct; var el = document.querySelector('.nr-track[data-k="' + t.key + '"] .up-mini > i'); if (el) el.style.width = pct + '%'; }).then(function (r) { t.staged = r.file; t.uploading = false; t.pct = 100; renderTracks(); }).catch(function (err) { t.uploading = false; t.error = err.message; renderTracks(); alert(f.name + ' not accepted:\n' + err.message); });
-        STAGING.push(p);
-      });
+    function startAudioUpload(f) {
+      var t = { key: 'k' + (++NR.seq), title: f.name.replace(/\.wav$/i, ''), filename: f.name, staged: null, audio_file: null, pct: 0, uploading: true, c_line: '', p_line: '', version: 'Original', isrc: '', prod_year: '2026', price: 'Front (Default)', lyrics_lang: 'Arabic', content_type: 'Not Explicit', start: '', contributors: [], instruments: [] };
+      NR.tracks.push(t); renderTracks(); autoNameFromSingle();
+      var p = upload('/stage/audio', 'audio', f, function (pct) { t.pct = pct; var el = document.querySelector('.nr-track[data-k="' + t.key + '"] .up-mini > i'); if (el) el.style.width = pct + '%'; }).then(function (r) { t.staged = r.file; t.uploading = false; t.pct = 100; renderTracks(); }).catch(function (err) { t.uploading = false; t.error = err.message; renderTracks(); alert(f.name + ' not accepted:\n' + err.message); });
+      STAGING.push(p);
     }
+    // add-more inside the workspace uploads immediately (already inside)
+    SC.addMoreAudio = function (input) { Array.prototype.forEach.call(input.files, function (f) { if (/\.wav$/i.test(f.name)) startAudioUpload(f); }); input.value = ''; };
+
     function autoNameFromSingle() { var el = document.getElementById('nrTitle'); if (NR.tracks.length === 1 && el && !el.value.trim()) { el.value = NR.tracks[0].title; SC.syncHeader(); } }
 
     // ---- STEP A: name & type first ----
@@ -168,9 +215,14 @@
       searchTimer = setTimeout(function () {
         Promise.all([API.call('/artists?q=' + encodeURIComponent(q)).catch(function () { return { artists: [] }; }), API.call('/artists/search?q=' + encodeURIComponent(q)).catch(function () { return { results: [] }; })]).then(function (res) {
           var internal = res[0].artists || [], ext = res[1].results || [], html = '';
+          var spotifyOn = res[1].spotify_enabled, spErr = res[1].spotify_error;
+          var spResults = ext.filter(function (a) { return a.platform === 'spotify'; });
+          var apResults = ext.filter(function (a) { return a.platform === 'apple'; });
           if (internal.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">Your saved artists</div>'; html += internal.map(function (a) { return row({ name: a.name, spotify_url: a.spotify_url, spotify_id: a.spotify_id, apple_url: a.apple_url, apple_id: a.apple_id, image: a.image }, 'Saved', a.image, (a.spotify_url ? 'Spotify ✓ ' : '') + (a.apple_url ? 'Apple ✓' : '')); }).join(''); }
-          if (ext.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">Spotify &amp; Apple Music</div>'; html += ext.map(function (a) { var payload = a.platform === 'spotify' ? { name: a.name, spotify_url: a.url, spotify_id: a.id, image: a.image || '' } : { name: a.name, apple_url: a.url, apple_id: a.id }; return row(payload, a.platform === 'spotify' ? 'Spotify' : 'Apple', a.image, a.sub || ''); }).join(''); }
-          if (!html) html = '<div class="art-result"><span class="art-badge" style="background:var(--surface-3);color:var(--fg-soft)">New</span><div class="cell-sub">No match — a new profile will be created for "' + esc(q) + '"</div></div>';
+          if (spResults.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">🟢 Spotify</div>'; html += spResults.map(function (a) { return row({ name: a.name, spotify_url: a.url, spotify_id: a.id, image: a.image || '' }, 'Spotify', a.image, a.sub || ''); }).join(''); }
+          else if (!spotifyOn) { html += '<div class="cell-sub" style="padding:7px 11px;background:#fff7ed;color:#c2410c">Spotify not connected' + (spErr && spErr !== 'no_token' ? ': ' + esc(spErr) : ' — add API keys to enable') + '</div>'; }
+          if (apResults.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">🔴 Apple Music</div>'; html += apResults.map(function (a) { return row({ name: a.name, apple_url: a.url, apple_id: a.id, image: a.image || '' }, 'Apple', a.image, a.sub || ''); }).join(''); }
+          if (!internal.length && !ext.length) html = '<div class="art-result"><span class="art-badge" style="background:var(--surface-3);color:var(--fg-soft)">New</span><div class="cell-sub">No match — a new profile will be created for "' + esc(q) + '"</div></div>';
           box.innerHTML = html; box.style.display = '';
         });
       }, 300);
@@ -209,7 +261,7 @@
       Promise.resolve().then(function () { if (STAGING.length) { setBtn('Finishing uploads…'); return Promise.allSettled(STAGING); } }).then(function () { STAGING = []; if (NR.artStaged) body.artwork_staged = NR.artStaged; setBtn('Saving…'); if (NR.editId) return API.call('/releases/' + NR.editId, { method: 'PUT', body: body }).then(function () { return NR.editId; }); return API.call('/releases', { method: 'POST', body: body }).then(function (r) { return r.id; }); }).then(function (relId) { if (status === 'submitted') { setBtn('Submitting…'); return API.call('/releases/' + relId + '/submit', { method: 'POST' }); } }).then(function () { toast(status === 'submitted' ? 'Submitted for review ✓' : 'Saved as draft ✓'); resetNR(); if (SC.reloadReleases) SC.reloadReleases(); if (window.go) window.go('releases'); }).catch(function (err) { alert('Error: ' + (err && err.message || err)); }).then(function () { btns.forEach(function (b) { b.disabled = false; }); if (btn) btn.innerHTML = html; });
     };
     function resetNR() { NR.tracks = []; NR.artStaged = null; NR.hasArtwork = false; NR.artUrl = ''; NR.editId = null; NR.activeKey = null; NR.dates = { digital: '', original: '', preorder: '', exclusive: '' }; NR.terrMode = 'worldwide'; NR.terrList = []; }
-    SC.initNewRelease = function (editId) { resetNR(); NR.editId = editId || null; SC.setPlatforms('major'); updatePlatSummary(); var g = function (id) { var e = document.getElementById(id); if (e) e.value = ''; }; g('nrTitle'); g('nrLabel'); var hdr = document.getElementById('nrHdrArt'); if (hdr) hdr.removeAttribute('src'); var st = document.getElementById('nrStepName'); if (st) st.style.display = ''; var w = document.getElementById('nrWelcome'); if (w) w.style.display = 'none'; var ws = document.getElementById('nrWorkspace'); if (ws) ws.style.display = 'none'; var pt = document.getElementById('nrPreTitle'); if (pt) pt.value = ''; NR.preType = 'Single'; var ptc = document.getElementById('nrPreType'); if (ptc) { Array.prototype.forEach.call(ptc.children, function (ch, i) { ch.classList.toggle('active', i === 0); }); } var ds = document.getElementById('nrDatesSummary'); if (ds) ds.textContent = 'Set digital date…'; var ts = document.getElementById('nrTerrSummary'); if (ts) ts.textContent = 'Worldwide'; document.getElementById('nrTerr').value = 'Worldwide'; showPanelWelcome(); renderTracks(); SC.syncHeader(); API.call('/labels').then(function (d) { var dl = document.getElementById('labelList'); if (dl && d.labels) dl.innerHTML = d.labels.map(function (l) { return '<option value="' + esc(l) + '">'; }).join(''); }).catch(function () {}); };
+    SC.initNewRelease = function (editId) { resetNR(); NR.editId = editId || null; SC.setPlatforms('major'); updatePlatSummary(); NR.queueArt = null; NR.queueAudio = []; var qb = document.getElementById('nrQueue'); if (qb) qb.style.display = 'none'; var ub = document.getElementById('nrUploadBtn'); if (ub) ub.style.display = 'none'; var g = function (id) { var e = document.getElementById(id); if (e) e.value = ''; }; g('nrTitle'); g('nrLabel'); var hdr = document.getElementById('nrHdrArt'); if (hdr) hdr.removeAttribute('src'); var st = document.getElementById('nrStepName'); if (st) st.style.display = ''; var w = document.getElementById('nrWelcome'); if (w) w.style.display = 'none'; var ws = document.getElementById('nrWorkspace'); if (ws) ws.style.display = 'none'; var pt = document.getElementById('nrPreTitle'); if (pt) pt.value = ''; NR.preType = 'Single'; var ptc = document.getElementById('nrPreType'); if (ptc) { Array.prototype.forEach.call(ptc.children, function (ch, i) { ch.classList.toggle('active', i === 0); }); } var ds = document.getElementById('nrDatesSummary'); if (ds) ds.textContent = 'Set digital date…'; var ts = document.getElementById('nrTerrSummary'); if (ts) ts.textContent = 'Worldwide'; document.getElementById('nrTerr').value = 'Worldwide'; showPanelWelcome(); renderTracks(); SC.syncHeader(); API.call('/labels').then(function (d) { var dl = document.getElementById('labelList'); if (dl && d.labels) dl.innerHTML = d.labels.map(function (l) { return '<option value="' + esc(l) + '">'; }).join(''); }).catch(function () {}); };
     console.log('New Release (Believe two-column) ready');
   });
 })();
