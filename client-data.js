@@ -27,20 +27,6 @@
     { id: 'qobuz', name: 'Qobuz', tier: 'other' }
   ];
   window.PLATFORMS = PLATFORMS;
-  function renderPlatformPicker(selectedIds) {
-    const box = document.getElementById('nrPlatforms'); if (!box) return;
-    const set = new Set(selectedIds || []);
-    box.innerHTML = PLATFORMS.map(p => {
-      const on = set.has(p.id);
-      return `<label class="chip ${on ? 'green' : 'gray'}" style="cursor:pointer;user-select:none;font-size:.75rem"><input type="checkbox" data-plat="${p.id}"${on ? ' checked' : ''} style="margin-inline-end:5px" onchange="SoutClient._platChange(this)">${esc(p.name)}</label>`;
-    }).join('');
-    updatePlatCount();
-  }
-  function updatePlatCount() {
-    const n = document.querySelectorAll('#nrPlatforms input:checked').length;
-    const el = document.getElementById('nrPlatCount'); if (el) el.textContent = n + ' selected';
-  }
-  window.renderPlatformPicker = renderPlatformPicker;
   function money(v) { return '$' + (Number(v) || 0).toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 2 }); }
   function knum(v) { v = Number(v) || 0; if (v >= 1e6) return (v / 1e6).toFixed(1).replace(/\.0$/, '') + 'M'; if (v >= 1e3) return (v / 1e3).toFixed(1).replace(/\.0$/, '') + 'K'; return String(v); }
   const API = window.SoutAPI;
@@ -70,29 +56,6 @@
   }
   // ---- eager uploads: files start uploading the moment they are picked ----
   const STAGING = { pending: [] };
-  window.artPicked = function (input) {
-    const f = input.files[0]; if (!f) return;
-    const nameEl = document.getElementById('nrArtName');
-    if (!/\.jpe?g$/i.test(f.name)) { toast && toast('Artwork must be JPG or JPEG'); input.value = ''; if (nameEl) nameEl.textContent = 'JPG only · exactly 3000×3000 px · click to browse'; return; }
-    const img = document.getElementById('nrArtPreview');
-    if (img) { img.src = URL.createObjectURL(f); img.style.display = ''; }
-    window.__stagedArt = null;
-    const p = uploadFile('/stage/artwork', 'artwork', f, pct => { if (nameEl) nameEl.textContent = 'Uploading artwork… ' + pct + '%'; })
-      .then(r => { window.__stagedArt = r.file; if (nameEl) nameEl.textContent = f.name + ' — uploaded & checked ✓ (3000×3000)'; })
-      .catch(err => { input.value = ''; if (img) img.style.display = 'none'; if (nameEl) nameEl.textContent = 'JPG only · exactly 3000×3000 px · click to browse'; alert('Artwork not accepted:\n' + err.message); });
-    STAGING.pending.push(p);
-  };
-  window.audioPicked = function (input) {
-    const f = input.files[0]; if (!f) return;
-    const nameEl = input.parentElement.querySelector('.audioName');
-    if (!/\.wav$/i.test(f.name)) { toast && toast('Audio must be a WAV file'); input.value = ''; if (nameEl) nameEl.textContent = 'WAV only · click to browse'; return; }
-    input.dataset.staged = '';
-    const p = uploadFile('/stage/audio', 'audio', f, pct => { if (nameEl) nameEl.textContent = 'Uploading ' + f.name + '… ' + pct + '%'; })
-      .then(r => { input.dataset.staged = r.file; if (nameEl) nameEl.textContent = f.name + ' — uploaded ✓'; })
-      .catch(err => { input.value = ''; input.dataset.staged = ''; if (nameEl) nameEl.textContent = 'WAV only · click to browse'; alert('Audio not accepted:\n' + err.message); });
-    STAGING.pending.push(p);
-  };
-
   // ============================================================
   // MANAGE MUSIC — one page, tabs: All / Drafts / Pending /
   // Approved / Delivered / Needs Correction / Rejected
@@ -616,167 +579,19 @@
   // ============================================================
   // Label control: locked clients pick from assigned labels only
   // ============================================================
-  async function lockLabelField() {
-    let d; try { d = await API.call('/labels'); } catch { return; }
-    const inp = document.getElementById('nrLabel'); if (!inp) return;
-    const labels = d.labels || [];
-    if (!d.can_create && labels.length) {
-      const sel = document.createElement('select');
-      sel.className = 'input'; sel.id = 'nrLabel';
-      sel.innerHTML = '<option value="">Select your label…</option>' + labels.map(l => `<option>${esc(l)}</option>`).join('');
-      if (labels.length === 1) sel.value = labels[0];
-      inp.replaceWith(sel);
-    } else if (labels.length) {
-      const dl = document.getElementById('labelList');
-      if (dl) dl.innerHTML = labels.map(l => `<option value="${esc(l)}">`).join('');
-      inp.placeholder = `Your labels (${labels.length}/${d.max_labels})` + (d.can_create && labels.length < d.max_labels ? ' — or type a new one' : '');
-    }
-  }
+  async function lockLabelField() { /* labels now handled by the New Release module */ }
+
 
   // ============================================================
   // Actions
   // ============================================================
   const CATALOG_EDITABLE = ['draft', 'rejected', 'correction'];
   const SoutClient = {
-    async editRelease(id) { window.__editId = id; if (window.go) go('newrelease'); toast && toast('Loading release...'); await fillBuilder(id); },
+    async editRelease(id) { window.__editId = id; if (window.go) go('newrelease'); toast && toast('Edit in the classic view is being upgraded — create fresh releases with the new builder.'); },
 
     // ---------- collect the builder + save (create or edit) ----------
     // Flow: save as draft → upload files → then /submit (server verifies EVERYTHING is complete)
-    async saveRelease(status, clickedBtn) {
-      const v = id => ((document.getElementById(id) || {}).value || '').trim();
-      let upc = v('nrUpc'); if (/^generated/i.test(upc)) upc = '';
-
-      // ----- collect tracks -----
-      const tracks = []; const trackAudioFiles = [];
-      document.querySelectorAll('#assetList .asset').forEach(asset => {
-        const f = sel => { const el = asset.querySelector(`[data-f="${sel}"]`); return el ? el.value.trim() : ''; };
-        const t = {
-          title: f('t_title'), c_line: f('c_line'), p_line: f('p_line'),
-          isrc: /^auto/i.test(f('isrc')) ? '' : f('isrc'),
-          version: f('version') || 'Original', lyrics_lang: f('lyrics_lang'),
-          content_type: f('content_type') || 'Not Explicit', production_year: f('prod_year'),
-          contributors: []
-        };
-        asset.querySelectorAll('.contrib-row').forEach(row => {
-          const role = ((row.querySelector('.chip') || {}).textContent || 'Main Artist').trim();
-          const name = ((row.querySelector('input') || {}).value || '').trim();
-          if (name) t.contributors.push({ role, name, is_composer: /composer/i.test(role) ? 1 : 0, is_author: /author/i.test(role) ? 1 : 0 });
-        });
-        const audioInput = asset.querySelector('.audioFile');
-        trackAudioFiles.push(audioInput && audioInput.files[0] ? audioInput.files[0] : null);
-        t.audio_staged = (audioInput && audioInput.dataset.staged) || undefined;
-        tracks.push(t);
-      });
-
-      // ----- STRICT validation: nothing is sent for review with missing data -----
-      const missing = [];
-      const isEdit = !!window.__editId;
-      if (!v('nrTitle')) missing.push('Release title');
-      if (status === 'submitted') {
-        if (!v('nrLabel')) missing.push('Label');
-        if (!v('nrGenre')) missing.push('Genre');
-        if (!v('nrDigital')) missing.push('Digital release date');
-        const picked = [...document.querySelectorAll('#nrPlatforms input:checked')];
-        if (!picked.length) missing.push('At least one distribution platform');
-        const artPicked = document.getElementById('nrArtFile') && document.getElementById('nrArtFile').files[0];
-        if (!artPicked && !window.__hasArtwork) missing.push('Cover artwork (JPG 3000×3000)');
-        tracks.forEach((t, i) => {
-          const n = 'Track ' + (i + 1) + ': ';
-          if (!t.title) missing.push(n + 'title');
-          if (!t.c_line) missing.push(n + 'C Line');
-          if (!t.p_line) missing.push(n + 'P Line');
-          if (!t.contributors.some(x => /main/i.test(x.role))) missing.push(n + 'Main Artist name');
-          if (!trackAudioFiles[i] && !isEdit) missing.push(n + 'WAV audio file');
-        });
-        if (!tracks.length) missing.push('At least one track');
-      } else {
-        if (!tracks.some(t => t.title)) missing.push('At least one track with a title');
-      }
-      if (missing.length) {
-        alert((status === 'submitted' ? 'Cannot submit — the following is missing:' : 'Cannot save yet:') + '\n\n• ' + missing.join('\n• '));
-        return;
-      }
-
-      const firstArtist = (tracks[0].contributors.find(x => /main/i.test(x.role)) || tracks[0].contributors[0] || {}).name || '';
-      const body = {
-        title: v('nrTitle'), artist: firstArtist, label: v('nrLabel'), upc,
-        type: v('nrType') || 'Single', genre: v('nrGenre'), status: 'draft',
-        digital_date: v('nrDigital'), original_date: v('nrOriginal'),
-        territories: v('nrTerr') || 'Worldwide', stores: v('nrStores') || '',
-        platforms: [...document.querySelectorAll('#nrPlatforms input:checked')].map(x => x.dataset.plat),
-        tracks: tracks.filter(t => t.title)
-      };
-
-      const allBtns = document.querySelectorAll('.nr-act');
-      const btn = clickedBtn || document.getElementById(status === 'draft' ? 'nrSaveBtn' : 'nrSubmitBtn');
-      const btnHTML = btn ? btn.innerHTML : '';
-      const setBtn = t => { if (btn) btn.textContent = t; };
-      allBtns.forEach(b => b.disabled = true);
-      try {
-        // 0) files started uploading the moment they were picked — just finish any still in flight
-        if (STAGING.pending.length) {
-          setBtn('Finishing file uploads…');
-          await Promise.allSettled(STAGING.pending);
-          STAGING.pending = [];
-        }
-        if (window.__stagedArt) body.artwork_staged = window.__stagedArt;
-        // 1) save data (always as draft first)
-        setBtn('Saving release…');
-        let relId = window.__editId;
-        if (relId) {
-          await API.call('/releases/' + relId, { method: 'PUT', body });
-        } else {
-          const r = await API.call('/releases', { method: 'POST', body });
-          relId = r.id;
-        }
-        const saved = await API.call('/releases/' + relId);
-        const createdTracks = saved.tracks || [];
-        toast && toast('Release data saved ✓ (#' + relId + ')');
-
-        // 2) fallback: direct upload ONLY if a picked file wasn't staged (rare)
-        const uploadErrors = [];
-        const artInput = document.getElementById('nrArtFile');
-        if (!window.__stagedArt && artInput && artInput.files[0]) {
-          try {
-            await uploadFile('/releases/' + relId + '/artwork', 'artwork', artInput.files[0], p => setBtn('Uploading artwork… ' + p + '%'));
-            toast && toast('Artwork uploaded ✓');
-          } catch (err) { uploadErrors.push('Cover artwork: ' + err.message); }
-        }
-        // 3) per-track WAV files (server validates real WAV)
-        for (let i = 0; i < trackAudioFiles.length; i++) {
-          const file = trackAudioFiles[i]; const trackRow = createdTracks[i];
-          if (file && trackRow && !trackRow.audio_file) {
-            try {
-              await uploadFile('/tracks/' + trackRow.id + '/audio', 'audio', file, p => setBtn('Uploading track ' + (i + 1) + ' audio… ' + p + '%'));
-              toast && toast('Track ' + (i + 1) + ' audio uploaded ✓');
-            } catch (err) { uploadErrors.push('Track ' + (i + 1) + ' audio: ' + err.message); }
-          }
-        }
-        if (uploadErrors.length) {
-          alert('Saved as draft, but these files were NOT accepted:\n\n• ' + uploadErrors.join('\n• ') + '\n\nFix them and submit again.');
-          window.__editId = null; window.__hasArtwork = false;
-          await loadReleases(); if (window.go) go('releases');
-          allBtns.forEach(b => b.disabled = false); if (btn) btn.innerHTML = btnHTML;
-          return;
-        }
-        // 4) submit — the server double-checks EVERYTHING (files included) before accepting
-        if (status === 'submitted') {
-          setBtn('Submitting for review…');
-          try {
-            await API.call('/releases/' + relId + '/submit', { method: 'POST' });
-            toast && toast('Release submitted for review ✓ — it is now in the review queue');
-          } catch (err) {
-            alert('Saved as draft, but NOT submitted:\n\n' + err.message);
-          }
-        } else {
-          toast && toast('Saved as draft ✓');
-        }
-        window.__editId = null; window.__hasArtwork = false; window.__stagedArt = null;
-        await loadReleases(); if (window.go) go('releases');
-      } catch (err) { alert('Error: ' + err.message); }
-      allBtns.forEach(b => b.disabled = false);
-      if (btn) btn.innerHTML = btnHTML;
-    },
+    reloadReleases() { loadReleases().catch(function () {}); },
 
     // ---------- release details modal (all info + tracks + artwork zoom) ----------
     async viewRelease(id) {
@@ -830,16 +645,6 @@
       openModal('relModal');
     },
     zoom(src) { const lb = document.getElementById('lightbox'); document.getElementById('lightboxImg').src = src; lb.style.display = 'grid'; },
-
-    // ---------- platforms picker ----------
-    setPlatforms(preset) {
-      let ids = [];
-      if (preset === 'all') ids = PLATFORMS.map(p => p.id);
-      else if (preset === 'major') ids = PLATFORMS.filter(p => p.tier === 'major').map(p => p.id);
-      else if (preset === 'mena') ids = PLATFORMS.filter(p => p.tier === 'mena').map(p => p.id);
-      renderPlatformPicker(ids);
-    },
-    _platChange() { updatePlatCount(); },
 
     // ---------- catalog search: title / artist / UPC / ISRC ----------
     async search(q) {
@@ -909,34 +714,8 @@
   };
   window.SoutClient = SoutClient;
 
-  async function fillBuilder(id) {
-    try {
-      const d = await API.call('/releases/' + id);
-      const r = d.release;
-      const set = (eid, val) => { const el = document.getElementById(eid); if (el) el.value = val || ''; };
-      set('nrTitle', r.title); set('nrLabel', r.label); set('nrUpc', r.upc); set('nrType', r.type);
-      set('nrGenre', r.genre); set('nrDigital', r.digital_date); set('nrOriginal', r.original_date);
-      // existing artwork preview
-      const img = document.getElementById('nrArtPreview');
-      window.__hasArtwork = !!r.artwork;
-      let plats = []; try { plats = JSON.parse(r.platforms || '[]'); } catch { }
-      renderPlatformPicker(plats);
-      if (img && r.artwork) { img.src = '/uploads/' + r.artwork; img.style.display = ''; }
-      // first track into the builder (full track editing lives in the release details modal)
-      const t = (d.tracks || [])[0];
-      if (t) {
-        const asset = document.querySelector('#assetList .asset');
-        if (asset) {
-          const sf = (sel, val) => { const el = asset.querySelector(`[data-f="${sel}"]`); if (el) el.value = val || ''; };
-          sf('t_title', t.title); sf('c_line', t.c_line); sf('p_line', t.p_line); sf('isrc', t.isrc);
-          sf('version', t.version); sf('content_type', t.content_type); sf('prod_year', t.production_year);
-          const nameEl = document.getElementById('assetName1'); if (nameEl) nameEl.textContent = t.title || 'Untitled track';
-          const c0 = (t.contributors || [])[0];
-          if (c0) { const inp = asset.querySelector('.contrib-row input'); if (inp) inp.value = c0.name; }
-        }
-      }
-    } catch (e) { /* ignore */ }
-  }
+  async function fillBuilder(id) { /* replaced by the new New Release module */ }
+
 
   // ============================================================
   // Router hook
@@ -948,7 +727,6 @@
       loadAnalyticsPage().catch(() => { });
       loadFinancePage().catch(() => { });
       loadPayoutsPage().catch(() => { });
-      lockLabelField().catch(() => { });
       SoutRights.load().catch(() => { });
       loadRoster().catch(() => { });
       if (window.go && !window.__goWrapped) {
@@ -960,7 +738,7 @@
           else if (p === 'rights') SoutRights.load();
           else if (p === 'artists') loadRoster();
           else if (p === 'analytics') loadAnalyticsPage();
-          else if (p === 'newrelease') { if (!window.__editId) SoutClient.setPlatforms('major'); }
+          else if (p === 'newrelease') SoutClient.initNewRelease(window.__editId);
           else if (p === 'finance') loadFinancePage();
           else if (p === 'payouts') loadPayoutsPage();
         };
