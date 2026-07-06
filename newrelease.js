@@ -324,7 +324,13 @@
           if (spResults.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">🟢 Spotify</div>'; html += spResults.map(function (a) { return row({ name: a.name, spotify_url: a.url, spotify_id: a.id, image: a.image || '' }, 'Spotify', a.image, a.sub || ''); }).join(''); }
           else if (!spotifyOn) { html += '<div class="cell-sub" style="padding:7px 11px;background:#fff7ed;color:#c2410c">Spotify not connected' + (spErr && spErr !== 'no_token' ? ': ' + esc(spErr) : ' — add API keys to enable') + '</div>'; }
           if (apResults.length) { html += '<div class="cell-sub" style="padding:7px 11px;font-weight:700;background:var(--surface-2)">🔴 Apple Music</div>'; html += apResults.map(function (a) { return row({ name: a.name, apple_url: a.url, apple_id: a.id, image: a.image || '' }, 'Apple', a.image, a.sub || ''); }).join(''); }
-          if (!internal.length && !ext.length) html = '<div class="art-result"><span class="art-badge" style="background:var(--surface-3);color:var(--fg-soft)">New</span><div class="cell-sub">No match — a new profile will be created for "' + esc(q) + '"</div></div>';
+          if (!internal.length && !ext.length) {
+            if (res[1].apple_error) {
+              html = '<div class="art-result"><span class="art-badge" style="background:#fdecec;color:#dc2626">Apple offline</span><div class="cell-sub">Server can\'t reach Apple Music right now. You can still paste the artist\'s link manually below.</div></div>';
+            } else {
+              html = '<div class="art-result"><span class="art-badge" style="background:var(--surface-3);color:var(--fg-soft)">New</span><div class="cell-sub">No match — a new profile will be created for "' + esc(q) + '"</div></div>';
+            }
+          }
           box.innerHTML = html; box.style.display = '';
         });
       }, 300);
